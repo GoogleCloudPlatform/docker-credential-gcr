@@ -186,6 +186,8 @@ func tokenFromAppDefaultCreds() (string, error) {
 
 // tokenFromGcloudSDK attempts to generate an access_token using the gcloud SDK.
 func tokenFromGcloudSDK() (string, error) {
+	// shelling out to gcloud is the only currently supported way of
+	// obtaining the gcloud access_token
 	if _, err := exec.LookPath("gcloud"); err != nil {
 		return "", helperErr("gcloud not found on PATH", nil)
 	}
@@ -194,8 +196,7 @@ func tokenFromGcloudSDK() (string, error) {
 
 	var out bytes.Buffer
 	cmd.Stdout = &out
-	err := cmd.Run()
-	if err != nil {
+	if err := cmd.Run(); err != nil {
 		return "", helperErr("gcloud auth print-access-token failed", err)
 	}
 
@@ -203,7 +204,6 @@ func tokenFromGcloudSDK() (string, error) {
 	if token == "" {
 		return "", helperErr("gcloud auth print-access-token returned empty access_token", nil)
 	}
-
 	return token, nil
 }
 
