@@ -48,8 +48,12 @@ The program in this repository is written with the Go programming language and b
 	```
 
 ## Installation and Usage
+* Configure the Docker CLI to use docker-credential-gcr as its credential store
 
-* Set the `credsStore` option in your docker config (usually `~/.docker/config.json`) file with the suffix of the compiled binary (everything after "docker-credential-").
+	```shell
+    docker-credential-gcr configure-docker
+    ```
+** Alternativley, manually set the `credsStore` option in your docker config (usually `~/.docker/config.json`) file with the suffix of the compiled binary (everything after "docker-credential-").
 	e.g. for `docker-credential-gcr`:
 
 	```json

@@ -39,7 +39,7 @@ func NewVersionSubcommand() subcommands.Command {
 	}
 }
 
-func (p *versionCmd) Execute(_ context.Context, _ *flag.FlagSet, _ ...interface{}) subcommands.ExitStatus {
+func (p *versionCmd) Execute(context.Context, *flag.FlagSet, ...interface{}) subcommands.ExitStatus {
 	fmt.Fprintf(os.Stdout, "GCR Docker Credential Helper v%d.%d\n", config.VersionMajor, config.VersionMinor)
 	return subcommands.ExitSuccess
 }

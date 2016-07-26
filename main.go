@@ -32,6 +32,7 @@ import (
 const (
 	gcrGroup             = "GCR authentication"
 	dockerCredStoreGroup = "Docker credential store API"
+	configGroup          = "Config"
 )
 
 func main() {
@@ -43,6 +44,7 @@ func main() {
 	subcommands.Register(api.NewListSubcommand(), dockerCredStoreGroup)
 	subcommands.Register(api.NewGCRLoginSubcommand(), gcrGroup)
 	subcommands.Register(api.NewGCRLogoutSubcommand(), gcrGroup)
+	subcommands.Register(api.NewDockerConfigSubcommand(), configGroup)
 	subcommands.Register(api.NewVersionSubcommand(), "")
 
 	flag.Parse()
