@@ -19,8 +19,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/google/docker-credential-gcr/auth"
-	"github.com/google/docker-credential-gcr/store"
+	"github.com/GoogleCloudPlatform/docker-credential-gcr/auth"
+	"github.com/GoogleCloudPlatform/docker-credential-gcr/store"
 	"github.com/google/subcommands"
 	"golang.org/x/net/context"
 )

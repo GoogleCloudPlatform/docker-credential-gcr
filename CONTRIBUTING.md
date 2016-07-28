@@ -10,7 +10,7 @@ You generally only need to submit a CLA once, so if you've already submitted one
 ### Submitting a Pull Request
 Before you submit your pull request consider the following guidelines:
 
-* Search [GitHub](https://github.com/google/docker-credential-gcr/pulls) for an open or closed Pull Request that relates to your submission.
+* Search [GitHub](https://github.com/GoogleCloudPlatform/docker-credential-gcr/pulls) for an open or closed Pull Request that relates to your submission.
 * Please sign our [Contributor License Agreement (CLA)](#cla) before sending pull requests. We cannot accept code without this.
 * Make your changes in a new git branch:
 

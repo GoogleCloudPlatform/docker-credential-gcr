@@ -28,7 +28,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/google/docker-credential-gcr/config"
+	"github.com/GoogleCloudPlatform/docker-credential-gcr/config"
 	"golang.org/x/oauth2"
 )
 

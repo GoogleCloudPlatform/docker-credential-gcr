@@ -24,9 +24,9 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/GoogleCloudPlatform/docker-credential-gcr/config"
+	"github.com/GoogleCloudPlatform/docker-credential-gcr/store"
 	"github.com/docker/docker-credential-helpers/credentials"
-	"github.com/google/docker-credential-gcr/config"
-	"github.com/google/docker-credential-gcr/store"
 
 	"golang.org/x/oauth2/google"
 )

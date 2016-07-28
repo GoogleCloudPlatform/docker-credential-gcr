@@ -24,7 +24,7 @@ import (
 	"flag"
 	"os"
 
-	"github.com/google/docker-credential-gcr/api"
+	"github.com/GoogleCloudPlatform/docker-credential-gcr/api"
 	"github.com/google/subcommands"
 	"golang.org/x/net/context"
 )

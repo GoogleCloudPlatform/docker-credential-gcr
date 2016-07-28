@@ -20,10 +20,10 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/GoogleCloudPlatform/docker-credential-gcr/mock/mock_store" // mocks must be generated before test execution
+	"github.com/GoogleCloudPlatform/docker-credential-gcr/store"
 	"github.com/docker/docker-credential-helpers/credentials"
 	"github.com/golang/mock/gomock"
-	"github.com/google/docker-credential-gcr/mock/mock_store" // mocks must be generated before test execution
-	"github.com/google/docker-credential-gcr/store"
 )
 
 const (

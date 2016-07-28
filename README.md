@@ -30,13 +30,13 @@ The program in this repository is written with the Go programming language and b
 1. Download the source and put it in your `$GOPATH` with `go get`.
 
 	```shell
-    go get github.com/google/docker-credential-gcr
+    go get github.com/GoogleCloudPlatform/docker-credential-gcr
 	```
 
 2. Use `make` to build the program. The executable will be output to the `bin` directory inside the repository.
 
 	```shell
-    cd $GOPATH/github.com/google/docker-credential-gcr
+    cd $GOPATH/github.com/GoogleCloudPlatform/docker-credential-gcr
     make
 	```
 
@@ -53,7 +53,7 @@ The program in this repository is written with the Go programming language and b
 	```shell
     docker-credential-gcr configure-docker
     ```
-** Alternativley, manually set the `credsStore` option in your docker config (usually `~/.docker/config.json`) file with the suffix of the compiled binary (everything after "docker-credential-").
+  * Alternativley, manually set the `credsStore` option in your docker config (usually `~/.docker/config.json`) file with the suffix of the compiled binary (everything after "docker-credential-").
 	e.g. for `docker-credential-gcr`:
 
 	```json

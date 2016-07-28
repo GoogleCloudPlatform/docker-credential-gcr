@@ -19,9 +19,9 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/GoogleCloudPlatform/docker-credential-gcr/credhelper"
+	"github.com/GoogleCloudPlatform/docker-credential-gcr/store"
 	"github.com/docker/docker-credential-helpers/credentials"
-	"github.com/google/docker-credential-gcr/credhelper"
-	"github.com/google/docker-credential-gcr/store"
 	"github.com/google/subcommands"
 	"golang.org/x/net/context"
 )

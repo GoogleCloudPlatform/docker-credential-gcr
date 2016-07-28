@@ -56,7 +56,7 @@ func (c *dockerConfigCmd) Execute(context.Context, *flag.FlagSet, ...interface{}
 		printErrorln("Binary name must be prefixed with '%s': %s", credHelperPrefix, binaryName)
 		return subcommands.ExitFailure
 	}
-	
+
 	// the Docker client can only use binaries on the $PATH
 	if _, err := exec.LookPath(binaryName); err != nil {
 		printErrorln("'%s' must exist on your PATH", binaryName)
