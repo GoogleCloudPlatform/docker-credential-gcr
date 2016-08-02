@@ -10,7 +10,7 @@ all: clean deps bin
 test: clean deps unit-tests integration-tests
 
 deps:
-	@go get ./...
+	@go get -u -t ./...
 
 bin:
 	@go build -race -o ${OUT_DIR}/${BINARY_FILENAME} main.go
