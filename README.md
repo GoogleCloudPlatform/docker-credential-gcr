@@ -36,7 +36,7 @@ The program in this repository is written with the Go programming language and b
 2. Use `make` to build the program. The executable will be output to the `bin` directory inside the repository.
 
 	```shell
-    cd $GOPATH/github.com/GoogleCloudPlatform/docker-credential-gcr
+    cd $GOPATH/src/github.com/GoogleCloudPlatform/docker-credential-gcr
     make
 	```
 
