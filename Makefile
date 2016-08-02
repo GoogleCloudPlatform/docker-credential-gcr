@@ -7,11 +7,15 @@ MOCK_DIR := mock
 
 all: clean deps bin
 
-test: clean deps unit-tests integration-tests
+test: clean testdeps unit-tests integration-tests
 
 deps:
 	@go get -u -t ./...
-
+	
+testdeps:
+	@go get -u -t ./...
+	@go get -u github.com/golang/mock/gomock
+	@go get -u github.com/golang/mock/mockgen
 bin:
 	@go build -race -o ${OUT_DIR}/${BINARY_FILENAME} main.go
 	@echo Binary created: ${OUT_DIR}/${BINARY_FILENAME}
