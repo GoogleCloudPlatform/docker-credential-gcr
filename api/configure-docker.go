@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"github.com/docker/docker/cliconfig"
@@ -51,7 +52,7 @@ func (c *dockerConfigCmd) SetFlags(fs *flag.FlagSet) {
 }
 
 func (c *dockerConfigCmd) Execute(context.Context, *flag.FlagSet, ...interface{}) subcommands.ExitStatus {
-	binaryName := os.Args[0]
+	binaryName := filepath.Base(os.Args[0])
 	if !strings.HasPrefix(binaryName, credHelperPrefix) {
 		printErrorln("Binary name must be prefixed with '%s': %s", credHelperPrefix, binaryName)
 		return subcommands.ExitFailure
