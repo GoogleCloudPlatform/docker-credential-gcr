@@ -16,8 +16,9 @@ testdeps:
 	@go get -u -t ./...
 	@go get -u github.com/golang/mock/gomock
 	@go get -u github.com/golang/mock/mockgen
+
 bin:
-	@go build -race -o ${OUT_DIR}/${BINARY_FILENAME} main.go
+	@go build -i -o ${OUT_DIR}/${BINARY_FILENAME} main.go
 	@echo Binary created: ${OUT_DIR}/${BINARY_FILENAME}
 
 clean:
