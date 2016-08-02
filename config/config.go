@@ -31,10 +31,17 @@ const (
 	// See https://developers.google.com/identity/protocols/OAuth2InstalledApp
 	GCRCredHelperClientNotSoSecret = "HpVi8cnKx8AAkddzaNrSWmS8"
 
-	// VersionMajor is the credential helper's major version number.
-	VersionMajor = 1
-	// VersionMinor is the credential helper's minor version number.
-	VersionMinor = 0
+	// From http://semver.org/
+	// MAJOR version when you make incompatible API changes,
+	// MINOR version when you add functionality in a backwards-compatible manner, and
+	// PATCH version when you make backwards-compatible bug fixes.
+
+	// MajorVersion is the credential helper's major version number.
+	MajorVersion = 1
+	// MinorVersion is the credential helper's minor version number.
+	MinorVersion = 0
+	// PatchVersion is the credential helper's patch version number.
+	PatchVersion = 0
 )
 
 // SupportedGCRRegistries maps registry URLs to a bool representing whether
