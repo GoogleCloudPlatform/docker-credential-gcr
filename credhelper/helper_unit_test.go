@@ -30,17 +30,35 @@ const (
 	expectedGCRUsername = "oauth2accesstoken"
 )
 
-var gcrHosts = [...]string{"gcr.io", "us.gcr.io", "eu.gcr.io", "asia.gcr.io", "b.gcr.io", "bucket.gcr.io", "appengine.gcr.io", "gcr.kubernetes.io"}
+var gcrHosts = [...]string{
+	"gcr.io",
+	"us.gcr.io",
+	"eu.gcr.io",
+	"asia.gcr.io",
+	"b.gcr.io",
+	"bucket.gcr.io",
+	"appengine.gcr.io",
+	"gcr.kubernetes.io",
+}
 var otherHosts = [...]string{"docker.io", "otherrepo.com"}
 
 func TestIsAGCRHostname(t *testing.T) {
 	t.Parallel()
+	// test for GCR hosts
 	for _, host := range gcrHosts {
 		if !isAGCRHostname(host) {
 			t.Error("Expected to be detected as a GCR hostname: ", host)
 		}
 	}
 
+	// test for GCR hosts + scheme
+	for _, host := range gcrHosts {
+		if !isAGCRHostname("https://" + host) {
+			t.Error("Expected to be detected as a GCR hostname: ", "https://"+host)
+		}
+	}
+
+	// test for non-GCR hosts
 	for _, host := range otherHosts {
 		if isAGCRHostname(host) {
 			t.Error("Expected to not be a GCR host: ", host)
@@ -56,13 +74,14 @@ func TestAdd_GCRCredentials(t *testing.T) {
 	// create a mock store to use
 	mockStore := mock_store.NewMockGCRCredStore(mockCtrl)
 	tested := NewGCRCredentialHelper(mockStore)
+
 	creds := credentials.Credentials{
 		Username: "foobarre",
 		Secret:   "secret",
 	}
 
 	for _, host := range gcrHosts {
-		creds.ServerURL = host
+		creds.ServerURL = "https://" + host
 		err := tested.Add(&creds)
 		if err == nil {
 			t.Error("Adding GCR credentials should return an error.")
@@ -86,7 +105,7 @@ func TestAdd_OtherCredentials(t *testing.T) {
 	}
 
 	for _, host := range otherHosts {
-		creds.ServerURL = host
+		creds.ServerURL = "https://" + host
 		mockStore.EXPECT().SetOtherCreds(&creds).Return(nil)
 
 		err := tested.Add(&creds)
@@ -151,7 +170,7 @@ func TestGet_GCRCredentials(t *testing.T) {
 	}
 
 	for _, host := range gcrHosts {
-		username, secret, err := tested.Get(host)
+		username, secret, err := tested.Get("https://" + host)
 		if err != nil {
 			t.Errorf("Get returned an error: %v", err)
 		} else if username != expectedGCRUsername {
@@ -172,7 +191,7 @@ func TestDelete_GCRCredentials(t *testing.T) {
 	tested := NewGCRCredentialHelper(mockStore)
 
 	for _, host := range gcrHosts {
-		err := tested.Delete(host)
+		err := tested.Delete("https://" + host)
 		if err == nil {
 			t.Error("Deleting GCR credentials should return an error.")
 		}
@@ -190,9 +209,10 @@ func TestDelete_OtherCredentials(t *testing.T) {
 	tested := NewGCRCredentialHelper(mockStore)
 
 	for _, host := range otherHosts {
-		mockStore.EXPECT().DeleteOtherCreds(host).Return(nil)
+		schemedHost := "https://" + host
+		mockStore.EXPECT().DeleteOtherCreds(schemedHost).Return(nil)
 
-		err := tested.Delete(host)
+		err := tested.Delete(schemedHost)
 
 		if err != nil {
 			t.Errorf("Delete returned an error: %v", err)

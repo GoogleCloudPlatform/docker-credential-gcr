@@ -100,7 +100,7 @@ func (s *credStore) GetOtherCreds(serverURL string) (*credentials.Credentials, e
 
 	creds, present := all3pCreds[serverURL]
 	if !present {
-		return nil, authErr("no credentials present for "+serverURL, nil)
+		return nil, credentials.NewErrCredentialsNotFound()
 	}
 
 	return &creds, nil

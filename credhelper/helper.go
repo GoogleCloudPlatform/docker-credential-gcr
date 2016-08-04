@@ -21,6 +21,7 @@ package credhelper
 import (
 	"bytes"
 	"fmt"
+	"net/url"
 	"os/exec"
 	"strings"
 
@@ -84,7 +85,7 @@ func (ch *gcrCredHelper) List() ([]string, []string, error) {
 func (ch *gcrCredHelper) Add(creds *credentials.Credentials) error {
 	serverURL := creds.ServerURL
 	if isAGCRHostname(serverURL) {
-		return helperErr("add is unimplemented for GCR, please use one of the supported authentication methods", nil)
+		return helperErr("this operation is unsupported for GCR, please see docker-credential-gcr documentation for supported login methods", nil)
 	}
 	if err := ch.store.SetOtherCreds(creds); err != nil {
 		return helperErr("could not store 3p credentials for "+serverURL, err)
@@ -117,6 +118,9 @@ func (ch *gcrCredHelper) Get(serverURL string) (string, string, error) {
 	// Attempt to retrieve credentials for another repository
 	creds, err := ch.store.GetOtherCreds(serverURL)
 	if err != nil {
+		if credentials.IsErrCredentialsNotFound(err) {
+			return "", "", err
+		}
 		return "", "", helperErr("could not retrieve 3p credentials for "+serverURL, err)
 	}
 	return creds.Username, creds.Secret, nil
@@ -224,9 +228,13 @@ func tokenFromPrivateStore(store store.GCRCredStore) (string, error) {
 	return tok.AccessToken, nil
 }
 
-// isAGCRHostname returns true if the given registry server URL is one of GCR's
+// isAGCRHostname returns true if the given hostname is one of GCR's
 func isAGCRHostname(serverURL string) bool {
-	return config.SupportedGCRRegistries[serverURL]
+	URL, err := url.Parse(serverURL)
+	if err != nil {
+		return false
+	}
+	return config.SupportedGCRRegistries[URL.Host] || config.SupportedGCRRegistries[serverURL]
 }
 
 func helperErr(message string, err error) error {
