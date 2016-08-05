@@ -132,6 +132,7 @@ func TestGet_OtherCredentials(t *testing.T) {
 
 	tested := NewGCRCredentialHelper(mockStore)
 
+	// positive case
 	for _, host := range otherHosts {
 		mockStore.EXPECT().GetOtherCreds(host).Return(&creds, nil)
 
@@ -144,6 +145,17 @@ func TestGet_OtherCredentials(t *testing.T) {
 		} else if secret != expectedSecret {
 			t.Errorf("Expected secret: %s but got: %s", expectedSecret, secret)
 		}
+	}
+
+	// negative case
+	mockStore.EXPECT().GetOtherCreds("somewhere.else").Return(nil, credentials.NewErrCredentialsNotFound())
+
+	_, _, err := tested.Get("somewhere.else")
+
+	if err == nil {
+		t.Error("Expected an error to be returned")
+	} else if !credentials.IsErrCredentialsNotFound(err) {
+		t.Errorf("Expected a CredentialsNotFound error: %v", err)
 	}
 }
 
