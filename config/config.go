@@ -56,6 +56,7 @@ var SupportedGCRRegistries = map[string]bool{
 	"bucket.gcr.io":     true,
 	"appengine.gcr.io":  true,
 	"gcr.kubernetes.io": true,
+	"beta.gcr.io":       true,
 }
 
 // GCROAuth2Endpoint describes the oauth2.Endpoint to be used when

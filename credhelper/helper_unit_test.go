@@ -39,6 +39,7 @@ var gcrHosts = [...]string{
 	"bucket.gcr.io",
 	"appengine.gcr.io",
 	"gcr.kubernetes.io",
+	"beta.gcr.io",
 }
 var otherHosts = [...]string{"docker.io", "otherrepo.com"}
 
