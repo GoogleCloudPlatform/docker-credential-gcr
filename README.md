@@ -2,7 +2,7 @@
 
 ## Introduction
 
-docker-credential-gcr is [Google Container Registry](https://cloud.google.com/container-registry/)'s Docker credential helper. It allows for **Docker clients v1.10+** to easily make authenticated requests to GCR's repositories (gcr.io, eu.gcr.io, etc.).
+docker-credential-gcr is [Google Container Registry](https://cloud.google.com/container-registry/)'s Docker credential helper. It allows for **Docker clients v1.11+** to easily make authenticated requests to GCR's repositories (gcr.io, eu.gcr.io, etc.).
 
 The helper implements the [Docker Credential Store](https://docs.docker.com/engine/reference/commandline/login/#/credentials-store) API, but enables more advanced authentication schemes for GCR's users. In particular, it respects [Application Default Credentials](https://developers.google.com/identity/protocols/application-default-credentials) and is capable of generating credentials automatically (without a explicit login operation) when running in App Engine or Compute Engine.
 
