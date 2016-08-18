@@ -28,7 +28,7 @@ Before you submit your pull request consider the following guidelines:
 * Commit your changes using a descriptive commit message.
 
      ```shell
-     git commit -a -m "omg y u suck @ coding"
+     git commit -a -m "omg y u bad @ coding"
      ```
   Note: the optional commit `-a` command line option will automatically "add" and "rm" edited files.
 
@@ -53,10 +53,10 @@ Before you submit your pull request consider the following guidelines:
 
 If the PR gets too outdated we may ask you to rebase and force push to update the PR:
 
-    ```shell
-    git rebase master -i
-    git push origin my-fix-branch -f
-    ```
+```shell
+git rebase master -i
+git push origin my-fix-branch -f
+```
 
 *WARNING. Squashing or reverting commits and forced push thereafter may remove GitHub comments on code that were previously made by you and others in your commits.*
 
@@ -94,10 +94,12 @@ After your pull request is merged, you can safely delete your branch and pull th
 
 * Go source code should follow the conventions given in [Effective Go](https://golang.org/doc/effective_go.html).
 * Source files must be formatted with `gofmt` and updated with `go fix` before submission.
+
     ```shell
     make pretty
     ```
 * Source files should be inspected by `go vet` and `golint`. Since there may be false positives with both, ignored warnings require justification but won't necessarily block changes.
+
     ```shell
     make criticism
     ```
