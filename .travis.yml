@@ -1,5 +1,10 @@
 language: go
+go:
+ - 1.6
+ - tip
 install: true
-script: 
+script:
+ - gofmt -e -l
+ - make criticism
  - make test
  - make
