@@ -2,7 +2,8 @@ language: go
 go:
  - 1.6
  - tip
-install: true
+install:
+ - go get -u github.com/golang/lint/golint
 script:
  - gofmt -e -l .
  - make criticism
