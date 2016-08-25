@@ -1,4 +1,4 @@
-# docker-credential-gcr
+# docker-credential-gcr [![Build Status](https://travis-ci.org/GoogleCloudPlatform/docker-credential-gcr.svg?branch=master)](https://travis-ci.org/GoogleCloudPlatform/docker-credential-gcr)
 
 ## Introduction
 
