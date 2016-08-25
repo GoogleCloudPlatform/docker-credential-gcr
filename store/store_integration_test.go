@@ -140,7 +140,7 @@ func TestSetGCRAuth_NoFile(t *testing.T) {
 		t.Errorf("refresh_token: Expected \"%s\", got \"%s\"", expctedRefresh, actualRefresh)
 	}
 	actualExp := auth.initialToken.Expiry
-	if actualExp != expectedExpiry {
+	if !actualExp.Equal(expectedExpiry) {
 		t.Errorf("Expiry: Expected %v, got %v", expectedExpiry, actualExp)
 	}
 }
@@ -182,7 +182,7 @@ func TestSetGCRAuth_OverwriteOld(t *testing.T) {
 		t.Errorf("refresh_token: Expected \"%s\", got \"%s\"", expctedRefresh, actualRefresh)
 	}
 	actualExp := auth.initialToken.Expiry
-	if actualExp != expectedExpiry {
+	if !actualExp.Equal(expectedExpiry) {
 		t.Errorf("Expiry: Expected %v, got %v", expectedExpiry, actualExp)
 	}
 }
@@ -224,7 +224,7 @@ func TestSetGCRAuth_PreserveOthers(t *testing.T) {
 		t.Errorf("refresh_token: Expected \"%s\", got \"%s\"", expctedRefresh, actualRefresh)
 	}
 	actualExp := auth.initialToken.Expiry
-	if actualExp != expectedExpiry {
+	if !actualExp.Equal(expectedExpiry) {
 		t.Errorf("Expiry: Expected %v, got %v", expectedExpiry, actualExp)
 	}
 }
@@ -317,7 +317,7 @@ func TestGCRAuthLifespan(t *testing.T) {
 		t.Errorf("refresh_token: Expected \"%s\", got \"%s\"", expctedRefresh, actualRefresh)
 	}
 	actualExp := auth.initialToken.Expiry
-	if actualExp != expectedExpiry {
+	if !actualExp.Equal(expectedExpiry) {
 		t.Errorf("Expiry: Expected %v, got %v", expectedExpiry, actualExp)
 	}
 
