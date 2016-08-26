@@ -56,12 +56,17 @@ The program in this repository is written with the Go programming language and b
   * Alternatively, manually set the `credsStore` option in your docker config file (usually `~/.docker/config.json`) with the suffix of the compiled binary (everything after "docker-credential-").
 	e.g. for `docker-credential-gcr`:
 
-	```json
+<pre>
     {
-      "credsStore": "gcr"
+      <b>"credsStore": "gcr",</b>
+      "HttpHeaders": ...
+      "psFormat": ...
+      "imagesFormat": ...
+      "detachKeys": ...
     }
-	```
-* Log in to GCR
+</pre>
+  
+* Log in to GCR (or don't! ```gcloud auth login``` is sufficient, too)
 
 	```shell
     docker-credential-gcr gcr-login
