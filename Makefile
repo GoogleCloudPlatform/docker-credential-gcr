@@ -52,3 +52,5 @@ fix:
 	@go fix ./...
 	
 pretty: fmt fix
+
+presubmit: criticism pretty test
