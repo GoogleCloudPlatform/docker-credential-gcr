@@ -85,7 +85,9 @@ func (ch *gcrCredHelper) List() ([]string, []string, error) {
 func (ch *gcrCredHelper) Add(creds *credentials.Credentials) error {
 	serverURL := creds.ServerURL
 	if isAGCRHostname(serverURL) {
-		return helperErr("this operation is unsupported for GCR, please see docker-credential-gcr documentation for supported login methods", nil)
+		errStr := "this operation is unsupported for GCR, please see docker-credential-gcr documentation for supported login methods. " +
+			"'gcloud docker' is unnecessary when using docker-credential-gcr, use 'docker' instead."
+		return helperErr(errStr, nil)
 	}
 	if err := ch.store.SetOtherCreds(creds); err != nil {
 		return helperErr("could not store 3p credentials for "+serverURL, err)
