@@ -53,11 +53,18 @@ The program in this repository is written with the Go programming language and b
 	```shell
     docker-credential-gcr configure-docker
     ```
-  * Alternatively, manually set the `credsStore` option in your docker config file (usually `~/.docker/config.json`) with the suffix of the compiled binary (everything after "docker-credential-").
+  * Alternatively, manually set the `credsStore` and `auths` fields in your docker config file (usually `~/.docker/config.json`). `credsStore` should be the suffix of the compiled binary (everything after "docker-credential-") and `auths` should have an empty entry for each GCR endpoint that you care about (with the "https://").
+
 	e.g. for `docker-credential-gcr`:
 
   <pre>
     {
+      "auths": {
+            "https://coolregistry.com": { ... },
+            <b>"https://gcr.io": {},
+            "https://asia.gcr.io": {},
+            ...</b>
+      },
       <b>"credsStore": "gcr",</b>
       "HttpHeaders": ...
       "psFormat": ...
