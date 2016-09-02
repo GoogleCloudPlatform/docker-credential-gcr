@@ -46,6 +46,7 @@ func main() {
 	subcommands.Register(api.NewGCRLogoutSubcommand(), gcrGroup)
 	subcommands.Register(api.NewDockerConfigSubcommand(), configGroup)
 	subcommands.Register(api.NewVersionSubcommand(), "")
+	subcommands.Register(api.NewClearSubcommand(), "")
 
 	flag.Parse()
 	ctx := context.Background()
