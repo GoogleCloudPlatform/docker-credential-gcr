@@ -56,29 +56,24 @@ func NewGCRCredentialHelper(store store.GCRCredStore) credentials.Helper {
 	}
 }
 
-// Delete lists all credentials stored and associated usernames.
-func (ch *gcrCredHelper) List() ([]string, []string, error) {
+// Delete lists all stored credentials and associated usernames.
+func (ch *gcrCredHelper) List() (map[string]string, error) {
 	all3pCreds, err := ch.store.AllThirdPartyCreds()
 	if err != nil {
-		return nil, nil, helperErr("could not retrieve 3p credentials", err)
+		return nil, helperErr("could not retrieve 3p credentials", err)
 	}
 
-	numRegistries := len(all3pCreds) + len(config.SupportedGCRRegistries)
-	var registries, usernames []string
-	registries = make([]string, 0, numRegistries)
-	usernames = make([]string, 0, numRegistries)
+	resp := make(map[string]string)
 
 	for registry, creds := range all3pCreds {
-		registries = append(registries, registry)
-		usernames = append(usernames, creds.Username)
+		resp[registry] = creds.Username
 	}
 
 	for gcrRegistry := range config.SupportedGCRRegistries {
-		registries = append(registries, gcrRegistry)
-		usernames = append(usernames, gcrOAuth2Username)
+		resp[gcrRegistry] = gcrOAuth2Username
 	}
 
-	return registries, usernames, nil
+	return resp, nil
 }
 
 // Add adds new third-party credentials to the keychain.
