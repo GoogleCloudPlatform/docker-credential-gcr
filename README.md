@@ -8,7 +8,7 @@ The helper implements the [Docker Credential Store](https://docs.docker.com/engi
 
 ## GCR Credentials
 
-The helper searches for GCR credentials in the following order:
+By default, the helper searches for GCR credentials in the following order:
 
 1. In a JSON file whose path is specified by the GOOGLE_APPLICATION_CREDENTIALS environment variable.
 2. In a JSON file in a location known to the helper. 
@@ -18,6 +18,14 @@ The helper searches for GCR credentials in the following order:
 4. On Google Compute Engine and Google App Engine Managed VMs, it fetches credentials from the metadata server.
 5. From the gcloud SDK (i.e. those printed via `gcloud auth print-access-token`).
 6. In the helper's private credential store (i.e. those stored via `docker-credential-gcr gcr-login`)
+
+However, the user may limit or re-order where the helper searches for GCR credentials using `docker-credential-gcr config --token-source`. Sources numbered 1-4 above are designated by the "env" source, 5 by "gcloud_sdk" and 6 by "store". Multiple stores are separated by commas. Default is "env, gcloud_sdk, store".
+Examples:
+To configure the credential helper to only use the gcloud SDK's access token:
+`docker-credential-gcr config --token-source="gcloud_sdk"`
+
+To look in the environment, followed by the private store:
+`docker-credential-gcr config --token-source="env, store"`
 
 ## Other Credentials
 
