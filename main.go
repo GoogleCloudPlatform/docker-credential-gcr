@@ -45,6 +45,7 @@ func main() {
 	subcommands.Register(api.NewGCRLoginSubcommand(), gcrGroup)
 	subcommands.Register(api.NewGCRLogoutSubcommand(), gcrGroup)
 	subcommands.Register(api.NewDockerConfigSubcommand(), configGroup)
+	subcommands.Register(api.NewConfigSubcommand(), configGroup)
 	subcommands.Register(api.NewVersionSubcommand(), "")
 	subcommands.Register(api.NewClearSubcommand(), "")
 

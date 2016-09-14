@@ -29,7 +29,9 @@ clean:
 mocks:
 	@rm -rf ${MOCK_DIR}
 	@mkdir -p ${MOCK_DIR}/mock_store
+	@mkdir -p ${MOCK_DIR}/mock_config
 	@mockgen -destination=${MOCK_DIR}/mock_store/mocks.go github.com/GoogleCloudPlatform/docker-credential-gcr/store GCRCredStore
+	@mockgen -destination=${MOCK_DIR}/mock_config/mocks.go github.com/GoogleCloudPlatform/docker-credential-gcr/config UserConfig
 
 unit-tests: mocks
 	@go test -timeout 10s -v -tags=unit ./...

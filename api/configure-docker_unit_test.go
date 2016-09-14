@@ -20,7 +20,7 @@ import (
 	"testing"
 
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/config"
-	"github.com/docker/engine-api/types"
+	"github.com/docker/docker/api/types"
 )
 
 func TestAddHostNamesToAuths_AddOne(t *testing.T) {

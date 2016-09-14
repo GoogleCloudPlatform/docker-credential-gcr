@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package config provides constants used in configuring the behavior of the app.
+// Package config provides variables used in configuring the behavior of the app.
 package config
 
 import (
@@ -57,6 +57,14 @@ var SupportedGCRRegistries = map[string]bool{
 	"appengine.gcr.io":  true,
 	"gcr.kubernetes.io": true,
 	"beta.gcr.io":       true,
+}
+
+// SupportedGCRTokenSources maps config keys to plain english explanations for
+// where the helper should search for a GCR access token.
+var SupportedGCRTokenSources = map[string]string{
+	"env":        "Application default credentials or GCE/AppEngine metadata.",
+	"gcloud_sdk": "'gcloud auth print-access-token'",
+	"store":      "The file store maintained by the credential helper.",
 }
 
 // GCROAuth2Endpoint describes the oauth2.Endpoint to be used when

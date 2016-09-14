@@ -37,22 +37,25 @@ const gcrOAuth2Username = "oauth2accesstoken"
 // gcrCredHelper implements a credentials.Helper interface backed by a GCR
 // credential store.
 type gcrCredHelper struct {
-	store store.GCRCredStore
+	store        store.GCRCredStore
+	tokenSources []string
 
 	// helper methods, package exposed for testing
-	defaultCredsToken func() (string, error)
-	gcloudSDKToken    func() (string, error)
-	credStoreToken    func(store.GCRCredStore) (string, error)
+	envToken       func() (string, error)
+	gcloudSDKToken func() (string, error)
+	credStoreToken func(store.GCRCredStore) (string, error)
 }
 
 // NewGCRCredentialHelper returns a Docker credential helper which
 // specializes in GCR's authentication schemes.
-func NewGCRCredentialHelper(store store.GCRCredStore) credentials.Helper {
+func NewGCRCredentialHelper(store store.GCRCredStore, userCfg config.UserConfig) credentials.Helper {
+	tokenSources := userCfg.TokenSources()
 	return &gcrCredHelper{
-		store:             store,
-		credStoreToken:    tokenFromPrivateStore,
-		gcloudSDKToken:    tokenFromGcloudSDK,
-		defaultCredsToken: tokenFromAppDefaultCreds,
+		store:          store,
+		tokenSources:   tokenSources,
+		credStoreToken: tokenFromPrivateStore,
+		gcloudSDKToken: tokenFromGcloudSDK,
+		envToken:       tokenFromEnv,
 	}
 }
 
@@ -123,47 +126,52 @@ func (ch *gcrCredHelper) Get(serverURL string) (string, string, error) {
 	return creds.Username, creds.Secret, nil
 }
 
-// getGCRAccessToken attempts to generate an access_token from credentials
-// from the helper's own credential store.
+// getGCRAccessToken attempts to retrieve a GCR access token from the sources
+// listed by ch.tokenSources, in order.
 func (ch *gcrCredHelper) getGCRAccessToken() (string, error) {
-	// First, look for the Application Default Credentials.
-	// https://developers.google.com/identity/protocols/application-default-credentials
-	token, err := ch.defaultCredsToken()
-	if err != nil {
-		// Second, attempt to retrieve credentials from the gcloud SDK's store.
-		token, err = ch.gcloudSDKToken()
-	}
-	if err != nil {
-		// Finally, retrieve credentials from our credential store.
-		token, err = ch.credStoreToken(ch.store)
-		if err != nil {
-			return "", err
+	var token string
+	var err error
+	for _, source := range ch.tokenSources {
+		switch source {
+		case "env":
+			token, err = ch.envToken()
+		case "gcloud_sdk":
+			token, err = ch.gcloudSDKToken()
+		case "store":
+			token, err = ch.credStoreToken(ch.store)
+		default:
+			return "", helperErr("unknown token source: "+source, nil)
+		}
+
+		// if we successfully retrieved a token, break.
+		if err == nil {
+			break
 		}
 	}
 
-	return token, nil
+	return token, err
 }
 
-// tokenFromAppDefaultCreds retrieves a gcloud
-// access_token from the "Application Default Credentials".
-func tokenFromAppDefaultCreds() (string, error) {
-	/*
-		From https://godoc.org/golang.org/x/oauth2/google:
+/*
+	tokenFromEnv retrieves a gcloud access_token from the environment.
 
-		DefaultTokenSource is a token source that uses "Application Default Credentials".
+	From https://godoc.org/golang.org/x/oauth2/google:
 
-		It looks for credentials in the following places, preferring the first location found:
+	DefaultTokenSource is a token source that uses "Application Default Credentials".
 
-		1. A JSON file whose path is specified by the
-		   GOOGLE_APPLICATION_CREDENTIALS environment variable.
-		2. A JSON file in a location known to the gcloud command-line tool.
-		   On Windows, this is %APPDATA%/gcloud/application_default_credentials.json.
-		   On other systems, $HOME/.config/gcloud/application_default_credentials.json.
-		3. On Google App Engine it uses the appengine.AccessToken function.
-		4. On Google Compute Engine and Google App Engine Managed VMs, it fetches
-		   credentials from the metadata server.
-		   (In this final case any provided scopes are ignored.)
-	*/
+	It looks for credentials in the following places, preferring the first location found:
+
+	1. A JSON file whose path is specified by the
+	   GOOGLE_APPLICATION_CREDENTIALS environment variable.
+	2. A JSON file in a location known to the gcloud command-line tool.
+	   On Windows, this is %APPDATA%/gcloud/application_default_credentials.json.
+	   On other systems, $HOME/.config/gcloud/application_default_credentials.json.
+	3. On Google App Engine it uses the appengine.AccessToken function.
+	4. On Google Compute Engine and Google App Engine Managed VMs, it fetches
+	   credentials from the metadata server.
+	   (In this final case any provided scopes are ignored.)
+*/
+func tokenFromEnv() (string, error) {
 	ts, err := google.DefaultTokenSource(config.OAuthHTTPContext, config.GCRScopes...)
 	if err != nil {
 		return "", err

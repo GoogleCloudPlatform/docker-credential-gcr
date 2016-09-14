@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/GoogleCloudPlatform/docker-credential-gcr/config"
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/credhelper"
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/store"
 	"github.com/docker/docker-credential-helpers/credentials"
@@ -36,7 +37,13 @@ func (*helperCmd) Execute(context.Context, *flag.FlagSet, ...interface{}) subcom
 		fmt.Fprintf(os.Stderr, "Failure: %v\n", err)
 		return subcommands.ExitFailure
 	}
-	credentials.Serve(credhelper.NewGCRCredentialHelper(store))
+	userCfg, err := config.NewUserConfig()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Failure: %v\n", err)
+		return subcommands.ExitFailure
+	}
+
+	credentials.Serve(credhelper.NewGCRCredentialHelper(store, userCfg))
 	return subcommands.ExitSuccess
 }
 

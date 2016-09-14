@@ -23,8 +23,8 @@ import (
 	"strings"
 
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/config"
+	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/cliconfig"
-	"github.com/docker/engine-api/types"
 	"github.com/google/subcommands"
 	"golang.org/x/net/context"
 )

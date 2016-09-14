@@ -20,7 +20,10 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/GoogleCloudPlatform/docker-credential-gcr/mock/mock_store" // mocks must be generated before test execution
+	"github.com/GoogleCloudPlatform/docker-credential-gcr/mock/mock_config" // mocks must be generated before test execution
+	"github.com/GoogleCloudPlatform/docker-credential-gcr/mock/mock_store"
+
+	"github.com/GoogleCloudPlatform/docker-credential-gcr/config"
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/store"
 	"github.com/docker/docker-credential-helpers/credentials"
 	"github.com/golang/mock/gomock"
@@ -72,9 +75,10 @@ func TestAdd_GCRCredentials(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
-	// create a mock store to use
 	mockStore := mock_store.NewMockGCRCredStore(mockCtrl)
-	tested := NewGCRCredentialHelper(mockStore)
+	mockUserCfg := mock_config.NewMockUserConfig(mockCtrl)
+	mockUserCfg.EXPECT().TokenSources().Return(config.DefaultTokenSources[:])
+	tested := NewGCRCredentialHelper(mockStore, mockUserCfg)
 
 	creds := credentials.Credentials{
 		Username: "foobarre",
@@ -95,10 +99,10 @@ func TestAdd_OtherCredentials(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
-	// create a mock store to use
 	mockStore := mock_store.NewMockGCRCredStore(mockCtrl)
-
-	tested := NewGCRCredentialHelper(mockStore)
+	mockUserCfg := mock_config.NewMockUserConfig(mockCtrl)
+	mockUserCfg.EXPECT().TokenSources().Return(config.DefaultTokenSources[:])
+	tested := NewGCRCredentialHelper(mockStore, mockUserCfg)
 
 	creds := credentials.Credentials{
 		Username: "foobarre",
@@ -122,16 +126,17 @@ func TestGet_OtherCredentials(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
-	// create a mock store to use
 	mockStore := mock_store.NewMockGCRCredStore(mockCtrl)
+	mockUserCfg := mock_config.NewMockUserConfig(mockCtrl)
+	mockUserCfg.EXPECT().TokenSources().Return(config.DefaultTokenSources[:])
+	tested := NewGCRCredentialHelper(mockStore, mockUserCfg)
+
 	expectedUsername := "foobarre"
 	expectedSecret := "secrets!"
 	creds := credentials.Credentials{
 		Username: expectedUsername,
 		Secret:   expectedSecret,
 	}
-
-	tested := NewGCRCredentialHelper(mockStore)
 
 	// positive case
 	for _, host := range otherHosts {
@@ -170,8 +175,9 @@ func TestGet_GCRCredentials(t *testing.T) {
 	// mock the helper methods used by getGCRAccessToken
 	expectedSecret := "secrets!"
 	tested := &gcrCredHelper{
-		store: mockStore,
-		defaultCredsToken: func() (string, error) {
+		store:        mockStore,
+		tokenSources: config.DefaultTokenSources[:],
+		envToken: func() (string, error) {
 			return expectedSecret, nil
 		},
 		gcloudSDKToken: func() (string, error) {
@@ -199,9 +205,10 @@ func TestDelete_GCRCredentials(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
-	// create a mock store to use
 	mockStore := mock_store.NewMockGCRCredStore(mockCtrl)
-	tested := NewGCRCredentialHelper(mockStore)
+	mockUserCfg := mock_config.NewMockUserConfig(mockCtrl)
+	mockUserCfg.EXPECT().TokenSources().Return(config.DefaultTokenSources[:])
+	tested := NewGCRCredentialHelper(mockStore, mockUserCfg)
 
 	for _, host := range gcrHosts {
 		err := tested.Delete("https://" + host)
@@ -216,10 +223,10 @@ func TestDelete_OtherCredentials(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
-	// create a mock store to use
 	mockStore := mock_store.NewMockGCRCredStore(mockCtrl)
-
-	tested := NewGCRCredentialHelper(mockStore)
+	mockUserCfg := mock_config.NewMockUserConfig(mockCtrl)
+	mockUserCfg.EXPECT().TokenSources().Return(config.DefaultTokenSources[:])
+	tested := NewGCRCredentialHelper(mockStore, mockUserCfg)
 
 	for _, host := range otherHosts {
 		schemedHost := "https://" + host
@@ -234,12 +241,11 @@ func TestDelete_OtherCredentials(t *testing.T) {
 }
 
 /*
-	The following tests verify the behavior of getGCRAccessToken. The token
-	source preference should be as follows:
-	application default > gcloud sdk > private store
+	The following tests verify the behavior of getGCRAccessToken. Preference
+	is defined by tokenSources
 */
 
-func TestGetGCRAccessToken_ApplicationDefault(t *testing.T) {
+func TestGetGCRAccessToken_Env(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	// create a mock store to use
@@ -247,8 +253,9 @@ func TestGetGCRAccessToken_ApplicationDefault(t *testing.T) {
 	// mock the helper methods used by getGCRAccessToken
 	const expected = "application default creds!"
 	tested := &gcrCredHelper{
-		store: mockStore,
-		defaultCredsToken: func() (string, error) {
+		store:        mockStore,
+		tokenSources: config.DefaultTokenSources[:],
+		envToken: func() (string, error) {
 			return expected, nil
 		},
 		gcloudSDKToken: func() (string, error) {
@@ -276,8 +283,9 @@ func TestGetGCRAccessToken_GcloudSDK(t *testing.T) {
 	// mock the helper methods used by getGCRAccessToken
 	const expected = "gcloud sdk creds!"
 	tested := &gcrCredHelper{
-		store: mockStore,
-		defaultCredsToken: func() (string, error) {
+		store:        mockStore,
+		tokenSources: config.DefaultTokenSources[:],
+		envToken: func() (string, error) {
 			return "", errors.New("No token here!")
 		},
 		gcloudSDKToken: func() (string, error) {
@@ -307,8 +315,9 @@ func TestGetGCRAccessToken_PrivateStore(t *testing.T) {
 	// mock the helper methods used by getGCRAccessToken
 	const expected = "private creds!"
 	tested := &gcrCredHelper{
-		store: mockStore,
-		defaultCredsToken: func() (string, error) {
+		store:        mockStore,
+		tokenSources: config.DefaultTokenSources[:],
+		envToken: func() (string, error) {
 			return "", errors.New("No token here!")
 		},
 		gcloudSDKToken: func() (string, error) {
@@ -337,8 +346,9 @@ func TestGetGCRAccessToken_NoneExist(t *testing.T) {
 
 	// mock the helper methods used by getGCRAccessToken
 	tested := &gcrCredHelper{
-		store: mockStore,
-		defaultCredsToken: func() (string, error) {
+		store:        mockStore,
+		tokenSources: config.DefaultTokenSources[:],
+		envToken: func() (string, error) {
 			return "", errors.New("No token here!")
 		},
 		gcloudSDKToken: func() (string, error) {
@@ -346,6 +356,109 @@ func TestGetGCRAccessToken_NoneExist(t *testing.T) {
 		},
 		credStoreToken: func(_ store.GCRCredStore) (string, error) {
 			return "", errors.New("Sad panda!")
+		},
+	}
+
+	token, err := tested.getGCRAccessToken()
+
+	if err == nil {
+		t.Fatalf("Expected an error, got token: %s", token)
+	}
+}
+
+func TestGetGCRAccessToken_CustomTokenSources(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	// create a mock store to use
+	mockStore := mock_store.NewMockGCRCredStore(mockCtrl)
+
+	const (
+		gcloudCreds = "gcloud sdk creds!"
+		storeCreds  = "private creds!"
+		envCreds    = "environment creds!"
+	)
+	// mock the helper methods used by getGCRAccessToken
+	tested := &gcrCredHelper{
+		store:        mockStore,
+		tokenSources: []string{"store", "gcloud_sdk", "env"}, // reversed from default
+		envToken: func() (string, error) {
+			return envCreds, nil
+		},
+		gcloudSDKToken: func() (string, error) {
+			return gcloudCreds, nil
+		},
+		credStoreToken: func(_ store.GCRCredStore) (string, error) {
+			return storeCreds, nil
+		},
+	}
+
+	token, err := tested.getGCRAccessToken()
+
+	if err != nil {
+		t.Fatalf("getGCRAccessToken returned an error: %v", err)
+	} else if token != storeCreds {
+		t.Fatalf("Expected: %s got: %s", storeCreds, token)
+	}
+}
+
+func TestGetGCRAccessToken_CustomTokenSources_ValidSourceDisabled(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	// create a mock store to use
+	mockStore := mock_store.NewMockGCRCredStore(mockCtrl)
+
+	const (
+		storeCreds = "private creds!"
+		envCreds   = "environment creds!"
+	)
+	// mock the helper methods used by getGCRAccessToken
+	tested := &gcrCredHelper{
+		store:        mockStore,
+		tokenSources: []string{"gcloud_sdk"}, // gcloud only configured source
+		envToken: func() (string, error) {
+			return envCreds, nil
+		},
+		gcloudSDKToken: func() (string, error) {
+			return "", errors.New("No token here!")
+		},
+		credStoreToken: func(_ store.GCRCredStore) (string, error) {
+			return storeCreds, nil
+		},
+	}
+
+	token, err := tested.getGCRAccessToken()
+
+	if err == nil {
+		t.Fatalf("Expected an error, got token: %s", token)
+	}
+}
+
+func TestGetGCRAccessToken_CustomTokenSources_InvalidSource(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	// create a mock store to use
+	mockStore := mock_store.NewMockGCRCredStore(mockCtrl)
+
+	const (
+		gcloudCreds = "gcloud sdk creds!"
+		storeCreds  = "private creds!"
+		envCreds    = "environment creds!"
+	)
+	// mock the helper methods used by getGCRAccessToken
+	tested := &gcrCredHelper{
+		store:        mockStore,
+		tokenSources: []string{"invalid"},
+		envToken: func() (string, error) {
+			return envCreds, nil
+		},
+		gcloudSDKToken: func() (string, error) {
+			return gcloudCreds, nil
+		},
+		credStoreToken: func(_ store.GCRCredStore) (string, error) {
+			return storeCreds, nil
 		},
 	}
 

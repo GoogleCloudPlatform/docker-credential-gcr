@@ -13,7 +13,7 @@
 // limitations under the License.
 
 /*
-Package store impolements a credential store that is capable of storing both
+Package store implements a credential store that is capable of storing both
 plain Docker credentials as well as GCR access and refresh tokens.
 */
 package store
@@ -23,12 +23,11 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"os/user"
 	"path/filepath"
-	"runtime"
 	"time"
 
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/config"
+	"github.com/GoogleCloudPlatform/docker-credential-gcr/util"
 	"github.com/docker/docker-credential-helpers/credentials"
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2"
@@ -235,7 +234,7 @@ func (s *credStore) createCredentialFile() (*os.File, error) {
 	if err := os.MkdirAll(filepath.Dir(s.credentialPath), 0777); err != nil {
 		return nil, err
 	}
-	// next, create the credential file, or truncate (clear) it if it exists
+	// create the credential file, or truncate (clear) it if it exists
 	f, err := os.Create(s.credentialPath)
 	if err != nil {
 		return nil, authErr("failed to create credential file", err)
@@ -264,41 +263,18 @@ func (s *credStore) setDockerCredentials(creds *dockerCredentials) error {
 	if err != nil {
 		return err
 	}
+	defer f.Close()
 
-	err = json.NewEncoder(f).Encode(creds)
-	if cerr := f.Close(); err == nil {
-		return cerr
-	}
-	return err
+	return json.NewEncoder(f).Encode(creds)
 }
 
 // dockerCredentialPath returns the full path of our Docker credential store.
 func dockerCredentialPath() (string, error) {
-	configPath, err := sdkConfigPath()
+	configPath, err := util.SdkConfigPath()
 	if err != nil {
 		return "", authErr("couldn't construct config path", err)
 	}
 	return filepath.Join(configPath, credentialStoreFilename), nil
-}
-
-// sdkConfigPath tries to guess where the gcloud config is located.
-func sdkConfigPath() (string, error) {
-	if runtime.GOOS == "windows" {
-		return filepath.Join(os.Getenv("APPDATA"), "gcloud"), nil
-	}
-	homeDir := unixHomeDir()
-	if homeDir == "" {
-		return "", errors.New("unable to get current user home directory: os/user lookup failed; $HOME is empty")
-	}
-	return filepath.Join(homeDir, ".config", "gcloud"), nil
-}
-
-func unixHomeDir() string {
-	usr, err := user.Current()
-	if err == nil {
-		return usr.HomeDir
-	}
-	return os.Getenv("HOME")
 }
 
 func authErr(message string, err error) error {
