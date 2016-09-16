@@ -4,7 +4,7 @@
 
 docker-credential-gcr is [Google Container Registry](https://cloud.google.com/container-registry/)'s Docker credential helper. It allows for **Docker clients v1.11+** to easily make authenticated requests to GCR's repositories (gcr.io, eu.gcr.io, etc.).
 
-The helper implements the [Docker Credential Store](https://docs.docker.com/engine/reference/commandline/login/#/credentials-store) API, but enables more advanced authentication schemes for GCR's users. In particular, it respects [Application Default Credentials](https://developers.google.com/identity/protocols/application-default-credentials) and is capable of generating credentials automatically (without a explicit login operation) when running in App Engine or Compute Engine.
+The helper implements the [Docker Credential Store](https://docs.docker.com/engine/reference/commandline/login/#/credentials-store) API, but enables more advanced authentication schemes for GCR's users. In particular, it respects [Application Default Credentials](https://developers.google.com/identity/protocols/application-default-credentials) and is capable of generating credentials automatically (without an explicit login operation) when running in App Engine or Compute Engine.
 
 ## GCR Credentials
 
@@ -19,16 +19,16 @@ By default, the helper searches for GCR credentials in the following order:
 5. From the gcloud SDK (i.e. those printed via `gcloud auth print-access-token`).
 6. In the helper's private credential store (i.e. those stored via `docker-credential-gcr gcr-login`)
 
-However, the user may limit or re-order where the helper searches for GCR credentials using `docker-credential-gcr config --token-source`. Sources numbered 1-4 above are designated by the "env" source, 5 by "gcloud_sdk" and 6 by "store". Multiple stores are separated by commas. Default is "env, gcloud_sdk, store".
+However, the user may limit or re-order how the helper searches for GCR credentials using `docker-credential-gcr config --token-source`. Numbers 1-4 above are designated by the "env" source, 5 by "gcloud_sdk" and 6 by "store". Multiple sources are separated by commas, and the default is "env, gcloud_sdk, store".
 
 **Examples:**
 
-To configure the credential helper to only use the gcloud SDK's access token:
+To configure the credential helper to use only the gcloud SDK's access token:
 ```shell
 docker-credential-gcr config --token-source="gcloud_sdk"
 ```
 
-To look in the the private store, followed by the environment:
+To try the private store, followed by the environment:
 ```shell
 docker-credential-gcr config --token-source="store, env"
 ```
