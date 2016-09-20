@@ -62,9 +62,9 @@ var SupportedGCRRegistries = map[string]bool{
 // SupportedGCRTokenSources maps config keys to plain english explanations for
 // where the helper should search for a GCR access token.
 var SupportedGCRTokenSources = map[string]string{
-	"env":        "Application default credentials or GCE/AppEngine metadata.",
-	"gcloud_sdk": "'gcloud auth print-access-token'",
-	"store":      "The file store maintained by the credential helper.",
+	"env":    "Application default credentials or GCE/AppEngine metadata.",
+	"gcloud": "'gcloud auth print-access-token'",
+	"store":  "The file store maintained by the credential helper.",
 }
 
 // GCROAuth2Endpoint describes the oauth2.Endpoint to be used when

@@ -27,7 +27,7 @@ const configFileName = "docker_credential_gcr_config.json"
 
 // DefaultTokenSources designates which default source(s) should be used to
 // fetch a GCR access_token, and in which order.
-var DefaultTokenSources = [...]string{"env", "gcloud_sdk", "store"}
+var DefaultTokenSources = [...]string{"env", "gcloud", "store"}
 
 // UserConfig describes
 type UserConfig interface {

@@ -20,7 +20,7 @@ import (
 	"testing"
 )
 
-var expctedDefaultTokSrcs = []string{"env", "gcloud_sdk", "store"}
+var expctedDefaultTokSrcs = []string{"env", "gcloud", "store"}
 
 func assertEqual(t *testing.T, expected, actual []string) {
 	if (expected == nil && actual != nil) || (expected != nil && actual == nil) {
@@ -70,7 +70,7 @@ func TestTokenSources_UserDefined(t *testing.T) {
 }
 
 func TestSetTokenSources(t *testing.T) {
-	expected := []string{"gcloud_sdk"}
+	expected := []string{"gcloud"}
 	tested := &configFile{
 		persist: func(c *configFile) error {
 			if !equal(expected, c.TokenSrcs) {

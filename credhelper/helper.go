@@ -135,7 +135,7 @@ func (ch *gcrCredHelper) getGCRAccessToken() (string, error) {
 		switch source {
 		case "env":
 			token, err = ch.envToken()
-		case "gcloud_sdk":
+		case "gcloud", "gcloud_sdk":
 			token, err = ch.gcloudSDKToken()
 		case "store":
 			token, err = ch.credStoreToken(ch.store)
