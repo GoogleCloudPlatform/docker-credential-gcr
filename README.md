@@ -19,13 +19,13 @@ By default, the helper searches for GCR credentials in the following order:
 5. From the gcloud SDK (i.e. those printed via `gcloud auth print-access-token`).
 6. In the helper's private credential store (i.e. those stored via `docker-credential-gcr gcr-login`)
 
-However, the user may limit or re-order how the helper searches for GCR credentials using `docker-credential-gcr config --token-source`. Numbers 1-4 above are designated by the "env" source, 5 by "gcloud_sdk" and 6 by "store". Multiple sources are separated by commas, and the default is "env, gcloud_sdk, store".
+However, the user may limit or re-order how the helper searches for GCR credentials using `docker-credential-gcr config --token-source`. Numbers 1-4 above are designated by the "env" source, 5 by "gcloud" and 6 by "store". Multiple sources are separated by commas, and the default is "env, gcloud, store".
 
 **Examples:**
 
 To configure the credential helper to use only the gcloud SDK's access token:
 ```shell
-docker-credential-gcr config --token-source="gcloud_sdk"
+docker-credential-gcr config --token-source="gcloud"
 ```
 
 To try the private store, followed by the environment:
