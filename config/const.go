@@ -39,7 +39,7 @@ const (
 	// MajorVersion is the credential helper's major version number.
 	MajorVersion = 1
 	// MinorVersion is the credential helper's minor version number.
-	MinorVersion = 1
+	MinorVersion = 2
 	// PatchVersion is the credential helper's patch version number.
 	PatchVersion = 0
 )
