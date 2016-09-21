@@ -17,103 +17,208 @@
 package api
 
 import (
+	"errors"
+	"reflect"
 	"testing"
 
-	"github.com/GoogleCloudPlatform/docker-credential-gcr/config"
+	"github.com/GoogleCloudPlatform/docker-credential-gcr/mock/mock_store"
+	"github.com/docker/docker-credential-helpers/credentials"
 	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/cliconfig/configfile"
+	"github.com/golang/mock/gomock"
 )
 
-func TestAddHostNamesToAuths_AddOne(t *testing.T) {
-	hostName := "http://expected.com"
-	auths := make(map[string]types.AuthConfig)
-
-	authsModified := addHostNamesToAuths([]string{hostName}, auths)
-
-	if !authsModified {
-		t.Error("Expected addHostNamesToAuths to return true")
-	}
-	if len(auths) != 1 {
-		t.Error("Expected auths to contain 1 element, was %d", len(auths))
-	}
-	if _, exists := auths[hostName]; !exists {
-		t.Errorf("Expected auths to contain an entry for %s", hostName)
-	}
-
-	if t.Failed() {
-		t.Logf("Auths: %v", auths)
+func expectedAuthConfigs() map[string]types.AuthConfig {
+	return map[string]types.AuthConfig{
+		"https://gcr.io":            {},
+		"https://us.gcr.io":         {},
+		"https://eu.gcr.io":         {},
+		"https://asia.gcr.io":       {},
+		"https://b.gcr.io":          {},
+		"https://bucket.gcr.io":     {},
+		"https://appengine.gcr.io":  {},
+		"https://gcr.kubernetes.io": {},
+		"https://beta.gcr.io":       {},
 	}
 }
 
-func TestAddHostNamesToAuths_AddOne_AlreadyExists(t *testing.T) {
-	hostName := "http://expected.com"
-	auths := make(map[string]types.AuthConfig)
-	auths[hostName] = types.AuthConfig{}
+func TestSetGCRAuthConfigs_EmptyConfig(t *testing.T) {
+	t.Parallel()
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockStore := mock_store.NewMockGCRCredStore(mockCtrl)
+	mockStore.EXPECT().AllThirdPartyCreds().Return(nil, nil)
 
-	authsModified := addHostNamesToAuths([]string{hostName}, auths)
+	tested := &configfile.ConfigFile{}
 
-	if authsModified {
-		t.Error("Expected addHostNamesToAuths to return false")
-	}
-	if len(auths) != 1 {
-		t.Errorf("Expected auths to contain 1 element, was %d", len(auths))
-	}
-	if _, exists := auths[hostName]; !exists {
-		t.Errorf("Expected auths to contain an entry for %s", hostName)
+	modified := setAuthConfigs(tested, mockStore)
+
+	if !modified {
+		t.Fatal("expected setAuthConfigs to return true")
 	}
 
-	if t.Failed() {
-		t.Logf("Auths: %v", auths)
+	if !reflect.DeepEqual(expectedAuthConfigs(), tested.AuthConfigs) {
+		t.Fatalf("expected: %v, got: %v", expectedAuthConfigs(), tested.AuthConfigs)
 	}
 }
 
-func TestAddHostNamesToAuths_AddOne_NoScheme(t *testing.T) {
-	hostName := "expected.com"
-	expectedEntry := "https://" + hostName
-	auths := make(map[string]types.AuthConfig)
+func TestSetGCRAuthConfigs_CredStoreSet(t *testing.T) {
+	t.Parallel()
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockStore := mock_store.NewMockGCRCredStore(mockCtrl)
+	mockStore.EXPECT().AllThirdPartyCreds().Return(nil, nil)
 
-	authsModified := addHostNamesToAuths([]string{hostName}, auths)
+	tested := &configfile.ConfigFile{}
+	tested.CredentialsStore = "gcr"
 
-	if !authsModified {
-		t.Error("Expected addHostNamesToAuths to return true")
-	}
-	if len(auths) != 1 {
-		t.Error("Expected auths to contain 1 element, was %d", len(auths))
-	}
-	if _, exists := auths[expectedEntry]; !exists {
-		t.Errorf("Expected auths to contain an entry for %s", expectedEntry)
+	modified := setAuthConfigs(tested, mockStore)
+
+	if !modified {
+		t.Fatal("expected setAuthConfigs to return true")
 	}
 
-	if t.Failed() {
-		t.Logf("Auths: %v", auths)
+	if !reflect.DeepEqual(expectedAuthConfigs(), tested.AuthConfigs) {
+		t.Errorf("expected: %v, got: %v", expectedAuthConfigs(), tested.AuthConfigs)
+	}
+
+	if tested.CredentialsStore != "gcr" {
+		t.Errorf("expected credsStore to be: %s, got: %s", "gcr", tested.CredentialsStore)
 	}
 }
 
-func TestAddHostNamesToAuths_AddAllGCR(t *testing.T) {
-	auths := make(map[string]types.AuthConfig)
-	var newRegistries []string
+func TestSetGCRAuthConfigs_NoOp(t *testing.T) {
+	t.Parallel()
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockStore := mock_store.NewMockGCRCredStore(mockCtrl)
+	mockStore.EXPECT().AllThirdPartyCreds().Return(nil, nil)
 
-	for registry := range config.SupportedGCRRegistries {
-		newRegistries = append(newRegistries, registry)
+	tested := &configfile.ConfigFile{}
+	tested.AuthConfigs = expectedAuthConfigs()
+
+	modified := setAuthConfigs(tested, mockStore)
+
+	if modified {
+		t.Fatal("expected setAuthConfigs to return false")
 	}
 
-	authsModified := addHostNamesToAuths(newRegistries, auths)
+	if !reflect.DeepEqual(expectedAuthConfigs(), tested.AuthConfigs) {
+		t.Errorf("expected: %v, got: %v", expectedAuthConfigs(), tested.AuthConfigs)
+	}
+}
 
-	if !authsModified {
-		t.Error("Expected addHostNamesToAuths to return true")
-	}
-	numRegistries := len(config.SupportedGCRRegistries)
-	numAuths := len(auths)
-	if numAuths != numRegistries {
-		t.Errorf("Expected auths to contain %d elements, was %d", numRegistries, numAuths)
-	}
-	for registry := range config.SupportedGCRRegistries {
-		expectedEntry := "https://" + registry
-		if _, exists := auths[expectedEntry]; !exists {
-			t.Errorf("Expected auths to contain an entry for %s", expectedEntry)
-		}
+func TestSetGCRAuthConfigs_OverwriteThirdParty(t *testing.T) {
+	t.Parallel()
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockStore := mock_store.NewMockGCRCredStore(mockCtrl)
+	mockStore.EXPECT().AllThirdPartyCreds().Return(nil, nil)
+
+	tested := &configfile.ConfigFile{}
+	tested.AuthConfigs = map[string]types.AuthConfig{
+		"https://www.whatever.com": {},
 	}
 
-	if t.Failed() {
-		t.Logf("Auths: %v", auths)
+	modified := setAuthConfigs(tested, mockStore)
+
+	if !modified {
+		t.Fatal("expected setAuthConfigs to return true")
+	}
+
+	if !reflect.DeepEqual(expectedAuthConfigs(), tested.AuthConfigs) {
+		t.Errorf("expected: %v, got: %v", expectedAuthConfigs(), tested.AuthConfigs)
+	}
+}
+
+func TestSetGCRAuthConfigs_OverwriteMixed(t *testing.T) {
+	t.Parallel()
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockStore := mock_store.NewMockGCRCredStore(mockCtrl)
+	mockStore.EXPECT().AllThirdPartyCreds().Return(nil, nil)
+
+	tested := &configfile.ConfigFile{}
+	tested.AuthConfigs = expectedAuthConfigs()
+	tested.AuthConfigs["https://www.whatever.com"] = types.AuthConfig{}
+
+	modified := setAuthConfigs(tested, mockStore)
+
+	if !modified {
+		t.Fatal("expected setAuthConfigs to return true")
+	}
+
+	if !reflect.DeepEqual(expectedAuthConfigs(), tested.AuthConfigs) {
+		t.Errorf("expected: %v, got: %v", expectedAuthConfigs(), tested.AuthConfigs)
+	}
+}
+
+func TestSetGCRAuthConfigs_Subset(t *testing.T) {
+	t.Parallel()
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockStore := mock_store.NewMockGCRCredStore(mockCtrl)
+	mockStore.EXPECT().AllThirdPartyCreds().Return(nil, nil)
+
+	tested := &configfile.ConfigFile{}
+	tested.AuthConfigs = expectedAuthConfigs()
+	delete(tested.AuthConfigs, "https://gcr.io")
+	delete(tested.AuthConfigs, "https://beta.gcr.io")
+
+	modified := setAuthConfigs(tested, mockStore)
+
+	if !modified {
+		t.Fatal("expected setAuthConfigs to return true")
+	}
+
+	if !reflect.DeepEqual(expectedAuthConfigs(), tested.AuthConfigs) {
+		t.Errorf("expected: %v, got: %v", expectedAuthConfigs(), tested.AuthConfigs)
+	}
+}
+
+func TestSetGCRAuthConfigs_Adds3p(t *testing.T) {
+	t.Parallel()
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	expectedThirdParty := "https://www.winning.com"
+	mockStore := mock_store.NewMockGCRCredStore(mockCtrl)
+	mockStore.EXPECT().AllThirdPartyCreds().Return(map[string]credentials.Credentials{
+		expectedThirdParty: {},
+	}, nil)
+
+	tested := &configfile.ConfigFile{}
+	tested.AuthConfigs = nil
+
+	modified := setAuthConfigs(tested, mockStore)
+
+	if !modified {
+		t.Fatal("expected setAuthConfigs to return true")
+	}
+
+	expected := expectedAuthConfigs()
+	expected[expectedThirdParty] = types.AuthConfig{}
+
+	if !reflect.DeepEqual(expected, tested.AuthConfigs) {
+		t.Errorf("expected: %v, got: %v", expected, tested.AuthConfigs)
+	}
+}
+
+func TestSetGCRAuthConfigs_InvalidCredStoreOK(t *testing.T) {
+	t.Parallel()
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockStore := mock_store.NewMockGCRCredStore(mockCtrl)
+	mockStore.EXPECT().AllThirdPartyCreds().Return(nil, errors.New("dead cred store"))
+
+	tested := &configfile.ConfigFile{}
+
+	modified := setAuthConfigs(tested, mockStore)
+
+	if !modified {
+		t.Fatal("expected setAuthConfigs to return true")
+	}
+
+	if !reflect.DeepEqual(expectedAuthConfigs(), tested.AuthConfigs) {
+		t.Errorf("expected: %v, got: %v", expectedAuthConfigs(), tested.AuthConfigs)
 	}
 }

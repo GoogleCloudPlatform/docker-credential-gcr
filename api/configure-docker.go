@@ -20,11 +20,14 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"reflect"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/config"
+	"github.com/GoogleCloudPlatform/docker-credential-gcr/store"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/cliconfig"
+	"github.com/docker/docker/cliconfig/configfile"
 	"github.com/google/subcommands"
 	"golang.org/x/net/context"
 )
@@ -81,17 +84,17 @@ func (c *dockerConfigCmd) Execute(context.Context, *flag.FlagSet, ...interface{}
 		return subcommands.ExitFailure
 	}
 
-	hostnames := make([]string, len(config.SupportedGCRRegistries))
-	i := 0
-	for registry := range config.SupportedGCRRegistries {
-		hostnames[i] = registry
-		i++
+	// Populate the AuthConfigs exclusivley with GCR registries.
+	// 'docker build' work on 1.11 and 1.12.
+	s, err := store.NewGCRCredStore()
+	if err != nil {
+		printErrorln("Unable to read credentialStore: %v", err)
 	}
-
-	configModified := addHostNamesToAuths(hostnames, dockerConfig.AuthConfigs)
+	authsModified := setAuthConfigs(dockerConfig, s)
 
 	// Optimization. Don't modify the dockerConfig if we're already fully configured.
-	if configModified || dockerConfig.CredentialsStore != credHelperSuffix {
+	if authsModified || dockerConfig.CredentialsStore != credHelperSuffix {
+		// Overwrite the existing set of AuthConfigs since they aren't visible anymore, anyway.
 		dockerConfig.CredentialsStore = credHelperSuffix
 		if err = dockerConfig.Save(); err != nil {
 			printErrorln("Unable to save docker config: %v", err)
@@ -103,24 +106,31 @@ func (c *dockerConfigCmd) Execute(context.Context, *flag.FlagSet, ...interface{}
 	return subcommands.ExitSuccess
 }
 
-// Adds all of the default GCR registries defined config.SupportedGCRRegistries,
-// if they don't already exist, to the given map as empty types.AuthConfigs.
-// Returns true if auths was modified, false otherwise.
-func addHostNamesToAuths(hosts []string, auths map[string]types.AuthConfig) bool {
-	modified := false
-	for _, registry := range hosts {
-		// If the registry doesn't already have a scheme, set it to https.
-		if !strings.Contains(registry, "://") {
-			registry = "https://" + registry
-		}
-		if _, exists := auths[registry]; !exists {
-			// Add an empty auths entry for the registry so that 'docker build' works.
-			auths[registry] = types.AuthConfig{}
-			modified = true
+// Ensures that the AuthConfigs in the given ConfigFile are exactly the set
+// of config.SupportedGCRRegistries with the https scheme plus any 3p creds
+// we have stored.
+// Returns true if the ConfigFile was modified, false otherwise.
+func setAuthConfigs(dockerConfig *configfile.ConfigFile, s store.GCRCredStore) bool {
+	newAuthconfigs := make(map[string]types.AuthConfig)
+	for registry := range config.SupportedGCRRegistries {
+		registry = "https://" + registry
+		newAuthconfigs[registry] = types.AuthConfig{}
+	}
+
+	creds, err := s.AllThirdPartyCreds()
+	// Only add 3p creds if we can retrieve them, but FUBAR cred store is OK
+	if err == nil {
+		for registry := range creds {
+			newAuthconfigs[registry] = types.AuthConfig{}
 		}
 	}
 
-	return modified
+	if !reflect.DeepEqual(newAuthconfigs, dockerConfig.AuthConfigs) {
+		dockerConfig.AuthConfigs = newAuthconfigs
+		return true
+	}
+
+	return false
 }
 
 func printErrorln(fmtString string, v ...interface{}) {

@@ -73,6 +73,7 @@ func (ch *gcrCredHelper) List() (map[string]string, error) {
 	}
 
 	for gcrRegistry := range config.SupportedGCRRegistries {
+		gcrRegistry = "https://" + gcrRegistry
 		resp[gcrRegistry] = gcrOAuth2Username
 	}
 
@@ -135,7 +136,7 @@ func (ch *gcrCredHelper) getGCRAccessToken() (string, error) {
 		switch source {
 		case "env":
 			token, err = ch.envToken()
-		case "gcloud", "gcloud_sdk":
+		case "gcloud", "gcloud_sdk": // gcloud_sdk supported for legacy reasons
 			token, err = ch.gcloudSDKToken()
 		case "store":
 			token, err = ch.credStoreToken(ch.store)
