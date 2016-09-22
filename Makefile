@@ -5,9 +5,7 @@ OUT_DIR := bin
 # The directory to dump generated mocks
 MOCK_DIR := mock
 
-all: clean deps bin
-
-test: clean testdeps unit-tests integration-tests
+all: clean bin
 
 deps:
 	@go get -u -t ./...
@@ -17,7 +15,7 @@ testdeps:
 	@go get -u github.com/golang/mock/gomock
 	@go get -u github.com/golang/mock/mockgen
 
-bin:
+bin: deps
 	@go build -i -o ${OUT_DIR}/${BINARY_FILENAME} main.go
 	@echo Binary created: ${OUT_DIR}/${BINARY_FILENAME}
 
@@ -33,11 +31,17 @@ mocks:
 	@mockgen -destination=${MOCK_DIR}/mock_store/mocks.go github.com/GoogleCloudPlatform/docker-credential-gcr/store GCRCredStore
 	@mockgen -destination=${MOCK_DIR}/mock_config/mocks.go github.com/GoogleCloudPlatform/docker-credential-gcr/config UserConfig
 
-unit-tests: mocks
+test: clean testdeps mocks bin
+	@go test -timeout 10s -v -tags="unit integration surface" ./...
+
+unit-tests: testdeps mocks
 	@go test -timeout 10s -v -tags=unit ./...
 	
-integration-tests:
+integration-tests: testdeps
 	@go test -timeout 10s -v -tags=integration ./...
+	
+surface-tests: deps testdeps bin
+	@go test -timeout 10s -v -tags=surface ./...
 	
 vet: 
 	@go vet ./...

@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/config"
@@ -34,7 +35,10 @@ import (
 	"golang.org/x/oauth2/google"
 )
 
-const credentialStoreFilename = "docker_credentials.json"
+const (
+	credentialStoreEnvVar   = "DOCKER_CREDENTIAL_GCR_STORE"
+	credentialStoreFilename = "docker_credentials.json"
+)
 
 type tokens struct {
 	AccessToken  string     `json:"access_token"`
@@ -270,6 +274,10 @@ func (s *credStore) setDockerCredentials(creds *dockerCredentials) error {
 
 // dockerCredentialPath returns the full path of our Docker credential store.
 func dockerCredentialPath() (string, error) {
+	if path := os.Getenv(credentialStoreEnvVar); strings.TrimSpace(path) != "" {
+		return path, nil
+	}
+
 	configPath, err := util.SdkConfigPath()
 	if err != nil {
 		return "", authErr("couldn't construct config path", err)

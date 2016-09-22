@@ -2,3 +2,6 @@
 .project
 bin
 mock
+*/test_config.json
+*/test_credential_store.json
+**/testdata

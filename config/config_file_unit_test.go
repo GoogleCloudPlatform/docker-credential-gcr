@@ -17,7 +17,15 @@
 package config
 
 import (
+	"os"
+	"strings"
 	"testing"
+)
+
+const (
+	expectedConfigEnvVar = "DOCKER_CREDENTIAL_GCR_CONFIG"
+	expectedEnvPath      = "whatever"
+	expectedFilename     = "docker_credential_gcr_config.json"
 )
 
 var expctedDefaultTokSrcs = []string{"env", "gcloud", "store"}
@@ -35,6 +43,30 @@ func assertEqual(t *testing.T, expected, actual []string) {
 		if expected[i] != actual[i] {
 			t.Fatalf("Expected: %v, Actual: %v", expected, actual)
 		}
+	}
+}
+
+func TestConfigPath_RespectsEnvVar(t *testing.T) {
+	old := os.Getenv(expectedConfigEnvVar)
+	os.Setenv(expectedConfigEnvVar, expectedEnvPath)
+	defer os.Setenv(expectedConfigEnvVar, old)
+
+	result, err := configPath()
+
+	if err != nil {
+		t.Fatalf("Could not retrieve config path: %v", err)
+	} else if result != expectedEnvPath {
+		t.Fatalf("Expected config path to be: %s, was: %s", expectedEnvPath, result)
+	}
+}
+
+func TestConfigPath_Sanity(t *testing.T) {
+	result, err := configPath()
+
+	if err != nil {
+		t.Fatalf("Could not retrieve config path: %v", err)
+	} else if !strings.HasSuffix(result, expectedFilename) {
+		t.Fatalf("Expected config path to end in: %s, was: %s", expectedFilename, result)
 	}
 }
 

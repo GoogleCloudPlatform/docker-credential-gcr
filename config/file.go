@@ -19,11 +19,15 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/util"
 )
 
-const configFileName = "docker_credential_gcr_config.json"
+const (
+	configFileEnvVariable = "DOCKER_CREDENTIAL_GCR_CONFIG"
+	configFileName        = "docker_credential_gcr_config.json"
+)
 
 // DefaultTokenSources designates which default source(s) should be used to
 // fetch a GCR access_token, and in which order.
@@ -174,6 +178,10 @@ func createConfigFile() (*os.File, error) {
 
 // configPath returns the full path of our user config file.
 func configPath() (string, error) {
+	if path := os.Getenv(configFileEnvVariable); strings.TrimSpace(path) != "" {
+		return path, nil
+	}
+
 	sdkConfigPath, err := util.SdkConfigPath()
 	if err != nil {
 		return "", fmt.Errorf("couldn't construct config path: %v", err)
