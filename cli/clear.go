@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package api
+package cli
 
 import (
 	"flag"
@@ -24,35 +24,46 @@ import (
 	"golang.org/x/net/context"
 )
 
-type logoutCmd struct {
+type clearCmd struct {
 	cmd
 }
 
-// NewGCRLogoutSubcommand returns a subcommands.Command which implements the GCR
-// logout operation.
-func NewGCRLogoutSubcommand() subcommands.Command {
-	return &logoutCmd{
+// NewClearSubcommand returns a subcommands.Command which removes all stored
+// credentials.
+func NewClearSubcommand() subcommands.Command {
+	return &clearCmd{
 		cmd{
-			name:     "gcr-logout",
-			synopsis: "log out from GCR",
+			name:     "clear",
+			synopsis: "remove all stored credentials",
 		},
 	}
 }
 
-func (c *logoutCmd) Execute(context.Context, *flag.FlagSet, ...interface{}) subcommands.ExitStatus {
-	if err := c.GCRLogout(); err != nil {
-		fmt.Fprintf(os.Stderr, "Logout failure: %v\n", err)
+func (c *clearCmd) Execute(context.Context, *flag.FlagSet, ...interface{}) subcommands.ExitStatus {
+	if err := c.ClearAll(); err != nil {
+		fmt.Fprintf(os.Stderr, "failure: %v\n", err)
 		return subcommands.ExitFailure
 	}
 	return subcommands.ExitSuccess
 }
 
-// GCRLogout performs the actions necessary to remove any GCR credentials
-// from the credential store.
-func (*logoutCmd) GCRLogout() error {
+// ClearAll removes all credentials from the store (GCR or otherwise).
+func (c *clearCmd) ClearAll() error {
 	s, err := store.NewGCRCredStore()
 	if err != nil {
 		return err
 	}
+
+	othercreds, err := s.AllThirdPartyCreds()
+	if err != nil {
+		return err
+	}
+
+	for reg := range othercreds {
+		if err := s.DeleteOtherCreds(reg); err != nil {
+			return err
+		}
+	}
+
 	return s.DeleteGCRAuth()
 }

@@ -13,10 +13,10 @@
 // limitations under the License.
 
 /*
-Package api contains the implementations of all of the subcommands that are
+Package cli contains the implementations of all of the subcommands that are
 exposed via the command line.
 */
-package api
+package cli
 
 import (
 	"flag"

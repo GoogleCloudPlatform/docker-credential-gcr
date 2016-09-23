@@ -24,7 +24,7 @@ import (
 	"flag"
 	"os"
 
-	"github.com/GoogleCloudPlatform/docker-credential-gcr/api"
+	"github.com/GoogleCloudPlatform/docker-credential-gcr/cli"
 	"github.com/google/subcommands"
 	"golang.org/x/net/context"
 )
@@ -38,16 +38,16 @@ const (
 func main() {
 	subcommands.Register(subcommands.HelpCommand(), "")
 	subcommands.Register(subcommands.CommandsCommand(), "")
-	subcommands.Register(api.NewStoreSubcommand(), dockerCredStoreGroup)
-	subcommands.Register(api.NewGetSubcommand(), dockerCredStoreGroup)
-	subcommands.Register(api.NewEraseSubcommand(), dockerCredStoreGroup)
-	subcommands.Register(api.NewListSubcommand(), dockerCredStoreGroup)
-	subcommands.Register(api.NewGCRLoginSubcommand(), gcrGroup)
-	subcommands.Register(api.NewGCRLogoutSubcommand(), gcrGroup)
-	subcommands.Register(api.NewDockerConfigSubcommand(), configGroup)
-	subcommands.Register(api.NewConfigSubcommand(), configGroup)
-	subcommands.Register(api.NewVersionSubcommand(), "")
-	subcommands.Register(api.NewClearSubcommand(), "")
+	subcommands.Register(cli.NewStoreSubcommand(), dockerCredStoreGroup)
+	subcommands.Register(cli.NewGetSubcommand(), dockerCredStoreGroup)
+	subcommands.Register(cli.NewEraseSubcommand(), dockerCredStoreGroup)
+	subcommands.Register(cli.NewListSubcommand(), dockerCredStoreGroup)
+	subcommands.Register(cli.NewGCRLoginSubcommand(), gcrGroup)
+	subcommands.Register(cli.NewGCRLogoutSubcommand(), gcrGroup)
+	subcommands.Register(cli.NewDockerConfigSubcommand(), configGroup)
+	subcommands.Register(cli.NewConfigSubcommand(), configGroup)
+	subcommands.Register(cli.NewVersionSubcommand(), "")
+	subcommands.Register(cli.NewClearSubcommand(), "")
 
 	flag.Parse()
 	ctx := context.Background()
