@@ -155,9 +155,14 @@ func (s *credStore) DeleteOtherCreds(serverURL string) error {
 
 // AllThirdPartyCreds returns a map of all 3rd party repositories to their
 // associated Docker credentials.Credentials.
+// Returns the credentials if they exist, nil and credentials.errCredentialsNotFound if they do not.
 func (s *credStore) AllThirdPartyCreds() (map[string]credentials.Credentials, error) {
 	allCreds, err := s.loadDockerCredentials()
 	if err != nil {
+		if os.IsNotExist(err) {
+			// No file, no credentials.
+			return nil, credentials.NewErrCredentialsNotFound()
+		}
 		return nil, err
 	}
 
@@ -168,6 +173,10 @@ func (s *credStore) AllThirdPartyCreds() (map[string]credentials.Credentials, er
 func (s *credStore) GetGCRAuth() (*GCRAuth, error) {
 	creds, err := s.loadDockerCredentials()
 	if err != nil {
+		if os.IsNotExist(err) {
+			// No file, no credentials.
+			return nil, credentials.NewErrCredentialsNotFound()
+		}
 		return nil, err
 	}
 
