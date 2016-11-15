@@ -39,7 +39,7 @@ The helper implements the [Docker Credential Store](https://docs.docker.com/engi
 
 ### Building from Source
 
-The program in this repository is written with the Go programming language and built with `make`. These instructions assume that [Go](https://golang.org/) and `make` are installed on a *nix system.
+The program in this repository is written with the Go programming language and built with `make`. These instructions assume that [Go 1.7+](https://golang.org/) and `make` are installed on a *nix system.
 
 1. Download the source and put it in your `$GOPATH` with `go get`.
 
