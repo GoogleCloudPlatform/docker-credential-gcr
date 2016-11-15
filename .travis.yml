@@ -1,6 +1,6 @@
 language: go
 go:
- - 1.6
+ - 1.7
  - tip
 install:
  - go get -u github.com/golang/lint/golint
