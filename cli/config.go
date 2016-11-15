@@ -15,6 +15,7 @@
 package cli
 
 import (
+	"context"
 	"encoding/csv"
 	"errors"
 	"flag"
@@ -24,7 +25,6 @@ import (
 
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/config"
 	"github.com/google/subcommands"
-	"golang.org/x/net/context"
 )
 
 const (
