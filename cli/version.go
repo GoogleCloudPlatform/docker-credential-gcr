@@ -15,13 +15,13 @@
 package cli
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
 
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/config"
 	"github.com/google/subcommands"
-	"golang.org/x/net/context"
 )
 
 type versionCmd struct {

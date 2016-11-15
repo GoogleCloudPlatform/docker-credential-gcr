@@ -15,6 +15,7 @@
 package cli
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
@@ -22,7 +23,6 @@ import (
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/auth"
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/store"
 	"github.com/google/subcommands"
-	"golang.org/x/net/context"
 )
 
 type loginCmd struct {

@@ -21,12 +21,12 @@ See README.md
 package main
 
 import (
+	"context"
 	"flag"
 	"os"
 
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/cli"
 	"github.com/google/subcommands"
-	"golang.org/x/net/context"
 )
 
 const (

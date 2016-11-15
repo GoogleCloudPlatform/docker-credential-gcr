@@ -15,6 +15,7 @@
 package cli
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
@@ -24,7 +25,6 @@ import (
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/store"
 	"github.com/docker/docker-credential-helpers/credentials"
 	"github.com/google/subcommands"
-	"golang.org/x/net/context"
 )
 
 type helperCmd struct {

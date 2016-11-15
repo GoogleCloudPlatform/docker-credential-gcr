@@ -15,6 +15,7 @@
 package cli
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
@@ -29,7 +30,6 @@ import (
 	"github.com/docker/docker/cliconfig"
 	"github.com/docker/docker/cliconfig/configfile"
 	"github.com/google/subcommands"
-	"golang.org/x/net/context"
 )
 
 type dockerConfigCmd struct {
