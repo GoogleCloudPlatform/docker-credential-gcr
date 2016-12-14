@@ -26,6 +26,7 @@ import (
 
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/config"
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/store"
+	"github.com/GoogleCloudPlatform/docker-credential-gcr/util"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/cliconfig"
 	"github.com/docker/docker/cliconfig/configfile"
@@ -34,7 +35,8 @@ import (
 
 type dockerConfigCmd struct {
 	cmd
-	overwrite bool // overwrite any previously configured credential store
+	// overwrite any previously configured credential store and/or credentials
+	overwrite bool
 }
 
 // see https://github.com/docker/docker/blob/master/cliconfig/credentials/native_store.go
@@ -53,7 +55,7 @@ func NewDockerConfigSubcommand() subcommands.Command {
 }
 
 func (c *dockerConfigCmd) SetFlags(fs *flag.FlagSet) {
-	fs.BoolVar(&c.overwrite, "overwrite", false, "overwrite any previously configured credential helper")
+	fs.BoolVar(&c.overwrite, "overwrite", false, "overwrite any previously configured credential store and/or credentials")
 }
 
 func (c *dockerConfigCmd) Execute(context.Context, *flag.FlagSet, ...interface{}) subcommands.ExitStatus {
@@ -75,17 +77,90 @@ func (c *dockerConfigCmd) Execute(context.Context, *flag.FlagSet, ...interface{}
 		return subcommands.ExitFailure
 	}
 
-	// 'credsStore' takes the suffix of the credential helper binary
+	// 'credsStore' and 'credHelpers' take the suffix of the credential helper
+	// binary.
 	credHelperSuffix := binaryName[len(credHelperPrefix):]
 
-	// Only proceed if the creds store is empty or we're allowed to overwrite.
-	if dockerConfig.CredentialsStore != credHelperSuffix && dockerConfig.CredentialsStore != "" && !c.overwrite {
-		printErrorln("Docker is currently configured to use '%s%s' as its credential store. Retry with --overwrite", credHelperPrefix, dockerConfig.CredentialsStore)
+	major, minor, err := util.DockerMajorMinorVersion()
+	if err != nil {
+		printErrorln("Unable to determine Docker version: %v", err)
+		return subcommands.ExitFailure
+	} else if credHelpersSupported(major, minor) {
+		// If we can act as a registry-specific credential helper, do so...
+		return setConfig(dockerConfig, credHelperSuffix)
+	} else if credsStoreSupported(major, minor) {
+		// Else, attempt to act as the cred store...
+		return c.setLegacyConfig(dockerConfig, credHelperSuffix)
+	}
+
+	// Netiher cred helper nor cred store is supported by the detected docker
+	// version.
+	fmt.Fprintln(os.Stderr, "ERROR: Docker client version 1.10+ required")
+	return subcommands.ExitFailure
+}
+
+// credHelpersSupported returns true if the installed version of Docker supports
+// credential helpers (1.14+), error if Docker is not installed or there was an
+// error determining the version.
+func credHelpersSupported(majorVersion, minorVersion int) bool {
+	return majorVersion == 1 && minorVersion >= 14
+}
+
+// credsStoreSupported returns true if the installed version of Docker supports
+// credential stores (1.11+), error if Docker is not installed or there was an
+// error determining the version.
+func credsStoreSupported(majorVersion, minorVersion int) bool {
+	return majorVersion == 1 && minorVersion >= 11
+}
+
+// Configure Docker to use the credential helper for GCR's registries only.
+// Defining additional 'auths' entries is unnecessary in versions which
+// support registry-specific credential helpers.
+func setConfig(dockerConfig *configfile.ConfigFile, helperSuffix string) subcommands.ExitStatus {
+	// We always overwrite since there's no way that we can accidentally
+	// disable other credentials as a registry-specific credential helper.
+	if dockerConfig.CredentialHelpers == nil {
+		dockerConfig.CredentialHelpers = map[string]string{}
+	}
+
+	for registry := range config.SupportedGCRRegistries {
+		dockerConfig.CredentialHelpers[registry] = helperSuffix
+	}
+
+	if err := dockerConfig.Save(); err != nil {
+		printErrorln("Unable to save docker config: %v", err)
 		return subcommands.ExitFailure
 	}
 
-	// Populate the AuthConfigs exclusivley with GCR registries.
-	// 'docker build' work on 1.11 and 1.12.
+	fmt.Printf("%s configured to use this credential helper for GCR registries\n", dockerConfig.Filename)
+	return subcommands.ExitSuccess
+}
+
+// Configure Docker to use the credential helper as the default credential
+// store. Also add 'auths' entries to the config to support versions where the
+// docker config was the source of truth for the set of stored credentials.
+func (c *dockerConfigCmd) setLegacyConfig(dockerConfig *configfile.ConfigFile, helperSuffix string) subcommands.ExitStatus {
+	// Only proceed if the creds store is empty or we're allowed to overwrite.
+	// Replacing a cred store effectivley makes any previously stored
+	// credentials unreachable.
+	otherCredStoreConfigured := dockerConfig.CredentialsStore != helperSuffix && dockerConfig.CredentialsStore != ""
+	dcgcrConfiguredAsCredStore := dockerConfig.CredentialsStore == helperSuffix
+	credentialsStored := len(dockerConfig.AuthConfigs) > 0
+	if otherCredStoreConfigured && !c.overwrite {
+		// If another credential store is configured, demand explicit
+		// overwrite permissions.
+		printErrorln("Docker is currently configured to use '%s%s' as its credential store. Please retry with --overwrite. This will render any previously store credentials unaccessible.", credHelperPrefix, dockerConfig.CredentialsStore)
+		return subcommands.ExitFailure
+	} else if credentialsStored && !dcgcrConfiguredAsCredStore && !c.overwrite {
+		// If there are credentials stored somewhere other than this credential
+		// helper, demand explicit overwrite permissions.
+		printErrorln("%d credentials are currently stored which would be overwritten. Retry with --overwrite.", len(dockerConfig.AuthConfigs))
+		return subcommands.ExitFailure
+	}
+
+	// Populate the AuthConfigs portion of the config.
+	// This allows 'docker build' work on Docker client versions 1.11 and 1.12,
+	// where AuthConfigs was
 	s, err := store.NewGCRCredStore()
 	if err != nil {
 		printErrorln("Unable to read credentialStore: %v", err)
@@ -93,16 +168,19 @@ func (c *dockerConfigCmd) Execute(context.Context, *flag.FlagSet, ...interface{}
 	authsModified := setAuthConfigs(dockerConfig, s)
 
 	// Optimization. Don't modify the dockerConfig if we're already fully configured.
-	if authsModified || dockerConfig.CredentialsStore != credHelperSuffix {
+	if authsModified || dockerConfig.CredentialsStore != helperSuffix {
 		// Overwrite the existing set of AuthConfigs since they aren't visible anymore, anyway.
-		dockerConfig.CredentialsStore = credHelperSuffix
+		dockerConfig.CredentialsStore = helperSuffix
 		if err = dockerConfig.Save(); err != nil {
 			printErrorln("Unable to save docker config: %v", err)
 			return subcommands.ExitFailure
 		}
 	}
 
-	fmt.Printf("%s configured to use %s as its credential store\n", dockerConfig.Filename, binaryName)
+	fmt.Printf("%s successfully configured\n", dockerConfig.Filename)
+	if c.overwrite {
+		fmt.Println("Any previously stored credentials have been overwritten.")
+	}
 	return subcommands.ExitSuccess
 }
 
@@ -113,6 +191,7 @@ func (c *dockerConfigCmd) Execute(context.Context, *flag.FlagSet, ...interface{}
 func setAuthConfigs(dockerConfig *configfile.ConfigFile, s store.GCRCredStore) bool {
 	newAuthconfigs := make(map[string]types.AuthConfig)
 	for registry := range config.SupportedGCRRegistries {
+		// 'auths' members take the HTTP scheme
 		registry = "https://" + registry
 		newAuthconfigs[registry] = types.AuthConfig{}
 	}

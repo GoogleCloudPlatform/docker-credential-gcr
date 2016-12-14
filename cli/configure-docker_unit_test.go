@@ -222,3 +222,55 @@ func TestSetGCRAuthConfigs_InvalidCredStoreOK(t *testing.T) {
 		t.Errorf("expected: %v, got: %v", expectedAuthConfigs(), tested.AuthConfigs)
 	}
 }
+
+func TestCredHelpersSupported_Supported(t *testing.T) {
+	t.Parallel()
+
+	for minor := 14; minor < 16; minor++ {
+		if !credHelpersSupported(1, minor) {
+			t.Errorf("credHelperSupported erronously returned false for v1.%d", minor)
+		}
+	}
+}
+
+func TestCredHelpersSupported_Unsupported(t *testing.T) {
+	t.Parallel()
+
+	for major := -1; major < 1; major++ {
+		if credHelpersSupported(major, 0) {
+			t.Errorf("credHelperSupported erronously returned true for v%d.0", major)
+		}
+	}
+
+	for minor := -1; minor < 14; minor++ {
+		if credHelpersSupported(1, minor) {
+			t.Errorf("credHelperSupported erronously returned true for v1.%d", minor)
+		}
+	}
+}
+
+func TestCredsStoreSupported_Supported(t *testing.T) {
+	t.Parallel()
+
+	for minor := 11; minor < 16; minor++ {
+		if !credsStoreSupported(1, minor) {
+			t.Errorf("credsStoreSupported erronously returned false for v1.%d", minor)
+		}
+	}
+}
+
+func TestCredsStoreSupported_Unsupported(t *testing.T) {
+	t.Parallel()
+
+	for major := -1; major < 1; major++ {
+		if credsStoreSupported(major, 0) {
+			t.Errorf("credsStoreSupported erronously returned true for v%d.0", major)
+		}
+	}
+
+	for minor := -1; minor < 11; minor++ {
+		if credsStoreSupported(1, minor) {
+			t.Errorf("credsStoreSupported erronously returned true for v1.%d", minor)
+		}
+	}
+}

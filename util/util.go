@@ -20,9 +20,12 @@ package util
 import (
 	"errors"
 	"os"
+	"os/exec"
 	"os/user"
 	"path/filepath"
 	"runtime"
+	"strconv"
+	"strings"
 )
 
 // SdkConfigPath tries to return the directory where the gcloud config is
@@ -44,4 +47,47 @@ func unixHomeDir() string {
 		return usr.HomeDir
 	}
 	return os.Getenv("HOME")
+}
+
+// DockerClientVersion attempts to discover the version of the Docker client,
+// returning the major, minor, and patch versions, or an error if unsuccessful.
+func DockerClientVersion() (string, string, string, error) {
+	cmd := exec.Command("docker", "version", "--format", "'{{.Client.Version}}'")
+	out, err := cmd.Output()
+	if err != nil {
+		return "", "", "", err
+	}
+
+	vstring := string(out)
+
+	// Remove any leading/trailing '
+	vstring = strings.Trim(vstring, "'")
+
+	ver := strings.Split(vstring, ".")
+
+	if len(ver) != 3 {
+		return "", "", "", errors.New("version string not of the form '<major>.<minor>.<patch>': " + vstring)
+	}
+	return ver[0], ver[1], ver[2], nil
+}
+
+// DockerMajorMinorVersion attempts to discover the major and minor version
+// numbers of the Docker client, returning <major>, <minor>, nil if successful,
+// 0, 0, err otherwise.
+func DockerMajorMinorVersion() (int, int, error) {
+	majorstr, minorstr, _, err := DockerClientVersion()
+	if err != nil {
+		return 0, 0, err
+	}
+
+	major, err := strconv.Atoi(majorstr)
+	if err != nil {
+		return 0, 0, err
+	}
+	minor, err := strconv.Atoi(minorstr)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	return major, minor, nil
 }
