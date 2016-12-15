@@ -67,7 +67,51 @@ The program in this repository is written with the Go programming language and b
 	```shell
     docker-credential-gcr configure-docker
     ```
-  * Alternatively, manually set the `credsStore` and `auths` fields in your docker config file (usually `~/.docker/config.json`). `credsStore` should be the suffix of the compiled binary (everything after "docker-credential-") and `auths` should have an empty entry for each GCR endpoint that you care about (with the "https://").
+  * Alternatively, use the instructions below to configure your version of the Docker client.
+  
+* Log in to GCR (or don't! ```gcloud auth login``` is sufficient, too)
+
+	```shell
+    docker-credential-gcr gcr-login
+    ```
+* Use Docker!
+
+	```shell
+    docker pull gcr.io/project-id/neato-container
+    ```
+* Log out from GCR
+
+	```shell
+    docker-credential-gcr gcr-logout
+    ```
+
+### Docker Clients v1.14+ Manual Installation
+
+Add a `credHelpers` entry in the Docker config file (usually `~/.docker/config.json`) for each GCR registry that you care about. The key should be the domain of the registry (without the "https://") and the key chould be the suffix of the credential helper binary (everything after "docker-credential-").
+
+	e.g. for `docker-credential-gcr`:
+
+  <pre>
+    {
+      "auths" : {
+            ...
+      }
+      "credHelpers": {
+            "coolregistry.com": ... ,
+            <b>"gcr.io": "gcr",
+            "asia.gcr.io": "gcr",
+            ...</b>
+      },
+      "HttpHeaders": ...
+      "psFormat": ...
+      "imagesFormat": ...
+      "detachKeys": ...
+    }
+  </pre>
+
+
+### Docker Clients v1.11 - v1.13 Manual Installation
+Set the `credsStore` and `auths` fields in your Docker config file (usually `~/.docker/config.json`). `credsStore` should be the suffix of the compiled binary (everything after "docker-credential-") and `auths` should have an empty entry for each GCR endpoint that you care about (with the "https://").
 
 	e.g. for `docker-credential-gcr`:
 
@@ -86,22 +130,6 @@ The program in this repository is written with the Go programming language and b
       "detachKeys": ...
     }
   </pre>
-  
-* Log in to GCR (or don't! ```gcloud auth login``` is sufficient, too)
-
-	```shell
-    docker-credential-gcr gcr-login
-    ```
-* Use Docker!
-
-	```shell
-    docker pull gcr.io/my-project/neato-container
-    ```
-* Log out from GCR
-
-	```shell
-    docker-credential-gcr gcr-logout
-    ```
 
 ## License
 
