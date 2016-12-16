@@ -81,7 +81,7 @@ func (c *dockerConfigCmd) Execute(context.Context, *flag.FlagSet, ...interface{}
 	// binary.
 	credHelperSuffix := binaryName[len(credHelperPrefix):]
 
-	major, minor, err := util.DockerMajorMinorVersion()
+	major, minor, _, _, err := util.DockerClientVersion()
 	if err != nil {
 		printErrorln("Unable to determine Docker version: %v", err)
 		return subcommands.ExitFailure
@@ -100,10 +100,10 @@ func (c *dockerConfigCmd) Execute(context.Context, *flag.FlagSet, ...interface{}
 }
 
 // credHelpersSupported returns true if the installed version of Docker supports
-// credential helpers (1.14+), error if Docker is not installed or there was an
+// credential helpers (1.13+), error if Docker is not installed or there was an
 // error determining the version.
 func credHelpersSupported(majorVersion, minorVersion int) bool {
-	return majorVersion == 1 && minorVersion >= 14
+	return majorVersion == 1 && minorVersion >= 13
 }
 
 // credsStoreSupported returns true if the installed version of Docker supports

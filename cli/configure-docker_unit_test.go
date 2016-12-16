@@ -226,7 +226,7 @@ func TestSetGCRAuthConfigs_InvalidCredStoreOK(t *testing.T) {
 func TestCredHelpersSupported_Supported(t *testing.T) {
 	t.Parallel()
 
-	for minor := 14; minor < 16; minor++ {
+	for minor := 13; minor < 16; minor++ {
 		if !credHelpersSupported(1, minor) {
 			t.Errorf("credHelperSupported erronously returned false for v1.%d", minor)
 		}
@@ -242,7 +242,7 @@ func TestCredHelpersSupported_Unsupported(t *testing.T) {
 		}
 	}
 
-	for minor := -1; minor < 14; minor++ {
+	for minor := -1; minor < 13; minor++ {
 		if credHelpersSupported(1, minor) {
 			t.Errorf("credHelperSupported erronously returned true for v1.%d", minor)
 		}

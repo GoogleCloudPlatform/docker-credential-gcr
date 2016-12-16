@@ -85,7 +85,7 @@ The program in this repository is written with the Go programming language and b
     docker-credential-gcr gcr-logout
     ```
 
-### Docker Clients v1.14+ Manual Installation
+### Docker Clients v1.13(.0-rc4)+ Manual Installation
 
 Add a `credHelpers` entry in the Docker config file (usually `~/.docker/config.json`) for each GCR registry that you care about. The key should be the domain of the registry (without the "https://") and the key chould be the suffix of the credential helper binary (everything after "docker-credential-").
 
@@ -110,7 +110,7 @@ Add a `credHelpers` entry in the Docker config file (usually `~/.docker/config.j
   </pre>
 
 
-### Docker Clients v1.11 - v1.13 Manual Installation
+### Docker Clients v1.11 - v1.12 Manual Installation
 Set the `credsStore` and `auths` fields in your Docker config file (usually `~/.docker/config.json`). `credsStore` should be the suffix of the compiled binary (everything after "docker-credential-") and `auths` should have an empty entry for each GCR endpoint that you care about (with the "https://").
 
 	e.g. for `docker-credential-gcr`:
