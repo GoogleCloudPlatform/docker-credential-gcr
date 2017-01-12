@@ -26,6 +26,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"unicode"
 )
 
 // SdkConfigPath tries to return the directory where the gcloud config is
@@ -60,11 +61,10 @@ func DockerClientVersionStrings() (string, string, string, error) {
 
 	vstring := string(out)
 
-	// Remove any leading/trailing whitespace
-	vstring = strings.TrimSpace(vstring)
-
-	// Remove any leading/trailing '
-	vstring = strings.Trim(vstring, "'")
+	// Remove any leading/trailing whitespace or '
+	vstring = strings.TrimFunc(vstring, func(r rune) bool {
+		return unicode.IsSpace(r) || r == '\''
+	})
 
 	ver := strings.Split(vstring, ".")
 
