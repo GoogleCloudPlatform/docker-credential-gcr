@@ -28,8 +28,8 @@ import (
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/store"
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/util"
 	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/cliconfig"
-	"github.com/docker/docker/cliconfig/configfile"
+	cliconfig "github.com/docker/docker/cli/config"
+	"github.com/docker/docker/cli/config/configfile"
 	"github.com/google/subcommands"
 )
 

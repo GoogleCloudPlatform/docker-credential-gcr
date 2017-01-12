@@ -60,6 +60,9 @@ func DockerClientVersionStrings() (string, string, string, error) {
 
 	vstring := string(out)
 
+	// Remove any leading/trailing whitespace
+	vstring = strings.TrimSpace(vstring)
+
 	// Remove any leading/trailing '
 	vstring = strings.Trim(vstring, "'")
 
