@@ -102,5 +102,9 @@ func DockerClientVersion() (int, int, int, string, error) {
 		return 0, 0, 0, "", err
 	}
 
-	return major, minor, patch, patchSplit[1], nil
+	if len(patchSplit) > 1 {
+		return major, minor, patch, patchSplit[1], nil
+	}
+
+	return major, minor, patch, "", nil
 }
