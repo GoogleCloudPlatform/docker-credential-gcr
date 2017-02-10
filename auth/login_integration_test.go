@@ -1,4 +1,4 @@
-// +build integration,disabled
+// +build integration
 
 // Copyright 2016 Google, Inc.
 //
@@ -165,8 +165,15 @@ func performAuthServerActions(t *testing.T, testLn net.Listener) {
 	if grantType != expectedGrantType {
 		t.Errorf("Expected grant_type: %s, got: %s", expectedGrantType, grantType)
 	}
+
 	clientID := req.PostFormValue("client_id")
-	if clientID != expectedClientID {
+	if clientID == "" {
+		// Newer google oauth libraries deliver client_id in the Authorization header.
+		if username, _, headerExists := req.BasicAuth(); !headerExists || username != expectedClientID {
+			t.Errorf("Expected username: %s, got: %s", expectedClientID, username)
+		}
+	} else if clientID != expectedClientID {
+		// Older libraries use a client_id form value.
 		t.Errorf("Expected client_id: %s, got: %s", expectedClientID, clientID)
 	}
 	redirectURI := req.PostFormValue("redirect_uri")
