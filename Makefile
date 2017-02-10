@@ -7,15 +7,22 @@ MOCK_DIR := mock
 
 all: clean bin
 
-deps:
+updatedeps: deps
+	@go get -u github.com/kardianos/govendor
+	@govendor add +external
+	@govendor update +v
+
+deps: bindeps testdeps
+
+bindeps:
 	@go get -u -t ./...
-	
+
 testdeps:
 	@go get -u -t ./...
 	@go get -u github.com/golang/mock/gomock
 	@go get -u github.com/golang/mock/mockgen
 
-bin: deps
+bin:
 	@go build -i -o ${OUT_DIR}/${BINARY_FILENAME} main.go
 	@echo Binary created: ${OUT_DIR}/${BINARY_FILENAME}
 
@@ -33,32 +40,32 @@ mocks:
 	@mockgen -destination=${MOCK_DIR}/mock_config/mocks.go github.com/GoogleCloudPlatform/docker-credential-gcr/config UserConfig
 	@mockgen -destination=${MOCK_DIR}/mock_dockercmd/mocks.go github.com/GoogleCloudPlatform/docker-credential-gcr/util/dockercmd DockerClient
 
-test: clean testdeps mocks bin
+test: clean mocks bin
 	@go test -timeout 10s -v -tags="unit integration surface" ./...
 
-unit-tests: testdeps mocks
+unit-tests: mocks
 	@go test -timeout 10s -v -tags=unit ./...
-	
-integration-tests: testdeps
+
+integration-tests:
 	@go test -timeout 10s -v -tags=integration ./...
-	
-surface-tests: deps testdeps bin
+
+surface-tests: bin
 	@go test -timeout 10s -v -tags=surface ./...
-	
+
 vet: 
 	@go vet ./...
 
 lint:
 	@golint ./...
-	
+
 criticism: clean vet lint
 
 fmt:
 	@gofmt -w -s .
-	
+
 fix:
 	@go fix ./...
-	
+
 pretty: fmt fix
 
 presubmit: criticism pretty test
