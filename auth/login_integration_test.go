@@ -1,4 +1,4 @@
-// +build integration
+// +build integration,disabled
 
 // Copyright 2016 Google, Inc.
 //
@@ -33,6 +33,7 @@ import (
 )
 
 const (
+	// The client ID corresponding to GCR's OAuth2 login page.
 	expectedClientID  = "99426463878-o7n0bshgue20tdpm25q4at0vs2mr4utq.apps.googleusercontent.com"
 	expectedScope     = "https://www.googleapis.com/auth/cloud-platform"
 	expectedHost      = "localhost"
