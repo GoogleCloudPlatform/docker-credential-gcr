@@ -37,20 +37,23 @@ var DefaultTokenSources = [...]string{"env", "gcloud", "store"}
 type UserConfig interface {
 	TokenSources() []string
 	SetTokenSources([]string) error
+	DefaultToGCRAccessToken() bool
+	SetDefaultToGCRAccessToken(bool) error
 	ResetAll() error
 }
 
 // configFile describes the structure of the persistent config store.
 type configFile struct {
-	TokenSrcs []string `json:"TokenSources,omitempty"`
+	TokenSrcs         []string `json:"TokenSources,omitempty"`
+	DefaultToGCRToken bool     `json:"DefaultToGCRToken,omitempty"`
 
-	// package private helper exposed for testing
+	// package private helper, made a member variable and exposed for testing
 	persist func(*configFile) error
 }
 
-// NewUserConfig returns a UserConfig which provides user-configurable
-// application settings.
-func NewUserConfig() (UserConfig, error) {
+// LoadUserConfig returns the UserConfig which provides user-configurable
+// application settings, or a new on if it doesn't exist.
+func LoadUserConfig() (UserConfig, error) {
 	config, err := load()
 	if err != nil {
 		if !os.IsNotExist(err) {
@@ -114,6 +117,15 @@ func (c *configFile) SetTokenSources(newSources []string) error {
 	return c.persist(c)
 }
 
+func (c *configFile) DefaultToGCRAccessToken() bool {
+	return c.DefaultToGCRToken
+}
+
+func (c *configFile) SetDefaultToGCRAccessToken(defaultToGCR bool) error {
+	c.DefaultToGCRToken = defaultToGCR
+	return c.persist(c)
+}
+
 func persist(c *configFile) error {
 	f, err := createConfigFile()
 	if err != nil {
@@ -149,6 +161,7 @@ func (c *configFile) ResetAll() error {
 		return err
 	}
 	c.TokenSrcs = nil
+	c.DefaultToGCRToken = false
 	return nil
 }
 

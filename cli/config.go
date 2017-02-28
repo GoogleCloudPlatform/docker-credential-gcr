@@ -28,14 +28,16 @@ import (
 )
 
 const (
-	tokenSourceFlag = "token-source"
-	resetAllFlag    = "unset-all"
+	defaultToGCRTokenFlag = "default-to-gcr-access-token"
+	tokenSourceFlag       = "token-source"
+	resetAllFlag          = "unset-all"
 )
 
 type configCmd struct {
 	cmd
-	tokenSources string
-	resetAll     bool
+	defaultToGCRToken bool
+	tokenSources      string
+	resetAll          bool
 }
 
 // NewConfigSubcommand returns a subcommands.Command which allows for user
@@ -46,6 +48,9 @@ func NewConfigSubcommand() subcommands.Command {
 			name:     "config",
 			synopsis: "configure the credential helper",
 		},
+		// Because only specified flags are iterated by FlagSet.Visit,
+		// these values will always be explicitly set by the user if visited.
+		false,
 		"unused",
 		false,
 	}
@@ -53,6 +58,7 @@ func NewConfigSubcommand() subcommands.Command {
 
 func (c *configCmd) SetFlags(fs *flag.FlagSet) {
 	validSources := strings.Join(config.DefaultTokenSources[:], ", ")
+	fs.BoolVar(&c.defaultToGCRToken, defaultToGCRTokenFlag, false, "If enabled, the credential helper will attempt to return GCR's access token, rather than an error, when credentials cannot otherwise be found.")
 	fs.StringVar(&c.tokenSources, tokenSourceFlag, validSources, "The source(s), in order, to search for GCR credentials. Valid values are: "+validSources+". ")
 	fs.BoolVar(&c.resetAll, resetAllFlag, false, "Resets all settings to default.")
 }
@@ -81,6 +87,15 @@ func (c *configCmd) Execute(_ context.Context, flags *flag.FlagSet, _ ...interfa
 				} else {
 					printSuccess("Token source(s) set.")
 				}
+			case defaultToGCRTokenFlag:
+				if err := setDefaultToGCR(c.defaultToGCRToken); err != nil {
+					printError(defaultToGCRTokenFlag, err)
+					result = subcommands.ExitFailure
+				} else if c.defaultToGCRToken {
+					printSuccess("Will attempt to return GCR's access token when no other credentials are found.")
+				} else {
+					printSuccess("Will return an error when credentials are not found.")
+				}
 			default:
 				printError(flag, errors.New("Unknown flag!"))
 				result = subcommands.ExitFailure
@@ -91,15 +106,23 @@ func (c *configCmd) Execute(_ context.Context, flags *flag.FlagSet, _ ...interfa
 }
 
 func resetAll() error {
-	cfg, err := config.NewUserConfig()
+	cfg, err := config.LoadUserConfig()
 	if err != nil {
 		return err
 	}
 	return cfg.ResetAll()
 }
 
+func setDefaultToGCR(defaultToGCR bool) error {
+	cfg, err := config.LoadUserConfig()
+	if err != nil {
+		return err
+	}
+	return cfg.SetDefaultToGCRAccessToken(defaultToGCR)
+}
+
 func setTokenSources(rawSource string) error {
-	cfg, err := config.NewUserConfig()
+	cfg, err := config.LoadUserConfig()
 	if err != nil {
 		return err
 	}

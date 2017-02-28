@@ -37,7 +37,7 @@ func (*helperCmd) Execute(context.Context, *flag.FlagSet, ...interface{}) subcom
 		fmt.Fprintf(os.Stderr, "Failure: %v\n", err)
 		return subcommands.ExitFailure
 	}
-	userCfg, err := config.NewUserConfig()
+	userCfg, err := config.LoadUserConfig()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failure: %v\n", err)
 		return subcommands.ExitFailure

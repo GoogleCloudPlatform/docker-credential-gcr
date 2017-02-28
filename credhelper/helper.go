@@ -37,8 +37,8 @@ const gcrOAuth2Username = "oauth2accesstoken"
 // gcrCredHelper implements a credentials.Helper interface backed by a GCR
 // credential store.
 type gcrCredHelper struct {
-	store        store.GCRCredStore
-	tokenSources []string
+	store   store.GCRCredStore
+	userCfg config.UserConfig
 
 	// helper methods, package exposed for testing
 	envToken       func() (string, error)
@@ -49,10 +49,9 @@ type gcrCredHelper struct {
 // NewGCRCredentialHelper returns a Docker credential helper which
 // specializes in GCR's authentication schemes.
 func NewGCRCredentialHelper(store store.GCRCredStore, userCfg config.UserConfig) credentials.Helper {
-	tokenSources := userCfg.TokenSources()
 	return &gcrCredHelper{
 		store:          store,
-		tokenSources:   tokenSources,
+		userCfg:        userCfg,
 		credStoreToken: tokenFromPrivateStore,
 		gcloudSDKToken: tokenFromGcloudSDK,
 		envToken:       tokenFromEnv,
@@ -107,24 +106,38 @@ func (ch *gcrCredHelper) Delete(serverURL string) error {
 
 // Get returns the username and secret to use for a given registry server URL.
 func (ch *gcrCredHelper) Get(serverURL string) (string, string, error) {
+	// If this is a GCR hostname, return GCR's credentials.
 	if isAGCRHostname(serverURL) {
-		// Return GCR's access token.
-		accessToken, err := ch.getGCRAccessToken()
-		if err != nil {
-			return "", "", helperErr(fmt.Sprintf("could not retrieve %s's access token", serverURL), err)
-		}
-		return gcrOAuth2Username, accessToken, nil
+		return ch.gcrCreds()
 	}
 
-	// Attempt to retrieve credentials for another repository
+	// Next, attempt to retrieve credentials for another repository.
 	creds, err := ch.store.GetOtherCreds(serverURL)
 	if err != nil {
-		if credentials.IsErrCredentialsNotFound(err) {
-			return "", "", err
+		// Swallow not found error, return everything else.
+		if !credentials.IsErrCredentialsNotFound(err) {
+			return "", "", helperErr("could not retrieve 3p credentials for "+serverURL, err)
 		}
-		return "", "", helperErr("could not retrieve 3p credentials for "+serverURL, err)
+	} else {
+		// If 3p creds are found, return them.
+		return creds.Username, creds.Secret, nil
 	}
-	return creds.Username, creds.Secret, nil
+
+	// Finally, if we're configured to return GCR's access token rather
+	// than a not found error, do so. Otherwise, return the not found error
+	// expected by "github.com/docker/docker-credential-helpers/credentials"
+	if ch.userCfg.DefaultToGCRAccessToken() {
+		return ch.gcrCreds()
+	}
+	return "", "", credentials.NewErrCredentialsNotFound()
+}
+
+func (ch *gcrCredHelper) gcrCreds() (string, string, error) {
+	accessToken, err := ch.getGCRAccessToken()
+	if err != nil {
+		return "", "", helperErr("could not retrieve GCR's access token", err)
+	}
+	return gcrOAuth2Username, accessToken, nil
 }
 
 // getGCRAccessToken attempts to retrieve a GCR access token from the sources
@@ -132,7 +145,8 @@ func (ch *gcrCredHelper) Get(serverURL string) (string, string, error) {
 func (ch *gcrCredHelper) getGCRAccessToken() (string, error) {
 	var token string
 	var err error
-	for _, source := range ch.tokenSources {
+	tokenSources := ch.userCfg.TokenSources()
+	for _, source := range tokenSources {
 		switch source {
 		case "env":
 			token, err = ch.envToken()

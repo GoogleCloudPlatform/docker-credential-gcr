@@ -115,6 +115,34 @@ func TestSetTokenSources(t *testing.T) {
 	tested.SetTokenSources(expected)
 }
 
+func TestDefaultToGCRAccessToken_UserDefined(t *testing.T) {
+	expected := true
+	tested := &configFile{
+		DefaultToGCRToken: expected,
+	}
+
+	actual := tested.DefaultToGCRAccessToken()
+
+	if expected != actual {
+		t.Errorf("Expected: %v, Actual %v", expected, actual)
+	}
+}
+
+func TestSetDefaultToGCRAccessToken(t *testing.T) {
+	expected := true
+	tested := &configFile{
+		DefaultToGCRToken: false,
+		persist: func(c *configFile) error {
+			if expected != c.DefaultToGCRToken {
+				t.Errorf("Expected: %v, Actual %v", expected, c.DefaultToGCRToken)
+			}
+			return nil
+		},
+	}
+
+	tested.SetDefaultToGCRAccessToken(expected)
+}
+
 func TestEqual(t *testing.T) {
 	if !equal(nil, nil) {
 		t.Error("!equal(nil, nil)")
