@@ -103,14 +103,14 @@ func (c *dockerConfigCmd) Execute(context.Context, *flag.FlagSet, ...interface{}
 // credential helpers (1.13+), error if Docker is not installed or there was an
 // error determining the version.
 func credHelpersSupported(majorVersion, minorVersion int) bool {
-	return majorVersion == 1 && minorVersion >= 13
+	return majorVersion >= 17 || (majorVersion == 1 && minorVersion >= 13)
 }
 
 // credsStoreSupported returns true if the installed version of Docker supports
 // credential stores (1.11+), error if Docker is not installed or there was an
 // error determining the version.
 func credsStoreSupported(majorVersion, minorVersion int) bool {
-	return majorVersion == 1 && minorVersion >= 11
+	return majorVersion >= 17 || (majorVersion == 1 && minorVersion >= 11)
 }
 
 // Configure Docker to use the credential helper for GCR's registries only.

@@ -226,10 +226,16 @@ func TestSetGCRAuthConfigs_InvalidCredStoreOK(t *testing.T) {
 func TestCredHelpersSupported_Supported(t *testing.T) {
 	t.Parallel()
 
-	for minor := 13; minor < 16; minor++ {
-		if !credHelpersSupported(1, minor) {
-			t.Errorf("credHelperSupported erronously returned false for v1.%d", minor)
+	// New, date-based version numbering
+	for major := 17; major < 22; major++ {
+		if !credHelpersSupported(major, 0) {
+			t.Errorf("credHelperSupported erronously returned false for v%d.0", major)
 		}
+	}
+
+	// Old 1.xx.yy-zzz
+	if !credHelpersSupported(1, 13) {
+		t.Error("credHelperSupported erronously returned false for v1.13")
 	}
 }
 
@@ -252,7 +258,15 @@ func TestCredHelpersSupported_Unsupported(t *testing.T) {
 func TestCredsStoreSupported_Supported(t *testing.T) {
 	t.Parallel()
 
-	for minor := 11; minor < 16; minor++ {
+	// New, date-based version numbering
+	for major := 17; major < 22; major++ {
+		if !credsStoreSupported(major, 0) {
+			t.Errorf("credsStoreSupported erronously returned false for v%d.0", major)
+		}
+	}
+
+	// Old 1.xx.yy-zzz
+	for minor := 11; minor < 14; minor++ {
 		if !credsStoreSupported(1, minor) {
 			t.Errorf("credsStoreSupported erronously returned false for v1.%d", minor)
 		}
