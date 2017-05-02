@@ -19,14 +19,13 @@ for GCR authentication.
 package credhelper
 
 import (
-	"bytes"
 	"fmt"
 	"net/url"
-	"os/exec"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/config"
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/store"
+	"github.com/GoogleCloudPlatform/docker-credential-gcr/util/cmd"
 	"github.com/docker/docker-credential-helpers/credentials"
 
 	"golang.org/x/oauth2/google"
@@ -42,8 +41,11 @@ type gcrCredHelper struct {
 
 	// helper methods, package exposed for testing
 	envToken       func() (string, error)
-	gcloudSDKToken func() (string, error)
+	gcloudSDKToken func(cmd.Command) (string, error)
 	credStoreToken func(store.GCRCredStore) (string, error)
+
+	// `gcloud` exec interface, package exposed for testing
+	gcloudCmd cmd.Command
 }
 
 // NewGCRCredentialHelper returns a Docker credential helper which
@@ -55,6 +57,7 @@ func NewGCRCredentialHelper(store store.GCRCredStore, userCfg config.UserConfig)
 		credStoreToken: tokenFromPrivateStore,
 		gcloudSDKToken: tokenFromGcloudSDK,
 		envToken:       tokenFromEnv,
+		gcloudCmd:      &cmd.RealImpl{Command: "gcloud"},
 	}
 }
 
@@ -151,7 +154,7 @@ func (ch *gcrCredHelper) getGCRAccessToken() (string, error) {
 		case "env":
 			token, err = ch.envToken()
 		case "gcloud", "gcloud_sdk": // gcloud_sdk supported for legacy reasons
-			token, err = ch.gcloudSDKToken()
+			token, err = ch.gcloudSDKToken(ch.gcloudCmd)
 		case "store":
 			token, err = ch.credStoreToken(ch.store)
 		default:
@@ -209,24 +212,17 @@ func tokenFromEnv() (string, error) {
 }
 
 // tokenFromGcloudSDK attempts to generate an access_token using the gcloud SDK.
-func tokenFromGcloudSDK() (string, error) {
+func tokenFromGcloudSDK(gcloudCmd cmd.Command) (string, error) {
 	// shelling out to gcloud is the only currently supported way of
 	// obtaining the gcloud access_token
-	if _, err := exec.LookPath("gcloud"); err != nil {
-		return "", helperErr("gcloud not found on PATH", nil)
+	stdout, err := gcloudCmd.Exec("config", "config-helper", "--format=value(credential.access_token)")
+	if err != nil {
+		return "", helperErr("`gcloud config config-helper` failed", err)
 	}
 
-	cmd := exec.Command("gcloud", "auth", "print-access-token")
-
-	var out bytes.Buffer
-	cmd.Stdout = &out
-	if err := cmd.Run(); err != nil {
-		return "", helperErr("gcloud auth print-access-token failed", err)
-	}
-
-	token := strings.TrimSpace(out.String())
+	token := strings.TrimSpace(string(stdout))
 	if token == "" {
-		return "", helperErr("gcloud auth print-access-token returned empty access_token", nil)
+		return "", helperErr("`gcloud config config-helper` returned an empty access_token", nil)
 	}
 	return token, nil
 }

@@ -19,13 +19,13 @@ package util
 import (
 	"testing"
 
-	"github.com/GoogleCloudPlatform/docker-credential-gcr/mock/mock_dockercmd" // mocks must be generated before test execution
-	"github.com/GoogleCloudPlatform/docker-credential-gcr/util/dockercmd"
+	"github.com/GoogleCloudPlatform/docker-credential-gcr/mock/mock_cmd" // mocks must be generated before test execution
+	"github.com/GoogleCloudPlatform/docker-credential-gcr/util/cmd"
 	"github.com/golang/mock/gomock"
 )
 
-func getMockCmd(ctrl *gomock.Controller, returnVals ...interface{}) dockercmd.DockerClient {
-	mockCmd := mock_dockercmd.NewMockDockerClient(ctrl)
+func mockGetVersionCmd(ctrl *gomock.Controller, returnVals ...interface{}) cmd.Command {
+	mockCmd := mock_cmd.NewMockCommand(ctrl)
 	mockCmd.EXPECT().Exec("version", "--format", "'{{.Client.Version}}'").Return(returnVals...)
 	return mockCmd
 }
@@ -36,7 +36,7 @@ func TestDockerClientVersion_Basic(t *testing.T) {
 	defer mockCtrl.Finish()
 
 	// Mock out the executor.
-	command = getMockCmd(mockCtrl, []byte("1.2.3"), nil)
+	docker = mockGetVersionCmd(mockCtrl, []byte("1.2.3"), nil)
 
 	major, minor, patch, patchSuffix, err := DockerClientVersion()
 
@@ -64,7 +64,7 @@ func TestDockerClientVersion_WithSuffix(t *testing.T) {
 	defer mockCtrl.Finish()
 
 	// Mock out the executor.
-	command = getMockCmd(mockCtrl, []byte("1.2.3-dev"), nil)
+	docker = mockGetVersionCmd(mockCtrl, []byte("1.2.3-dev"), nil)
 
 	major, minor, patch, patchSuffix, err := DockerClientVersion()
 
@@ -92,7 +92,7 @@ func TestDockerClientVersion_SingleQuotedWithSuffix(t *testing.T) {
 	defer mockCtrl.Finish()
 
 	// Mock out the executor.
-	command = getMockCmd(mockCtrl, []byte("'1.2.3-dev'"), nil)
+	docker = mockGetVersionCmd(mockCtrl, []byte("'1.2.3-dev'"), nil)
 
 	major, minor, patch, patchSuffix, err := DockerClientVersion()
 
@@ -120,7 +120,7 @@ func TestDockerClientVersion_SingleQuotes(t *testing.T) {
 	defer mockCtrl.Finish()
 
 	// Mock out the executor.
-	command = getMockCmd(mockCtrl, []byte("'1.2.3'"), nil)
+	docker = mockGetVersionCmd(mockCtrl, []byte("'1.2.3'"), nil)
 
 	major, minor, patch, patchSuffix, err := DockerClientVersion()
 
@@ -148,7 +148,7 @@ func TestDockerClientVersion_Whitespace(t *testing.T) {
 	defer mockCtrl.Finish()
 
 	// Mock out the executor.
-	command = getMockCmd(mockCtrl, []byte("1.2.3\n"), nil)
+	docker = mockGetVersionCmd(mockCtrl, []byte("1.2.3\n"), nil)
 
 	major, minor, patch, patchSuffix, err := DockerClientVersion()
 
@@ -176,7 +176,7 @@ func TestDockerClientVersion_WhitespaceQuoted(t *testing.T) {
 	defer mockCtrl.Finish()
 
 	// Mock out the executor.
-	command = getMockCmd(mockCtrl, []byte("'1.2.3'\n"), nil)
+	docker = mockGetVersionCmd(mockCtrl, []byte("'1.2.3'\n"), nil)
 
 	major, minor, patch, patchSuffix, err := DockerClientVersion()
 

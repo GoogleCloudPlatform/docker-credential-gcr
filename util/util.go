@@ -27,10 +27,10 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/GoogleCloudPlatform/docker-credential-gcr/util/dockercmd"
+	"github.com/GoogleCloudPlatform/docker-credential-gcr/util/cmd"
 )
 
-var command dockercmd.DockerClient = &dockercmd.RealImpl{}
+var docker cmd.Command = &cmd.RealImpl{Command: "docker"}
 
 // SdkConfigPath tries to return the directory where the gcloud config is
 // located.
@@ -56,7 +56,7 @@ func unixHomeDir() string {
 // dockerClientVersionStrings attempts to discover the version of the Docker client,
 // returning the major, minor, and patch versions, or an error if unsuccessful.
 func dockerClientVersionStrings() (string, string, string, error) {
-	out, err := command.Exec("version", "--format", "'{{.Client.Version}}'")
+	out, err := docker.Exec("version", "--format", "'{{.Client.Version}}'")
 	if err != nil {
 		return "", "", "", err
 	}

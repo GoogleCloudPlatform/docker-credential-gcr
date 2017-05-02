@@ -13,25 +13,29 @@
 // limitations under the License.
 
 /*
-Package dockercmd contains utilities to execute commands on the Docker client.
+Package cmd contains utilities to execute commands using a test-friendly
+interface.
 */
-package dockercmd
+package cmd
 
 import (
 	"os/exec"
 )
 
-// DockerClient executes 'docker' with the given arguments.
-type DockerClient interface {
+// Command execs a command with the given arguments.
+type Command interface {
 	Exec(...string) ([]byte, error)
 }
 
-// RealImpl is the real implementation of cmdExecutor uses exec.Command to
-// execute the Docker client with the given args.
-type RealImpl struct{}
+// RealImpl is a real implementation of Command which uses exec.Command to
+// execute the given cmd.
+type RealImpl struct {
+	// The command to execute.
+	Command string
+}
 
-// Exec executes 'docker' with the given args, returning the results of stdout
-// or an error.
-func (RealImpl) Exec(args ...string) ([]byte, error) {
-	return exec.Command("docker", args...).Output()
+// Exec executes the defined command with the given args, returning the results
+// of stdout, or an error.
+func (s *RealImpl) Exec(args ...string) ([]byte, error) {
+	return exec.Command(s.Command, args...).Output()
 }

@@ -20,11 +20,13 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/GoogleCloudPlatform/docker-credential-gcr/mock/mock_cmd"
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/mock/mock_config" // mocks must be generated before test execution
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/mock/mock_store"
 
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/config"
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/store"
+	"github.com/GoogleCloudPlatform/docker-credential-gcr/util/cmd"
 	"github.com/docker/docker-credential-helpers/credentials"
 	"github.com/golang/mock/gomock"
 )
@@ -134,7 +136,7 @@ func TestGet_OtherCredentials(t *testing.T) {
 		envToken: func() (string, error) {
 			return expectedGCRSecret, nil
 		},
-		gcloudSDKToken: func() (string, error) {
+		gcloudSDKToken: func(_ cmd.Command) (string, error) {
 			return "", errors.New("No token here!")
 		},
 		credStoreToken: func(_ store.GCRCredStore) (string, error) {
@@ -208,7 +210,7 @@ func TestGet_GCRCredentials(t *testing.T) {
 		envToken: func() (string, error) {
 			return expectedSecret, nil
 		},
-		gcloudSDKToken: func() (string, error) {
+		gcloudSDKToken: func(_ cmd.Command) (string, error) {
 			return "", errors.New("No token here!")
 		},
 		credStoreToken: func(_ store.GCRCredStore) (string, error) {
@@ -290,7 +292,7 @@ func TestGetGCRAccessToken_Env(t *testing.T) {
 		envToken: func() (string, error) {
 			return expected, nil
 		},
-		gcloudSDKToken: func() (string, error) {
+		gcloudSDKToken: func(_ cmd.Command) (string, error) {
 			return "gcloud sdk creds!", nil
 		},
 		credStoreToken: func(_ store.GCRCredStore) (string, error) {
@@ -324,7 +326,7 @@ func TestGetGCRAccessToken_GcloudSDK(t *testing.T) {
 		envToken: func() (string, error) {
 			return "", errors.New("No token here!")
 		},
-		gcloudSDKToken: func() (string, error) {
+		gcloudSDKToken: func(_ cmd.Command) (string, error) {
 			return expected, nil
 		},
 		credStoreToken: func(_ store.GCRCredStore) (string, error) {
@@ -359,7 +361,7 @@ func TestGetGCRAccessToken_PrivateStore(t *testing.T) {
 		envToken: func() (string, error) {
 			return "", errors.New("No token here!")
 		},
-		gcloudSDKToken: func() (string, error) {
+		gcloudSDKToken: func(_ cmd.Command) (string, error) {
 			return "", errors.New("Still no token here!")
 		},
 		credStoreToken: func(_ store.GCRCredStore) (string, error) {
@@ -393,7 +395,7 @@ func TestGetGCRAccessToken_NoneExist(t *testing.T) {
 		envToken: func() (string, error) {
 			return "", errors.New("No token here!")
 		},
-		gcloudSDKToken: func() (string, error) {
+		gcloudSDKToken: func(_ cmd.Command) (string, error) {
 			return "", errors.New("Still no token here!")
 		},
 		credStoreToken: func(_ store.GCRCredStore) (string, error) {
@@ -431,7 +433,7 @@ func TestGetGCRAccessToken_CustomTokenSources(t *testing.T) {
 		envToken: func() (string, error) {
 			return envCreds, nil
 		},
-		gcloudSDKToken: func() (string, error) {
+		gcloudSDKToken: func(_ cmd.Command) (string, error) {
 			return gcloudCreds, nil
 		},
 		credStoreToken: func(_ store.GCRCredStore) (string, error) {
@@ -470,7 +472,7 @@ func TestGetGCRAccessToken_CustomTokenSources_ValidSourceDisabled(t *testing.T) 
 		envToken: func() (string, error) {
 			return envCreds, nil
 		},
-		gcloudSDKToken: func() (string, error) {
+		gcloudSDKToken: func(_ cmd.Command) (string, error) {
 			return "", errors.New("No token here!")
 		},
 		credStoreToken: func(_ store.GCRCredStore) (string, error) {
@@ -507,7 +509,7 @@ func TestGetGCRAccessToken_CustomTokenSources_InvalidSource(t *testing.T) {
 		envToken: func() (string, error) {
 			return envCreds, nil
 		},
-		gcloudSDKToken: func() (string, error) {
+		gcloudSDKToken: func(_ cmd.Command) (string, error) {
 			return gcloudCreds, nil
 		},
 		credStoreToken: func(_ store.GCRCredStore) (string, error) {
@@ -519,5 +521,26 @@ func TestGetGCRAccessToken_CustomTokenSources_InvalidSource(t *testing.T) {
 
 	if err == nil {
 		t.Fatalf("Expected an error, got token: %s", token)
+	}
+}
+
+func TestTokenFromGcloudSDK(t *testing.T) {
+	t.Parallel()
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	const gcloudCreds = "gcloud sdk creds!"
+
+	// This test is more-or-less tautological, but it's important to verify
+	// that gcloud is being queried in a supported way.
+	mockCmd := mock_cmd.NewMockCommand(mockCtrl)
+	mockCmd.EXPECT().Exec("config", "config-helper", "--format=value(credential.access_token)").Return([]uint8(gcloudCreds), nil)
+
+	token, err := tokenFromGcloudSDK(mockCmd)
+
+	if err != nil {
+		t.Fatalf("tokenFromGcloudSDK returned an error: %v", err)
+	} else if token != gcloudCreds {
+		t.Fatalf("Expected: '%s' got: '%s'", gcloudCreds, token)
 	}
 }

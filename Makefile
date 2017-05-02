@@ -28,10 +28,10 @@ mocks:
 	@rm -rf ${MOCK_DIR}
 	@mkdir -p ${MOCK_DIR}/mock_store
 	@mkdir -p ${MOCK_DIR}/mock_config
-	@mkdir -p ${MOCK_DIR}/mock_dockercmd
+	@mkdir -p ${MOCK_DIR}/mock_cmd
 	@mockgen -destination=${MOCK_DIR}/mock_store/mocks.go github.com/GoogleCloudPlatform/docker-credential-gcr/store GCRCredStore
 	@mockgen -destination=${MOCK_DIR}/mock_config/mocks.go github.com/GoogleCloudPlatform/docker-credential-gcr/config UserConfig
-	@mockgen -destination=${MOCK_DIR}/mock_dockercmd/mocks.go github.com/GoogleCloudPlatform/docker-credential-gcr/util/dockercmd DockerClient
+	@mockgen -destination=${MOCK_DIR}/mock_cmd/mocks.go github.com/GoogleCloudPlatform/docker-credential-gcr/util/cmd Command
 
 test: clean testdeps mocks bin
 	@go test -timeout 10s -v -tags="unit integration surface" ./...
