@@ -39,9 +39,9 @@ const (
 	// MajorVersion is the credential helper's major version number.
 	MajorVersion = 1
 	// MinorVersion is the credential helper's minor version number.
-	MinorVersion = 3
+	MinorVersion = 4
 	// PatchVersion is the credential helper's patch version number.
-	PatchVersion = 5
+	PatchVersion = 0
 )
 
 // SupportedGCRRegistries maps registry URLs to a bool representing whether
