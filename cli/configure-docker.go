@@ -27,9 +27,9 @@ import (
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/config"
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/store"
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/util"
+	cliconfig "github.com/docker/cli/cli/config"
+	"github.com/docker/cli/cli/config/configfile"
 	"github.com/docker/docker/api/types"
-	cliconfig "github.com/docker/docker/cli/config"
-	"github.com/docker/docker/cli/config/configfile"
 	"github.com/google/subcommands"
 )
 
@@ -192,7 +192,7 @@ func (c *dockerConfigCmd) setLegacyConfig(dockerConfig *configfile.ConfigFile, h
 func setAuthConfigs(dockerConfig *configfile.ConfigFile, s store.GCRCredStore) bool {
 	newAuthconfigs := make(map[string]types.AuthConfig)
 	for registry := range config.SupportedGCRRegistries {
-		// 'auths' members take the HTTP scheme
+		// 'auths' members take a scheme
 		registry = "https://" + registry
 		newAuthconfigs[registry] = types.AuthConfig{}
 	}

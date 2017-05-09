@@ -22,9 +22,9 @@ import (
 	"testing"
 
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/mock/mock_store"
+	"github.com/docker/cli/cli/config/configfile"
 	"github.com/docker/docker-credential-helpers/credentials"
 	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/cli/config/configfile"
 	"github.com/golang/mock/gomock"
 )
 
