@@ -98,15 +98,15 @@ func (b *testBrowser) Open(urlStr string) error {
 	}
 
 	redirectURI := URL.Query().Get("redirect_uri")
-	redirUrl, err := url.Parse(redirectURI)
+	redirURL, err := url.Parse(redirectURI)
 	if err != nil {
 		b.t.Errorf("Unable to parse redirect_uri: %s", redirectURI)
 	} else {
 		// pass the redirect URL to the browser
-		b.RedirectURL <- redirUrl
+		b.RedirectURL <- redirURL
 
-		if !strings.HasPrefix(redirUrl.Host, expectedHost) {
-			b.t.Errorf("RedirectURL should begin with %s: %s", expectedHost, redirUrl.Host)
+		if !strings.HasPrefix(redirURL.Host, expectedHost) {
+			b.t.Errorf("RedirectURL should begin with %s: %s", expectedHost, redirURL.Host)
 		}
 	}
 

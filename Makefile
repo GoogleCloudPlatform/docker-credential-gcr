@@ -4,6 +4,8 @@ BINARY_FILENAME := docker-credential-gcr
 OUT_DIR := bin
 # The directory to dump generated mocks
 MOCK_DIR := mock
+# The non-vendor golang sources to validate.
+SRCS := $(shell find **/*.go -type f | grep -v vendor/)
 
 all: clean bin
 
@@ -49,7 +51,8 @@ vet:
 	@go vet ./...
 
 lint:
-	@golint ./...
+	@echo 'Running golint...'
+	@$(foreach src,$(SRCS),golint $(src);)
 	
 criticism: clean vet lint
 
