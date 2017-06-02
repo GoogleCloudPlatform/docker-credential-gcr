@@ -36,7 +36,7 @@ mocks:
 	@mockgen -destination ${MOCK_DIR}/mock_cmd/mocks.go github.com/GoogleCloudPlatform/docker-credential-gcr/util/cmd Command
 	
 strip-vendor-dependencies:
-	@sed -i 's/github.com\/GoogleCloudPlatform\/docker-credential-gcr\/vendor\///g' ${SRCS}
+	@sed -i -e 's/github.com\/GoogleCloudPlatform\/docker-credential-gcr\/vendor\///g' ${SRCS}
 
 test: clean testdeps mocks strip-vendor-dependencies bin
 	@go test -timeout 10s -v -tags="unit integration surface" ./...
