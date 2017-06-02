@@ -5,7 +5,7 @@ OUT_DIR := bin
 # The directory to dump generated mocks
 MOCK_DIR := mock
 # The non-vendor golang sources to validate.
-SRCS := $(shell find **/*.go -type f | grep -v vendor/)
+SRCS = $(shell find . -name "*.go" -type f | grep -v vendor/)
 
 all: clean bin
 
@@ -31,11 +31,14 @@ mocks:
 	@mkdir -p ${MOCK_DIR}/mock_store
 	@mkdir -p ${MOCK_DIR}/mock_config
 	@mkdir -p ${MOCK_DIR}/mock_cmd
-	@mockgen -destination=${MOCK_DIR}/mock_store/mocks.go github.com/GoogleCloudPlatform/docker-credential-gcr/store GCRCredStore
-	@mockgen -destination=${MOCK_DIR}/mock_config/mocks.go github.com/GoogleCloudPlatform/docker-credential-gcr/config UserConfig
-	@mockgen -destination=${MOCK_DIR}/mock_cmd/mocks.go github.com/GoogleCloudPlatform/docker-credential-gcr/util/cmd Command
+	@mockgen -destination ${MOCK_DIR}/mock_store/mocks.go github.com/GoogleCloudPlatform/docker-credential-gcr/store GCRCredStore
+	@mockgen -destination ${MOCK_DIR}/mock_config/mocks.go github.com/GoogleCloudPlatform/docker-credential-gcr/config UserConfig
+	@mockgen -destination ${MOCK_DIR}/mock_cmd/mocks.go github.com/GoogleCloudPlatform/docker-credential-gcr/util/cmd Command
+	
+strip-vendor-dependencies:
+	@sed -i 's/github.com\/GoogleCloudPlatform\/docker-credential-gcr\/vendor\///g' ${SRCS}
 
-test: clean testdeps mocks bin
+test: clean testdeps mocks strip-vendor-dependencies bin
 	@go test -timeout 10s -v -tags="unit integration surface" ./...
 
 unit-tests: testdeps mocks
