@@ -50,7 +50,7 @@ func (c *logoutCmd) Execute(context.Context, *flag.FlagSet, ...interface{}) subc
 // GCRLogout performs the actions necessary to remove any GCR credentials
 // from the credential store.
 func (*logoutCmd) GCRLogout() error {
-	s, err := store.NewGCRCredStore()
+	s, err := store.DefaultGCRCredStore()
 	if err != nil {
 		return err
 	}

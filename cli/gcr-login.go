@@ -60,7 +60,7 @@ func (c *loginCmd) GCRLogin() error {
 	loginAgent := &auth.GCRLoginAgent{
 		AllowBrowser: !c.forbidBrowser,
 	}
-	s, err := store.NewGCRCredStore()
+	s, err := store.DefaultGCRCredStore()
 	if err != nil {
 		return err
 	}

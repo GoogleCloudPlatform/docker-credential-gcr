@@ -162,7 +162,7 @@ func (c *dockerConfigCmd) setLegacyConfig(dockerConfig *configfile.ConfigFile, h
 	// Populate the AuthConfigs portion of the config.
 	// This allows 'docker build' work on Docker client versions 1.11 and 1.12,
 	// where AuthConfigs was
-	s, err := store.NewGCRCredStore()
+	s, err := store.DefaultGCRCredStore()
 	if err != nil {
 		printErrorln("Unable to read credentialStore: %v", err)
 	}

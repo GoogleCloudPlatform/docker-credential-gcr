@@ -32,7 +32,7 @@ type helperCmd struct {
 }
 
 func (*helperCmd) Execute(context.Context, *flag.FlagSet, ...interface{}) subcommands.ExitStatus {
-	store, err := store.NewGCRCredStore()
+	store, err := store.DefaultGCRCredStore()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failure: %v\n", err)
 		return subcommands.ExitFailure
