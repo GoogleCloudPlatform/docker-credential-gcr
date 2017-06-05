@@ -17,7 +17,6 @@ package config
 
 import (
 	"golang.org/x/oauth2"
-	//"golang.org/x/oauth2/google"
 )
 
 const (
@@ -52,11 +51,8 @@ var SupportedGCRRegistries = map[string]bool{
 	"us.gcr.io":         true,
 	"eu.gcr.io":         true,
 	"asia.gcr.io":       true,
-	"b.gcr.io":          true,
-	"bucket.gcr.io":     true,
 	"appengine.gcr.io":  true,
 	"gcr.kubernetes.io": true,
-	"beta.gcr.io":       true,
 }
 
 // SupportedGCRTokenSources maps config keys to plain english explanations for
