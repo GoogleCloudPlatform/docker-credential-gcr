@@ -49,7 +49,7 @@ func (c *clearCmd) Execute(context.Context, *flag.FlagSet, ...interface{}) subco
 
 // ClearAll removes all credentials from the store (GCR or otherwise).
 func (c *clearCmd) ClearAll() error {
-	s, err := store.NewGCRCredStore()
+	s, err := store.DefaultGCRCredStore()
 	if err != nil {
 		return err
 	}

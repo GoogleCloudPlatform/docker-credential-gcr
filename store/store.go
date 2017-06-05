@@ -84,12 +84,19 @@ type credStore struct {
 	credentialPath string
 }
 
-// NewGCRCredStore returns a GCRCredStore which is backed by a file.
-func NewGCRCredStore() (GCRCredStore, error) {
+// DefaultGCRCredStore returns a GCRCredStore which is backed by a file.
+func DefaultGCRCredStore() (GCRCredStore, error) {
 	path, err := dockerCredentialPath()
 	return &credStore{
 		credentialPath: path,
 	}, err
+}
+
+// NewGCRCredStore returns a GCRCredStore which is backed by the given file.
+func NewGCRCredStore(path string) GCRCredStore {
+	return &credStore{
+		credentialPath: path,
+	}
 }
 
 // GetOtherCreds returns the stored credentials corresponding to the given

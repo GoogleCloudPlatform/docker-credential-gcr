@@ -64,7 +64,7 @@ func NewGCRCredentialHelper(store store.GCRCredStore, userCfg config.UserConfig)
 // Delete lists all stored credentials and associated usernames.
 func (ch *gcrCredHelper) List() (map[string]string, error) {
 	all3pCreds, err := ch.store.AllThirdPartyCreds()
-	if err != nil {
+	if err != nil && !credentials.IsErrCredentialsNotFound(err) {
 		return nil, helperErr("could not retrieve 3p credentials", err)
 	}
 
