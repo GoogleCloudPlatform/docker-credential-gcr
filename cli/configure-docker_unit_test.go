@@ -34,11 +34,8 @@ func expectedAuthConfigs() map[string]types.AuthConfig {
 		"https://us.gcr.io":         {},
 		"https://eu.gcr.io":         {},
 		"https://asia.gcr.io":       {},
-		"https://b.gcr.io":          {},
-		"https://bucket.gcr.io":     {},
 		"https://appengine.gcr.io":  {},
 		"https://gcr.kubernetes.io": {},
-		"https://beta.gcr.io":       {},
 	}
 }
 
