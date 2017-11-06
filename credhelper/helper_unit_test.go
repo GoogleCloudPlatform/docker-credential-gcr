@@ -134,10 +134,10 @@ func TestGet_OtherCredentials(t *testing.T) {
 			return expectedGCRSecret, nil
 		},
 		gcloudSDKToken: func(_ cmd.Command) (string, error) {
-			return "", errors.New("No token here!")
+			return "", errors.New("no token here")
 		},
 		credStoreToken: func(_ store.GCRCredStore) (string, error) {
-			return "", errors.New("No token here!")
+			return "", errors.New("no token here")
 		},
 	}
 
@@ -155,11 +155,11 @@ func TestGet_OtherCredentials(t *testing.T) {
 		username, secret, err := tested.Get(host)
 
 		if err != nil {
-			t.Errorf("Get returned an error: %v", err)
+			t.Errorf("get returned an error: %v", err)
 		} else if username != expectedUsername {
-			t.Errorf("Expected username: %s but got: %s", expectedUsername, username)
+			t.Errorf("expected username: %s but got: %s", expectedUsername, username)
 		} else if secret != expected3pSecret {
-			t.Errorf("Expected 3p secret: %s but got: %s", expected3pSecret, secret)
+			t.Errorf("expected 3p secret: %s but got: %s", expected3pSecret, secret)
 		}
 	}
 
@@ -170,9 +170,9 @@ func TestGet_OtherCredentials(t *testing.T) {
 	_, _, err := tested.Get("somewhere.else")
 
 	if err == nil {
-		t.Error("Expected an error to be returned")
+		t.Error("expected an error to be returned")
 	} else if !credentials.IsErrCredentialsNotFound(err) {
-		t.Errorf("Expected a CredentialsNotFound error: %v", err)
+		t.Errorf("expected a CredentialsNotFound error: %v", err)
 	}
 
 	// negative case - 3p creds not found, but configured to return GCR's creds by default.
@@ -183,11 +183,11 @@ func TestGet_OtherCredentials(t *testing.T) {
 	username, secret, err := tested.Get("somewhere.else")
 
 	if err != nil {
-		t.Errorf("Get returned an error: %v", err)
+		t.Errorf("get returned an error: %v", err)
 	} else if username != expectedGCRUsername {
-		t.Errorf("Expected GCR username: %s but got: %s", expectedGCRUsername, username)
+		t.Errorf("expected GCR username: %s but got: %s", expectedGCRUsername, username)
 	} else if secret != expectedGCRSecret {
-		t.Errorf("Expected GCR secret: %s but got: %s", expectedGCRSecret, secret)
+		t.Errorf("expected GCR secret: %s but got: %s", expectedGCRSecret, secret)
 	}
 }
 
@@ -208,10 +208,10 @@ func TestGet_GCRCredentials(t *testing.T) {
 			return expectedSecret, nil
 		},
 		gcloudSDKToken: func(_ cmd.Command) (string, error) {
-			return "", errors.New("No token here!")
+			return "", errors.New("no token here")
 		},
 		credStoreToken: func(_ store.GCRCredStore) (string, error) {
-			return "", errors.New("No token here!")
+			return "", errors.New("no token here")
 		},
 	}
 
@@ -220,11 +220,11 @@ func TestGet_GCRCredentials(t *testing.T) {
 		mockUserCfg.EXPECT().TokenSources().Return(config.DefaultTokenSources[:])
 		username, secret, err := tested.Get("https://" + host)
 		if err != nil {
-			t.Errorf("Get returned an error: %v", err)
+			t.Errorf("get returned an error: %v", err)
 		} else if username != expectedGCRUsername {
-			t.Errorf("Expected GCR username: %s but got: %s", expectedGCRUsername, username)
+			t.Errorf("expected GCR username: %s but got: %s", expectedGCRUsername, username)
 		} else if secret != expectedSecret {
-			t.Errorf("Expected secret: %s but got: %s", expectedSecret, secret)
+			t.Errorf("expected secret: %s but got: %s", expectedSecret, secret)
 		}
 	}
 }
@@ -241,7 +241,7 @@ func TestDelete_GCRCredentials(t *testing.T) {
 	for _, host := range gcrHosts {
 		err := tested.Delete("https://" + host)
 		if err == nil {
-			t.Error("Deleting GCR credentials should return an error.")
+			t.Error("deleting GCR credentials should return an error.")
 		}
 	}
 }
@@ -262,7 +262,7 @@ func TestDelete_OtherCredentials(t *testing.T) {
 		err := tested.Delete(schemedHost)
 
 		if err != nil {
-			t.Errorf("Delete returned an error: %v", err)
+			t.Errorf("delete returned an error: %v", err)
 		}
 	}
 }
@@ -321,7 +321,7 @@ func TestGetGCRAccessToken_GcloudSDK(t *testing.T) {
 		store:   mockStore,
 		userCfg: mockUserCfg,
 		envToken: func() (string, error) {
-			return "", errors.New("No token here!")
+			return "", errors.New("no token here")
 		},
 		gcloudSDKToken: func(_ cmd.Command) (string, error) {
 			return expected, nil
@@ -356,10 +356,10 @@ func TestGetGCRAccessToken_PrivateStore(t *testing.T) {
 		store:   mockStore,
 		userCfg: mockUserCfg,
 		envToken: func() (string, error) {
-			return "", errors.New("No token here!")
+			return "", errors.New("no token here")
 		},
 		gcloudSDKToken: func(_ cmd.Command) (string, error) {
-			return "", errors.New("Still no token here!")
+			return "", errors.New("still no token here")
 		},
 		credStoreToken: func(_ store.GCRCredStore) (string, error) {
 			return expected, nil
@@ -390,13 +390,13 @@ func TestGetGCRAccessToken_NoneExist(t *testing.T) {
 		store:   mockStore,
 		userCfg: mockUserCfg,
 		envToken: func() (string, error) {
-			return "", errors.New("No token here!")
+			return "", errors.New("no token here")
 		},
 		gcloudSDKToken: func(_ cmd.Command) (string, error) {
-			return "", errors.New("Still no token here!")
+			return "", errors.New("still no token here")
 		},
 		credStoreToken: func(_ store.GCRCredStore) (string, error) {
-			return "", errors.New("Sad panda!")
+			return "", errors.New("sad panda")
 		},
 	}
 
@@ -470,7 +470,7 @@ func TestGetGCRAccessToken_CustomTokenSources_ValidSourcesDisabled(t *testing.T)
 			return envCreds, nil
 		},
 		gcloudSDKToken: func(_ cmd.Command) (string, error) {
-			return "", errors.New("No token here!")
+			return "", errors.New("no token here")
 		},
 		credStoreToken: func(_ store.GCRCredStore) (string, error) {
 			return storeCreds, nil
