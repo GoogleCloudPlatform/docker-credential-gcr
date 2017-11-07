@@ -97,7 +97,7 @@ func (c *configCmd) Execute(_ context.Context, flags *flag.FlagSet, _ ...interfa
 					printSuccess("Will return an error when credentials are not found.")
 				}
 			default:
-				printError(flag, errors.New("Unknown flag!"))
+				printError(flag, errors.New("unknown flag"))
 				result = subcommands.ExitFailure
 			}
 		})

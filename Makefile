@@ -11,7 +11,7 @@ all: clean bin
 
 deps:
 	@go get -u -t ./...
-	
+
 testdeps:
 	@go get -u -t ./...
 	@go get -u github.com/golang/mock/gomock
@@ -34,37 +34,39 @@ mocks:
 	@mockgen -destination ${MOCK_DIR}/mock_store/mocks.go github.com/GoogleCloudPlatform/docker-credential-gcr/store GCRCredStore
 	@mockgen -destination ${MOCK_DIR}/mock_config/mocks.go github.com/GoogleCloudPlatform/docker-credential-gcr/config UserConfig
 	@mockgen -destination ${MOCK_DIR}/mock_cmd/mocks.go github.com/GoogleCloudPlatform/docker-credential-gcr/util/cmd Command
-	
-strip-vendor-dependencies:
-	@sed -i -e 's/github.com\/GoogleCloudPlatform\/docker-credential-gcr\/vendor\///g' ${SRCS}
+# mockgen doesn't play nice with vendor: https://github.com/golang/mock/issues/30
+# The differences in -i's behavior on OSX and linux necessitate the creation
+# of .bak files, which we want to clean up afterward...
+	@find ${MOCK_DIR} -name '*.go' -exec sed -i.bak -e 's,github.com/GoogleCloudPlatform/docker-credential-gcr/vendor/,,g' {} \;
+	@find ${MOCK_DIR} -name '*.go.bak' -exec rm {} \;
 
-test: clean testdeps mocks strip-vendor-dependencies bin
+test: clean testdeps mocks bin
 	@go test -timeout 10s -v -tags="unit integration surface" ./...
 
 unit-tests: testdeps mocks
 	@go test -timeout 10s -v -tags=unit ./...
-	
+
 integration-tests: testdeps
 	@go test -timeout 10s -v -tags=integration ./...
-	
+
 surface-tests: deps testdeps bin
 	@go test -timeout 10s -v -tags=surface ./...
-	
+
 vet: 
 	@go vet ./...
 
 lint:
 	@echo 'Running golint...'
 	@$(foreach src,$(SRCS),golint $(src);)
-	
+
 criticism: clean vet lint
 
 fmt:
 	@gofmt -w -s .
-	
+
 fix:
 	@go fix ./...
-	
+
 pretty: fmt fix
 
-presubmit: criticism pretty test
+presubmit: deps testdeps criticism pretty test
