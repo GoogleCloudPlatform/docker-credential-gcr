@@ -34,14 +34,13 @@ mocks:
 	@mockgen -destination ${MOCK_DIR}/mock_store/mocks.go github.com/GoogleCloudPlatform/docker-credential-gcr/store GCRCredStore
 	@mockgen -destination ${MOCK_DIR}/mock_config/mocks.go github.com/GoogleCloudPlatform/docker-credential-gcr/config UserConfig
 	@mockgen -destination ${MOCK_DIR}/mock_cmd/mocks.go github.com/GoogleCloudPlatform/docker-credential-gcr/util/cmd Command
+# mockgen doesn't play nice with vendor: https://github.com/golang/mock/issues/30
+# The differences in -i's behavior on OSX and linux necessitate the creation
+# of .bak files, which we want to clean up afterward...
+	@find ${MOCK_DIR} -name '*.go' -exec sed -i.bak -e 's,github.com/GoogleCloudPlatform/docker-credential-gcr/vendor/,,g' {} \;
+	@find ${MOCK_DIR} -name '*.go.bak' -exec rm {} \;
 
-strip-vendor-dependencies:
-# The differences in -i's behavior on OSX and linux necessitate the creation 
-# of .bak files, which we want to clean up afterward... 
-	@sed -i.bak -e 's/github.com\/GoogleCloudPlatform\/docker-credential-gcr\/vendor\///g' ${SRCS}
-	@find . -name '*.go.bak' -exec rm {} \;
-
-test: clean testdeps mocks strip-vendor-dependencies bin
+test: clean testdeps mocks bin
 	@go test -timeout 10s -v -tags="unit integration surface" ./...
 
 unit-tests: testdeps mocks
