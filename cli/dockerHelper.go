@@ -64,7 +64,7 @@ func NewGetSubcommand() subcommands.Command {
 	return &helperCmd{
 		cmd{
 			name:     "get",
-			synopsis: "for the specified server, return the stored credentials via stdout",
+			synopsis: "for the server specified via stdin, return the stored credentials via stdout",
 		},
 	}
 }
@@ -75,7 +75,7 @@ func NewEraseSubcommand() subcommands.Command {
 	return &helperCmd{
 		cmd{
 			name:     "erase",
-			synopsis: "erase any stored credentials for the specified server",
+			synopsis: "erase any stored credentials for the server specified via stdin",
 		},
 	}
 }

@@ -33,6 +33,11 @@ To try the private store, followed by the environment:
 docker-credential-gcr config --token-source="store, env"
 ```
 
+To verify that credentials are being returned for a given registry, e.g. for `https://gcr.io`:
+```shell
+echo "https://gcr.io" | docker-credential-gcr get
+```
+
 ## Other Credentials
 
 The helper implements the [Docker Credential Store](https://docs.docker.com/engine/reference/commandline/login/#/credentials-store) API and can be used to store credentials for other repositories. **WARNING**: Credentials are stored in plain text in a file under the user's home directory (e.g. $HOME/.config/gcloud/docker_credentials.json on non-windows systems).
