@@ -31,7 +31,6 @@ func mockGetVersionCmd(ctrl *gomock.Controller, returnVals ...interface{}) cmd.C
 }
 
 func TestDockerClientVersion_Basic(t *testing.T) {
-	t.Parallel()
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
@@ -59,7 +58,6 @@ func TestDockerClientVersion_Basic(t *testing.T) {
 }
 
 func TestDockerClientVersion_WithSuffix(t *testing.T) {
-	t.Parallel()
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
@@ -87,7 +85,6 @@ func TestDockerClientVersion_WithSuffix(t *testing.T) {
 }
 
 func TestDockerClientVersion_SingleQuotedWithSuffix(t *testing.T) {
-	t.Parallel()
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
@@ -115,7 +112,6 @@ func TestDockerClientVersion_SingleQuotedWithSuffix(t *testing.T) {
 }
 
 func TestDockerClientVersion_SingleQuotes(t *testing.T) {
-	t.Parallel()
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
@@ -143,7 +139,6 @@ func TestDockerClientVersion_SingleQuotes(t *testing.T) {
 }
 
 func TestDockerClientVersion_Whitespace(t *testing.T) {
-	t.Parallel()
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
@@ -171,7 +166,6 @@ func TestDockerClientVersion_Whitespace(t *testing.T) {
 }
 
 func TestDockerClientVersion_WhitespaceQuoted(t *testing.T) {
-	t.Parallel()
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
