@@ -142,7 +142,7 @@ func setConfig(dockerConfig *configfile.ConfigFile, helperSuffix string) subcomm
 // docker config was the source of truth for the set of stored credentials.
 func (c *dockerConfigCmd) setLegacyConfig(dockerConfig *configfile.ConfigFile, helperSuffix string) subcommands.ExitStatus {
 	// Only proceed if the creds store is empty or we're allowed to overwrite.
-	// Replacing a cred store effectivley makes any previously stored
+	// Replacing a cred store effectively makes any previously stored
 	// credentials unreachable.
 	otherCredStoreConfigured := dockerConfig.CredentialsStore != helperSuffix && dockerConfig.CredentialsStore != ""
 	dcgcrConfiguredAsCredStore := dockerConfig.CredentialsStore == helperSuffix
