@@ -131,11 +131,11 @@ func performBrowserActions(t *testing.T, browser *testBrowser) {
 	args.Set("state", state)
 	redirURL.RawQuery = args.Encode()
 	resp, err := http.Get(redirURL.String())
-	defer resp.Body.Close()
 	if err != nil {
 		t.Fatalf("Could not send authorization code response: %v", err)
 	}
-	// the browser should recieve a response AFTER the entire auth flow has completed
+	defer resp.Body.Close()
+	// the browser should receive a response AFTER the entire auth flow has completed
 	if resp.StatusCode >= 400 {
 		t.Errorf("Unsuccessful response: %+v", *resp)
 	}
