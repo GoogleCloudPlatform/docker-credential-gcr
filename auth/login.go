@@ -39,7 +39,7 @@ const redirectURIAuthCodeInTitleBar = "urn:ietf:wg:oauth:2.0:oob"
 // for the user. If AllowBrowser is set to true, the agent will attempt to
 // obtain an authorization_code automatically by executing OpenBrowser and
 // reading the redirect performed after a successful login. Otherwise, it will
-// attempt to use In and Out to direct the user to the login portal and recieve
+// attempt to use In and Out to direct the user to the login portal and receive
 // the authorization_code in response.
 type GCRLoginAgent struct {
 	// Whether to execute OpenBrowser when authenticating the user.
@@ -83,7 +83,7 @@ func (a *GCRLoginAgent) PerformLogin() (*oauth2.Token, error) {
 	var err error
 
 	if a.AllowBrowser {
-		// Attempt to recieve the authorization code via the redirect URL
+		// Attempt to receive the authorization code via the redirect URL
 		ln, port, err := getListener()
 		if err == nil {
 			defer ln.Close()
@@ -166,7 +166,7 @@ func handleCodeResponse(ln net.Listener) (string, error) {
 	// TODO i18n?
 	if code == "" {
 		err := fmt.Errorf("Code not present in response: %s", req.URL.String())
-		resp.Body = getResponseBody("ERROR: Authenitcation code not present in response, please retry with --no-browser.")
+		resp.Body = getResponseBody("ERROR: Authentication code not present in response, please retry with --no-browser.")
 		return "", err
 	}
 
