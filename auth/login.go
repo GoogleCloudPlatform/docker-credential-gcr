@@ -83,7 +83,7 @@ func (a *GCRLoginAgent) PerformLogin() (*oauth2.Token, error) {
 	var err error
 
 	if a.AllowBrowser {
-		// Attempt to receive the authorization code via the redirect URL
+		// Attempt to receive the authorization code via redirect URL
 		ln, port, err := getListener()
 		if err == nil {
 			defer ln.Close()
@@ -97,9 +97,9 @@ func (a *GCRLoginAgent) PerformLogin() (*oauth2.Token, error) {
 		}
 	}
 
-	// If we shouldn't or can't open a browser, default to a command line
-	// prompt.
-	if code == "" {
+	// If we can't or shouldn't automatically retrieve the code via browser,
+	// default to a command line prompt.
+	if code == "" || err != nil {
 		code, err = a.codeViaPrompt(conf)
 		if err != nil {
 			return nil, err
