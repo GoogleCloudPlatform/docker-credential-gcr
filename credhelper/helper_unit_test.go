@@ -571,7 +571,7 @@ func TestTokenFromGcloudSDK(t *testing.T) {
 	// This test is more-or-less tautological, but it's important to verify
 	// that gcloud is being queried in a supported way.
 	mockCmd := mock_cmd.NewMockCommand(mockCtrl)
-	mockCmd.EXPECT().Exec("config", "config-helper", "--format=value(credential.access_token)").Return([]uint8(gcloudCreds), nil)
+	mockCmd.EXPECT().Exec("config", "config-helper", "--force-auth-refresh", "--format=value(credential.access_token)").Return([]uint8(gcloudCreds), nil)
 
 	token, err := tokenFromGcloudSDK(mockCmd)
 

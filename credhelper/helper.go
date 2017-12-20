@@ -215,7 +215,7 @@ func tokenFromEnv() (string, error) {
 func tokenFromGcloudSDK(gcloudCmd cmd.Command) (string, error) {
 	// shelling out to gcloud is the only currently supported way of
 	// obtaining the gcloud access_token
-	stdout, err := gcloudCmd.Exec("config", "config-helper", "--format=value(credential.access_token)")
+	stdout, err := gcloudCmd.Exec("config", "config-helper", "--force-auth-refresh", "--format=value(credential.access_token)")
 	if err != nil {
 		return "", helperErr("`gcloud config config-helper` failed", err)
 	}
