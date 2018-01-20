@@ -1,0 +1,15 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "const.go",
+        "file.go",
+    ],
+    importpath = "github.com/GoogleCloudPlatform/docker-credential-gcr/config",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//util:go_default_library",
+        "@org_golang_x_oauth2//:go_default_library",
+    ],
+)
