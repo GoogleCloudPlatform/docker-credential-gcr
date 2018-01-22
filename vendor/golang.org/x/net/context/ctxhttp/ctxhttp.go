@@ -13,7 +13,7 @@ import (
 	"net/url"
 	"strings"
 
-	"golang.org/x/net/context"
+	"context"
 )
 
 // Do sends an HTTP request with the provided http.Client and returns
