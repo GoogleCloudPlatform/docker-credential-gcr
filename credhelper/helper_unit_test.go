@@ -63,7 +63,7 @@ func TestIsAGCRHostname(t *testing.T) {
 
 	// test for non-default GCR hosts
 	for _, host := range defaultGCRHosts {
-		if !isAGCRHostname("https://" + host) {
+		if !isAGCRHostname(host) {
 			t.Error("Expected to be detected as a GCR hostname: ", host)
 		}
 	}

@@ -75,7 +75,6 @@ func (ch *gcrCredHelper) List() (map[string]string, error) {
 	}
 
 	for gcrRegistry := range config.DefaultGCRRegistries {
-		gcrRegistry = "https://" + gcrRegistry
 		resp[gcrRegistry] = gcrOAuth2Username
 	}
 
