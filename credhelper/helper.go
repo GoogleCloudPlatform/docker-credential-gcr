@@ -250,7 +250,7 @@ func isAGCRHostname(serverURL string) bool {
 	if err != nil {
 		return false
 	}
-	return config.DefaultGCRRegistries[URL.Host] || config.DefaultGCRRegistries[URL.Hostname()] || config.DefaultGCRRegistries[serverURL] || strings.HasSuffix(URL.Hostname(), "gcr.io")
+	return config.DefaultGCRRegistries[URL.Host] || config.DefaultGCRRegistries[serverURL] || strings.HasSuffix(URL.Host, "gcr.io")
 }
 
 func helperErr(message string, err error) error {
