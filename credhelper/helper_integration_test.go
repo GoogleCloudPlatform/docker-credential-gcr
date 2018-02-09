@@ -32,8 +32,7 @@ var expectedGcrHosts = [...]string{
 	"us.gcr.io",
 	"eu.gcr.io",
 	"asia.gcr.io",
-	"appengine.gcr.io",
-	"k8s.gcr.io",
+	"staging-k8s.gcr.io",
 }
 
 var testCredStorePath = filepath.Clean("helper_test_cred_store.json")
@@ -82,7 +81,7 @@ func TestList_NoCredFile(t *testing.T) {
 		t.Fatalf("Expected %d credentials, got %d", len(expectedGcrHosts), len(creds))
 	}
 	for _, host := range expectedGcrHosts {
-		if username := creds["https://"+host]; username != "oauth2accesstoken" {
+		if username := creds[host]; username != "oauth2accesstoken" {
 			t.Errorf("Expected username to be %s for host %s, was %s", "oauth2accesstoken", host, username)
 		}
 	}
@@ -121,7 +120,7 @@ func TestList_CredFileExists(t *testing.T) {
 		t.Fatalf("Expected %d credentials, got %d", len(expectedGcrHosts), len(creds))
 	}
 	for _, host := range expectedGcrHosts {
-		if username := creds["https://"+host]; username != "oauth2accesstoken" {
+		if username := creds[host]; username != "oauth2accesstoken" {
 			t.Errorf("Expected username to be %s for host %s, was %s", "oauth2accesstoken", host, username)
 		}
 	}

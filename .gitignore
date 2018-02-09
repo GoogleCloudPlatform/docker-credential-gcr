@@ -7,3 +7,4 @@ bazel*
 */test_credential_store.json
 **/testdata
 .idea
+*.iml
