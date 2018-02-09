@@ -74,7 +74,7 @@ func (ch *gcrCredHelper) List() (map[string]string, error) {
 		resp[registry] = creds.Username
 	}
 
-	for gcrRegistry := range config.SupportedGCRRegistries {
+	for gcrRegistry := range config.DefaultGCRRegistries {
 		gcrRegistry = "https://" + gcrRegistry
 		resp[gcrRegistry] = gcrOAuth2Username
 	}
@@ -250,7 +250,7 @@ func isAGCRHostname(serverURL string) bool {
 	if err != nil {
 		return false
 	}
-	return config.SupportedGCRRegistries[URL.Host] || config.SupportedGCRRegistries[serverURL]
+	return config.DefaultGCRRegistries[URL.Host] || config.DefaultGCRRegistries[URL.Hostname()] || config.DefaultGCRRegistries[serverURL] || strings.HasSuffix(URL.Hostname(), "gcr.io")
 }
 
 func helperErr(message string, err error) error {

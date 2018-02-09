@@ -43,16 +43,13 @@ const (
 	PatchVersion = 2
 )
 
-// SupportedGCRRegistries maps registry URLs to a bool representing whether
-// or not the GCR credentials can be used to authenticate requests for that
-// repository.
-var SupportedGCRRegistries = map[string]bool{
-	"gcr.io":           true,
-	"us.gcr.io":        true,
-	"eu.gcr.io":        true,
-	"asia.gcr.io":      true,
-	"appengine.gcr.io": true,
-	"k8s.gcr.io":       true,
+// DefaultGCRRegistries contains the list of default registries to authenticate for.
+var DefaultGCRRegistries = map[string]bool{
+	"gcr.io":             true,
+	"us.gcr.io":          true,
+	"eu.gcr.io":          true,
+	"asia.gcr.io":        true,
+	"staging-k8s.gcr.io": true,
 }
 
 // SupportedGCRTokenSources maps config keys to plain english explanations for

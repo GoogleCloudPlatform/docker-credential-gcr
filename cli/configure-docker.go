@@ -124,7 +124,7 @@ func setConfig(dockerConfig *configfile.ConfigFile, helperSuffix string) subcomm
 		dockerConfig.CredentialHelpers = map[string]string{}
 	}
 
-	for registry := range config.SupportedGCRRegistries {
+	for registry := range config.DefaultGCRRegistries {
 		dockerConfig.CredentialHelpers[registry] = helperSuffix
 	}
 
@@ -186,12 +186,12 @@ func (c *dockerConfigCmd) setLegacyConfig(dockerConfig *configfile.ConfigFile, h
 }
 
 // Ensures that the AuthConfigs in the given ConfigFile are exactly the set
-// of config.SupportedGCRRegistries with the https scheme plus any 3p creds
+// of config.DefaultGCRRegistries with the https scheme plus any 3p creds
 // we have stored.
 // Returns true if the ConfigFile was modified, false otherwise.
 func setAuthConfigs(dockerConfig *configfile.ConfigFile, s store.GCRCredStore) bool {
 	newAuthconfigs := make(map[string]types.AuthConfig)
-	for registry := range config.SupportedGCRRegistries {
+	for registry := range config.DefaultGCRRegistries {
 		// 'auths' members take a scheme
 		registry = "https://" + registry
 		newAuthconfigs[registry] = types.AuthConfig{}

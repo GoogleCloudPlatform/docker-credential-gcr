@@ -30,12 +30,11 @@ import (
 
 func expectedAuthConfigs() map[string]types.AuthConfig {
 	return map[string]types.AuthConfig{
-		"https://gcr.io":           {},
-		"https://us.gcr.io":        {},
-		"https://eu.gcr.io":        {},
-		"https://asia.gcr.io":      {},
-		"https://appengine.gcr.io": {},
-		"https://k8s.gcr.io":       {},
+		"https://gcr.io":             {},
+		"https://us.gcr.io":          {},
+		"https://eu.gcr.io":          {},
+		"https://asia.gcr.io":        {},
+		"https://staging-k8s.gcr.io": {},
 	}
 }
 
