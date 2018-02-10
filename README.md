@@ -92,7 +92,7 @@ The program in this repository is written with the Go programming language and b
 
 ### Docker Clients v1.13(.0-rc4)+ Manual Installation
 
-Add a `credHelpers` entry in the Docker config file (usually `~/.docker/config.json`) for each GCR registry that you care about. The key should be the domain of the registry (without the "https://") and the key chould be the suffix of the credential helper binary (everything after "docker-credential-").
+Add a `credHelpers` entry in the Docker config file (usually `~/.docker/config.json`) for each GCR registry that you care about. The key should be the domain of the registry (without the "https://") and the key should be the suffix of the credential helper binary (everything after "docker-credential-").
 
 	e.g. for `docker-credential-gcr`:
 
