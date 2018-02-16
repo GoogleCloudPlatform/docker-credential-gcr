@@ -1,7 +1,6 @@
 .gitignore~
 .project
 bin
-mock
 bazel*
 */test_config.json
 */test_credential_store.json
