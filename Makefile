@@ -12,21 +12,18 @@ all: clean bin
 deps:
 	@go get -u -t ./...
 
-testdeps:
-	@go get -u -t ./...
-	@go get -u github.com/golang/mock/gomock
-	@go get -u github.com/golang/mock/mockgen
-
 bin: deps
 	@go build -i -o ${OUT_DIR}/${BINARY_FILENAME} main.go
 	@echo Binary created: ${OUT_DIR}/${BINARY_FILENAME}
 
 clean:
 	@rm -rf ${OUT_DIR}
-	@rm -rf ${MOCK_DIR}
 	@go clean
 
+# This re-generates the mocks using mockgen. Use this if tests don't compile due to type errors with
+# the existing mocks.
 mocks:
+	@go get -u github.com/golang/mock/mockgen
 	@rm -rf ${MOCK_DIR}
 	@mkdir -p ${MOCK_DIR}/mock_store
 	@mkdir -p ${MOCK_DIR}/mock_config
@@ -40,16 +37,16 @@ mocks:
 	@find ${MOCK_DIR} -name '*.go' -exec sed -i.bak -e 's,github.com/GoogleCloudPlatform/docker-credential-gcr/vendor/,,g' {} \;
 	@find ${MOCK_DIR} -name '*.go.bak' -exec rm {} \;
 
-test: clean testdeps mocks bin
+test: clean deps bin
 	@go test -timeout 10s -v -tags="unit integration surface" ./...
 
-unit-tests: testdeps mocks
+unit-tests: deps
 	@go test -timeout 10s -v -tags=unit ./...
 
-integration-tests: testdeps
+integration-tests: deps
 	@go test -timeout 10s -v -tags=integration ./...
 
-surface-tests: deps testdeps bin
+surface-tests: deps bin
 	@go test -timeout 10s -v -tags=surface ./...
 
 vet: 
@@ -69,4 +66,4 @@ fix:
 
 pretty: fmt fix
 
-presubmit: deps testdeps criticism pretty test
+presubmit: deps criticism pretty bin test
