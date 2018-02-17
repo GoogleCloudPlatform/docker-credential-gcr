@@ -16,6 +16,7 @@ By default, the helper searches for GCR credentials in the following order:
 	On other systems, $HOME/.config/gcloud/application_default_credentials.json.
 3. On Google App Engine it uses the appengine.AccessToken function.
 4. On Google Compute Engine and Google App Engine Managed VMs, it fetches credentials from the metadata server.
+	* Note: Google Kubernetes Engine blocks access to the GCE metadata server. Manual login via `docker-credential-gcr gcr-login` will be necessary for workloads running on GKE.
 5. From the gcloud SDK (i.e. the one printed via `gcloud config config-helper --force-auth-refresh --format='value(credential.access_token)'`).
 6. In the helper's private credential store (i.e. those stored via `docker-credential-gcr gcr-login`)
 
