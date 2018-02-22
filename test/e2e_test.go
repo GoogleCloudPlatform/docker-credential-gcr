@@ -32,7 +32,7 @@ import (
 )
 
 const (
-	thirdPartyRegistry = "www.wherever.com"
+	thirdPartyRegistry = "www.wherever.test"
 	expectedUsername   = "u$ern4me"
 	expectedSecret     = "$ecr3t"
 
