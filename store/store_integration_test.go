@@ -1,4 +1,4 @@
-// +build integration
+// +build !unit
 
 // Copyright 2016 Google, Inc.
 //

@@ -17,7 +17,7 @@
 package test
 
 import (
-  "bytes"
+	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
