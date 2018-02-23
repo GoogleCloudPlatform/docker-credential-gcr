@@ -27,17 +27,19 @@ install:
   - go get -u github.com/golang/lint/golint
 
 script:
+  - make deps
+
   # Verify that all source files are correctly formatted.
   - gofmt -e -l .
 
+  # Verify go lint, go vet, gofmt, go fix.
+  - make criticism
+  - make pretty
+
   # Verify that a vanilla Go build still works.
-  - make deps
   - make bin
 
-  # Verify all tests, lint, and vet.
-  - make presubmit
-
-  # Verify travis-only tests.
+  # Verify tests.
   - go test -timeout 10s -v -tags=travis ./...
 
   # Verify that Bazel builds still work.
