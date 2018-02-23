@@ -1,4 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
     name = "go_default_library",
@@ -25,5 +25,18 @@ go_library(
         "//vendor/github.com/docker/docker-credential-helpers/credentials:go_default_library",
         "//vendor/github.com/docker/docker/api/types:go_default_library",
         "//vendor/github.com/google/subcommands:go_default_library",
+    ],
+)
+
+go_test(
+    name = "go_default_test",
+    srcs = ["configure-docker_unit_test.go"],
+    embed = [":go_default_library"],
+    deps = [
+        "//mock/mock_store:go_default_library",
+        "//vendor/github.com/docker/cli/cli/config/configfile:go_default_library",
+        "//vendor/github.com/docker/docker-credential-helpers/credentials:go_default_library",
+        "//vendor/github.com/docker/docker/api/types:go_default_library",
+        "//vendor/github.com/golang/mock/gomock:go_default_library",
     ],
 )

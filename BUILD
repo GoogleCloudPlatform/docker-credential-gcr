@@ -1,4 +1,16 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+load("@bazel_gazelle//:def.bzl", "gazelle")
+
+gazelle(
+    name = "gazelle",
+    command = "fix",
+    external = "vendored",
+    extra_args = [
+        "-build_file_name",
+        "BUILD,BUILD.bazel",  # Prioritize `BUILD` for newly added files.
+    ],
+    prefix = "github.com/GoogleCloudPlatform/docker-credential-gcr",
+)
 
 go_library(
     name = "go_default_library",

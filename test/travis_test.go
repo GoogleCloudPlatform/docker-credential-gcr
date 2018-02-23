@@ -1,4 +1,4 @@
-// +build travis
+// +build travis,!gazelle
 
 // Copyright 2018 Google LLC
 //

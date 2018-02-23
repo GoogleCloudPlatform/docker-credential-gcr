@@ -16,6 +16,9 @@ bin: deps
 	@go build -i -o ${OUT_DIR}/${BINARY_FILENAME} main.go
 	@echo Binary created: ${OUT_DIR}/${BINARY_FILENAME}
 
+test-bin: deps
+	@go build -i -o test/testdata/docker-credential-gcr main.go
+
 clean:
 	@rm -rf ${OUT_DIR}
 	@go clean
@@ -37,7 +40,7 @@ mocks:
 	@find ${MOCK_DIR} -name '*.go' -exec sed -i.bak -e 's,github.com/GoogleCloudPlatform/docker-credential-gcr/vendor/,,g' {} \;
 	@find ${MOCK_DIR} -name '*.go.bak' -exec rm {} \;
 
-test: clean deps bin
+test: clean deps test-bin
 	@go test -timeout 10s -v ./...
 
 tests-unit: deps

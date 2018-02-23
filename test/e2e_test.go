@@ -1,4 +1,4 @@
-// +build !unit
+// +build !unit,!gazelle
 
 // Copyright 2016 Google, Inc.
 //

@@ -21,6 +21,7 @@ package test
 const (
 	credentialStoreEnvVar = "DOCKER_CREDENTIAL_GCR_STORE"
 	configFileEnvVar      = "DOCKER_CREDENTIAL_GCR_CONFIG"
-	testConfigFile        = "./testdata/test_config.json"
-	testStoreFile         = "./testdata/test_credential_store.json"
+	testDataDir           = "./testdata"
+	testConfigFile        = testDataDir + "/test_config.json"
+	testStoreFile         = testDataDir + "/test_credential_store.json"
 )
