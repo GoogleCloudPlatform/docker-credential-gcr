@@ -1,6 +1,10 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
 load("@bazel_gazelle//:def.bzl", "gazelle")
 
+licenses(["notice"])  # Apache 2.0
+
+exports_files(["LICENSE"])
+
 gazelle(
     name = "gazelle",
     command = "fix",
