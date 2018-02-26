@@ -79,31 +79,26 @@ func (a *GCRLoginAgent) PerformLogin() (*oauth2.Token, error) {
 		Endpoint:     config.GCROAuth2Endpoint,
 	}
 
-	var code string
-	var err error
-
 	if a.AllowBrowser {
 		// Attempt to receive the authorization code via redirect URL
-		ln, port, err := getListener()
-		if err == nil {
+		if ln, port, err := getListener(); err == nil {
 			defer ln.Close()
 			// open a web browser and listen on the redirect URL port
 			conf.RedirectURL = fmt.Sprintf("http://localhost:%d", port)
 			url := conf.AuthCodeURL("state", oauth2.AccessTypeOffline)
-			err = a.OpenBrowser(url)
-			if err == nil {
-				code, err = handleCodeResponse(ln)
+			if err := a.OpenBrowser(url); err == nil {
+				if code, err := handleCodeResponse(ln); err == nil {
+					return conf.Exchange(config.OAuthHTTPContext, code)
+				}
 			}
 		}
 	}
 
 	// If we can't or shouldn't automatically retrieve the code via browser,
 	// default to a command line prompt.
-	if code == "" || err != nil {
-		code, err = a.codeViaPrompt(conf)
-		if err != nil {
-			return nil, err
-		}
+	code, err := a.codeViaPrompt(conf)
+	if err != nil {
+		return nil, err
 	}
 
 	return conf.Exchange(config.OAuthHTTPContext, code)
