@@ -1,3 +1,5 @@
+<a href="https://gcr.io"><img src="https://avatars2.githubusercontent.com/u/21046548?s=400&v=4" height="120"/></a>
+
 # docker-credential-gcr [![Build Status](https://travis-ci.org/GoogleCloudPlatform/docker-credential-gcr.svg?branch=master)](https://travis-ci.org/GoogleCloudPlatform/docker-credential-gcr) [![Go Report Card](https://goreportcard.com/badge/GoogleCloudPlatform/docker-credential-gcr)](https://goreportcard.com/report/GoogleCloudPlatform/docker-credential-gcr)
 
 ## Introduction
@@ -35,6 +37,7 @@ docker-credential-gcr config --token-source="store, env"
 ```
 
 To verify that credentials are being returned for a given registry, e.g. for `https://gcr.io`:
+
 ```shell
 echo "https://gcr.io" | docker-credential-gcr get
 ```
