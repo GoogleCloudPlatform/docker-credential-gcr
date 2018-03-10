@@ -30,5 +30,6 @@ go_library(
 go_binary(
     name = "docker-credential-gcr",
     embed = [":go_default_library"],
+    pure = "on",
     visibility = ["//visibility:public"],
 )
