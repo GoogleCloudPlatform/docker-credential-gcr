@@ -40,7 +40,6 @@ script:
   - make bin
   
   # Verify that there aren't issues with correctness...
-  - go build -a -v -msan main.go
   - go build -a -v -race main.go
 
   # Verify tests.
