@@ -17,7 +17,7 @@ bin: deps
 	@echo Binary created: ${OUT_DIR}/${BINARY_FILENAME}
 
 test-bin: deps
-	@go build -race -i -o test/testdata/docker-credential-gcr main.go
+	@go build -i -o test/testdata/docker-credential-gcr main.go
 
 clean:
 	@rm -rf ${OUT_DIR}
