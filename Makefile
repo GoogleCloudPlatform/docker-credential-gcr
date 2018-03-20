@@ -5,7 +5,7 @@ OUT_DIR := bin
 # The directory to dump generated mocks
 MOCK_DIR := mock
 # The non-vendor golang sources to validate.
-SRCS = $(shell find . -name "*.go" -type f | grep -v vendor/)
+SRCS = $(go list ./... | grep -v vendor)
 
 all: clean bin
 
@@ -41,10 +41,10 @@ mocks:
 	@find ${MOCK_DIR} -name '*.go.bak' -exec rm {} \;
 
 test: clean deps test-bin
-	@go test -timeout 10s -v ./...
+	@go test -race -timeout 10s -v ./...
 
 tests-unit: deps
-	@go test -timeout 10s -v -tags=unit ./...
+	@go test -race -timeout 10s -v -tags=unit ./...
 
 vet: 
 	@go vet ./...
