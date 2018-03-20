@@ -23,7 +23,6 @@ import (
 )
 
 func TestVersion(t *testing.T) {
-	t.Parallel() // No resource contention.
 	helper := helperCmd([]string{"version"})
 
 	var out bytes.Buffer
