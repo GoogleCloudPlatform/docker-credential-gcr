@@ -295,10 +295,10 @@ func TestGetGCRAccessToken_Env(t *testing.T) {
 			return expected, nil
 		},
 		gcloudSDKToken: func(_ cmd.Command) (string, error) {
-			return "gcloud sdk creds!", nil
+			return "", errors.New("no token from gcloud")
 		},
 		credStoreToken: func(_ store.GCRCredStore) (string, error) {
-			return "private creds!", nil
+			return "", errors.New("no token in the cred store")
 		},
 	}
 
@@ -326,13 +326,13 @@ func TestGetGCRAccessToken_GcloudSDK(t *testing.T) {
 		store:   mockStore,
 		userCfg: mockUserCfg,
 		envToken: func() (string, error) {
-			return "", errors.New("no token here")
+			return "creds from `env`", nil
 		},
 		gcloudSDKToken: func(_ cmd.Command) (string, error) {
 			return expected, nil
 		},
 		credStoreToken: func(_ store.GCRCredStore) (string, error) {
-			return "private creds!", nil
+			return "", errors.New("no token from the cred store")
 		},
 	}
 
@@ -361,10 +361,11 @@ func TestGetGCRAccessToken_PrivateStore(t *testing.T) {
 		store:   mockStore,
 		userCfg: mockUserCfg,
 		envToken: func() (string, error) {
-			return "", errors.New("no token here")
+			return "creds from `env`", nil
 		},
 		gcloudSDKToken: func(_ cmd.Command) (string, error) {
-			return "", errors.New("still no token here")
+			return "creds from `gcloud`", nil
+
 		},
 		credStoreToken: func(_ store.GCRCredStore) (string, error) {
 			return expected, nil

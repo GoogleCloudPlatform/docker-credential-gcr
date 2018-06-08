@@ -26,7 +26,7 @@ const (
 	expectedFilename     = "docker_credential_gcr_config.json"
 )
 
-var expctedDefaultTokSrcs = []string{"env", "gcloud", "store"}
+var expctedDefaultTokSrcs = []string{"store", "gcloud", "env"}
 
 func assertEqual(t *testing.T, expected, actual []string) {
 	if (expected == nil && actual != nil) || (expected != nil && actual == nil) {
