@@ -16,16 +16,16 @@ For even more authentication options, see GCR's documentation on [advanced authe
 
 By default, the helper searches for GCR credentials in the following order:
 
+1. In the helper's private credential store (i.e. those stored via `docker-credential-gcr gcr-login`)
+1. From the `gcloud` SDK (i.e. the one printed via `gcloud config config-helper --force-auth-refresh --format='value(credential.access_token)'`).
 1. In a JSON file whose path is specified by the GOOGLE_APPLICATION_CREDENTIALS environment variable.
-2. In a JSON file in a location known to the helper. 
-	On Windows, this is %APPDATA%/gcloud/application_default_credentials.json.
-	On other systems, $HOME/.config/gcloud/application_default_credentials.json.
-3. On Google App Engine, it uses the appengine.AccessToken function.
-4. On Google Compute Engine and Google App Engine Managed VMs, it fetches the credentials of the _service account_ associated with the VM from the metadata server (if available).
-5. From the `gcloud` SDK (i.e. the one printed via `gcloud config config-helper --force-auth-refresh --format='value(credential.access_token)'`).
-6. In the helper's private credential store (i.e. those stored via `docker-credential-gcr gcr-login`)
+1. In a JSON file in a location known to the helper:
+	* On Windows, this is `%APPDATA%/gcloud/application_default_credentials.json`.
+	* On other systems, `$HOME/.config/gcloud/application_default_credentials.json`.
+1. On Google App Engine, it uses the `appengine.AccessToken` function.
+1. On Google Compute Engine, Kubernetes Engine, and App Engine Managed VMs, it fetches the credentials of the _service account_ associated with the VM from the metadata server (if available).
 
-Users may limit or re-order how the helper searches for GCR credentials using `docker-credential-gcr config --token-source`. Numbers 1-4 above are designated by the "env" source, 5 by "gcloud" and 6 by "store". Multiple sources are separated by commas, and the default is "env, gcloud, store".
+Users may limit or re-order how the helper searches for GCR credentials using `docker-credential-gcr config --token-source`. Number 1 above is designated by the `store`, 2 by `gcloud`, and 3-6 by `env` (which cannot be individually restricted or re-ordered). Multiple sources are separated by commas, and the default is `"store, gcloud, env"`.
 
 **Examples:**
 
@@ -53,12 +53,12 @@ The helper implements the [Docker Credential Store](https://docs.docker.com/engi
 
 The program in this repository is written with the Go programming language and built with `make`. These instructions assume that [**Go 1.7+**](https://golang.org/) and `make` are installed on a *nix system.
 
-You can download the source code, compile the binary, and put it in your `$GOPATH` with `go get`. 
+You can download the source code, compile the binary, and put it in your `$GOPATH` with `go get`.
 
 ```shell
 go get -u github.com/GoogleCloudPlatform/docker-credential-gcr
 ```
-	
+
 If `$GOPATH/bin` is in your system `$PATH`, this will also automatically install the compiled binary. You can confirm using `which docker-credential-gcr` and continue to the [section on Configuration and Usage](#configuration-and-usage).
 
 Alternatively, you can use `make` to build the program. The executable will be output to the `bin` directory inside the repository.
@@ -83,13 +83,13 @@ sudo mv ./bin/docker-credential-gcr /usr/bin/docker-credential-gcr
 	```
 
   * Alternatively, use the [manual configuration instructions](#manual-docker-client-configuration) below to configure your version of the Docker client.
-  
+
 * Log in to GCR (or don't! See the [GCR Credentials section](#gcr-credentials))
 
 	```shell
 	docker-credential-gcr gcr-login
 	```
-	
+
 * Use Docker!
 
 	```shell
