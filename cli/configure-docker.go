@@ -83,8 +83,9 @@ func (c *dockerConfigCmd) Execute(context.Context, *flag.FlagSet, ...interface{}
 
 	major, minor, _, _, err := util.DockerClientVersion()
 	if err != nil {
-		fmt.Printf("WARNING: Unable to determine Docker version: %v\n", err)
-		fmt.Printf("Configuring %s as a registry-specific helper. This is only supported by Docker client versions 1.13+\n", binaryName)
+		fmt.Printf("WARNING: Unable to execute `docker version`: %v\n", err)
+		fmt.Println("This is expected if `docker` is not installed, or if `dockerd` cannot be reached...")
+		fmt.Printf("Configuring %s as a registry-specific credential helper. This is only supported by Docker client versions 1.13+\n", binaryName)
 		return setConfig(dockerConfig, credHelperSuffix)
 	} else if credHelpersSupported(major, minor) {
 		// If we can act as a registry-specific credential helper, do so...
