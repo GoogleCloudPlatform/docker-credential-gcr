@@ -24,6 +24,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -199,8 +200,9 @@ func TestEndToEnd_GCRCreds(t *testing.T) {
 	if err := json.NewDecoder(bytes.NewReader(out.Bytes())).Decode(&creds); err != nil {
 		t.Fatalf("Unable to decode credentials returned from get: %v", err)
 	}
-	if creds.Username != "oauth2accesstoken" {
-		t.Errorf("Bad GCR username: Wanted: %s, Got: %s", "oauth2accesstoken", creds.Username)
+
+	if match, err := regexp.MatchString("_dcgcr_(?:[0-9]+_)*token", creds.Username); !match || err != nil {
+		t.Errorf("Bad GCR username: Wanted: %q, Got (val, err): %q, %v", "_dcgcr_(?:[0-9]+_)*token", creds.Username, err)
 	}
 	if creds.Secret != gcrAccessToken {
 		t.Errorf("Bad GCR access token. Wanted: %s, Got: %s", gcrAccessToken, creds.Secret)

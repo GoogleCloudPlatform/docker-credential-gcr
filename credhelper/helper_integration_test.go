@@ -81,8 +81,8 @@ func TestList_NoCredFile(t *testing.T) {
 		t.Fatalf("Expected %d credentials, got %d", len(expectedGcrHosts), len(creds))
 	}
 	for _, host := range expectedGcrHosts {
-		if username := creds[host]; username != "oauth2accesstoken" {
-			t.Errorf("Expected username to be %s for host %s, was %s", "oauth2accesstoken", host, username)
+		if username := creds[host]; username != expectedGCRUsername {
+			t.Errorf("Expected username to be %s for host %s, was %s", expectedGCRUsername, host, username)
 		}
 	}
 }
@@ -120,8 +120,8 @@ func TestList_CredFileExists(t *testing.T) {
 		t.Fatalf("Expected %d credentials, got %d", len(expectedGcrHosts), len(creds))
 	}
 	for _, host := range expectedGcrHosts {
-		if username := creds[host]; username != "oauth2accesstoken" {
-			t.Errorf("Expected username to be %s for host %s, was %s", "oauth2accesstoken", host, username)
+		if username := creds[host]; username != expectedGCRUsername {
+			t.Errorf("Expected username to be %s for host %s, was %s", expectedGCRUsername, host, username)
 		}
 	}
 	if username := creds[expected3PRegistry]; username != expected3PUsername {
