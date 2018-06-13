@@ -40,9 +40,9 @@ const (
 	// MajorVersion is the credential helper's major version number.
 	MajorVersion = 1
 	// MinorVersion is the credential helper's minor version number.
-	MinorVersion = 4
+	MinorVersion = 5
 	// PatchVersion is the credential helper's patch version number.
-	PatchVersion = 3
+	PatchVersion = 0
 )
 
 // DefaultGCRRegistries contains the list of default registries to authenticate for.
