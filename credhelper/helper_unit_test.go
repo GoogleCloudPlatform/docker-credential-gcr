@@ -16,6 +16,7 @@ package credhelper
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/mock/mock_cmd"
@@ -29,9 +30,7 @@ import (
 	"github.com/golang/mock/gomock"
 )
 
-const (
-	expectedGCRUsername = "oauth2accesstoken"
-)
+var expectedGCRUsername = fmt.Sprintf("_dcgcr_%d_%d_%d_token", config.MajorVersion, config.MinorVersion, config.PatchVersion)
 
 var defaultGCRHosts = [...]string{
 	"gcr.io",

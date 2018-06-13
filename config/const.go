@@ -16,6 +16,8 @@
 package config
 
 import (
+	"fmt"
+
 	"golang.org/x/oauth2"
 )
 
@@ -72,3 +74,6 @@ var GCRScopes = []string{"https://www.googleapis.com/auth/cloud-platform"}
 
 // OAuthHTTPContext is the HTTP context to use when performing OAuth2 calls.
 var OAuthHTTPContext = oauth2.NoContext
+
+// The sentinel username accompanying Docker requests to GCR.
+var GcrOAuth2Username = fmt.Sprintf("_dcgcr_%d_%d_%d_token", MajorVersion, MinorVersion, PatchVersion)

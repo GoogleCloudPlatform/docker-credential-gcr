@@ -31,8 +31,6 @@ import (
 	"golang.org/x/oauth2/google"
 )
 
-const gcrOAuth2Username = "oauth2accesstoken"
-
 // gcrCredHelper implements a credentials.Helper interface backed by a GCR
 // credential store.
 type gcrCredHelper struct {
@@ -75,7 +73,7 @@ func (ch *gcrCredHelper) List() (map[string]string, error) {
 	}
 
 	for gcrRegistry := range config.DefaultGCRRegistries {
-		resp[gcrRegistry] = gcrOAuth2Username
+		resp[gcrRegistry] = config.GcrOAuth2Username
 	}
 
 	return resp, nil
@@ -139,7 +137,7 @@ func (ch *gcrCredHelper) gcrCreds() (string, string, error) {
 	if err != nil {
 		return "", "", helperErr("could not retrieve GCR's access token", err)
 	}
-	return gcrOAuth2Username, accessToken, nil
+	return config.GcrOAuth2Username, accessToken, nil
 }
 
 // getGCRAccessToken attempts to retrieve a GCR access token from the sources
