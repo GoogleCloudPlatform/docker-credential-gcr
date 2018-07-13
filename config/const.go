@@ -53,6 +53,7 @@ var DefaultGCRRegistries = map[string]bool{
 	"eu.gcr.io":          true,
 	"asia.gcr.io":        true,
 	"staging-k8s.gcr.io": true,
+	"marketplace.gcr.io": true,
 }
 
 // SupportedGCRTokenSources maps config keys to plain english explanations for

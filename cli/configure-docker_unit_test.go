@@ -33,6 +33,7 @@ func expectedAuthConfigs() map[string]types.AuthConfig {
 		"https://eu.gcr.io":          {},
 		"https://asia.gcr.io":        {},
 		"https://staging-k8s.gcr.io": {},
+		"https://marketplace.gcr.io": {},
 	}
 }
 
