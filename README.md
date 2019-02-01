@@ -105,7 +105,7 @@ sudo mv ./bin/docker-credential-gcr /usr/bin/docker-credential-gcr
 ### Manual Docker Client Configuration
 #### **(Recommended)** Using `credHelpers`, for Docker clients since v1.13.0
 
-Add a `credHelpers` entry in the Docker config file (usually `~/.docker/config.json` on OSX and Linux, `%USERPROFILE%\.docker\config.json` on Windows) for each GCR registry that you care about. The key should be the domain of the registry (**without** the "https://") and the key should be the suffix of the credential helper binary (everything after "docker-credential-").
+Add a `credHelpers` entry in the Docker config file (usually `~/.docker/config.json` on OSX and Linux, `%USERPROFILE%\.docker\config.json` on Windows) for each GCR registry that you care about. The key should be the domain of the registry (**without** the "https://") and the value should be the suffix of the credential helper binary (everything after "docker-credential-").
 
 	e.g. for `docker-credential-gcr`:
 
@@ -113,7 +113,7 @@ Add a `credHelpers` entry in the Docker config file (usually `~/.docker/config.j
     {
       "auths" : {
             ...
-      }
+      },
       "credHelpers": {
             "coolregistry.com": ... ,
             <b>"gcr.io": "gcr",
