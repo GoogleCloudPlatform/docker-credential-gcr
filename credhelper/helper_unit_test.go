@@ -39,6 +39,8 @@ var defaultGCRHosts = [...]string{
 	"asia.gcr.io",
 	"staging-k8s.gcr.io",
 	"marketplace.gcr.io",
+	"master-gke.gcr.io",
+	"staging-gke.gcr.io",
 }
 var otherGCRHosts = [...]string{"appengine.gcr.io", "k8s.gcr.io"}
 var otherHosts = [...]string{"docker.io", "otherrepo.com"}

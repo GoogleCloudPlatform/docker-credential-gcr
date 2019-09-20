@@ -34,6 +34,8 @@ var expectedGcrHosts = [...]string{
 	"asia.gcr.io",
 	"staging-k8s.gcr.io",
 	"marketplace.gcr.io",
+	"master-gke.gcr.io",
+	"staging-gke.gcr.io",
 }
 
 var testCredStorePath = filepath.Clean("helper_test_cred_store.json")
