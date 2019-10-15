@@ -19,7 +19,7 @@ import (
 	"context"
 	"fmt"
 
-	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
 )
 
 const (
@@ -66,10 +66,7 @@ var SupportedGCRTokenSources = map[string]string{
 
 // GCROAuth2Endpoint describes the oauth2.Endpoint to be used when
 // authenticating a GCR user.
-var GCROAuth2Endpoint = oauth2.Endpoint{
-	AuthURL:  "https://accounts.google.com/o/oauth2/v2/auth",
-	TokenURL: "https://www.googleapis.com/oauth2/v4/token",
-}
+var GCROAuth2Endpoint = google.Endpoint
 
 // GCRScopes is/are the OAuth2 scope(s) to request during access_token creation.
 var GCRScopes = []string{"https://www.googleapis.com/auth/cloud-platform"}
