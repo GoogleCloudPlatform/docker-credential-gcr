@@ -22,8 +22,8 @@ go_library(
         "//util:go_default_library",
         "//vendor/github.com/docker/cli/cli/config:go_default_library",
         "//vendor/github.com/docker/cli/cli/config/configfile:go_default_library",
+        "//vendor/github.com/docker/cli/cli/config/types:go_default_library",
         "//vendor/github.com/docker/docker-credential-helpers/credentials:go_default_library",
-        "//vendor/github.com/docker/docker/api/types:go_default_library",
         "//vendor/github.com/google/subcommands:go_default_library",
     ],
 )
@@ -35,8 +35,8 @@ go_test(
     deps = [
         "//mock/mock_store:go_default_library",
         "//vendor/github.com/docker/cli/cli/config/configfile:go_default_library",
+        "//vendor/github.com/docker/cli/cli/config/types:go_default_library",
         "//vendor/github.com/docker/docker-credential-helpers/credentials:go_default_library",
-        "//vendor/github.com/docker/docker/api/types:go_default_library",
         "//vendor/github.com/golang/mock/gomock:go_default_library",
     ],
 )

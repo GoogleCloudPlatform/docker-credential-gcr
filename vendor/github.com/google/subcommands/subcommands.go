@@ -26,6 +26,7 @@ import (
 	"os"
 	"path"
 	"sort"
+	"strings"
 )
 
 // A Command represents a single command.
@@ -49,19 +50,28 @@ type Command interface {
 
 // A Commander represents a set of commands.
 type Commander struct {
-	commands  []*commandGroup
+	commands  []*CommandGroup
 	topFlags  *flag.FlagSet // top-level flags
 	important []string      // important top-level flags
 	name      string        // normally path.Base(os.Args[0])
+
+	Explain        func(io.Writer)                // A function to print a top level usage explanation. Can be overridden.
+	ExplainGroup   func(io.Writer, *CommandGroup) // A function to print a command group's usage explanation. Can be overridden.
+	ExplainCommand func(io.Writer, Command)       // A function to print a command usage explanation. Can be overridden.
 
 	Output io.Writer // Output specifies where the commander should write its output (default: os.Stdout).
 	Error  io.Writer // Error specifies where the commander should write its error (default: os.Stderr).
 }
 
-// A commandGroup represents a set of commands about a common topic.
-type commandGroup struct {
+// A CommandGroup represents a set of commands about a common topic.
+type CommandGroup struct {
 	name     string
 	commands []Command
+}
+
+// Name returns the group name
+func (g *CommandGroup) Name() string {
+	return g.name
 }
 
 // An ExitStatus represents a Posix exit status that a subcommand
@@ -84,8 +94,17 @@ func NewCommander(topLevelFlags *flag.FlagSet, name string) *Commander {
 		Output:   os.Stdout,
 		Error:    os.Stderr,
 	}
-	topLevelFlags.Usage = func() { cdr.explain(cdr.Error) }
+
+	cdr.Explain = cdr.explain
+	cdr.ExplainGroup = explainGroup
+	cdr.ExplainCommand = explain
+	topLevelFlags.Usage = func() { cdr.Explain(cdr.Error) }
 	return cdr
+}
+
+// Name returns the commander's name
+func (cdr *Commander) Name() string {
+	return cdr.name
 }
 
 // Register adds a subcommand to the supported subcommands in the
@@ -99,7 +118,7 @@ func (cdr *Commander) Register(cmd Command, group string) {
 			return
 		}
 	}
-	cdr.commands = append(cdr.commands, &commandGroup{
+	cdr.commands = append(cdr.commands, &CommandGroup{
 		name:     group,
 		commands: []Command{cmd},
 	})
@@ -111,6 +130,55 @@ func (cdr *Commander) Register(cmd Command, group string) {
 // "flags" subcommand.)
 func (cdr *Commander) ImportantFlag(name string) {
 	cdr.important = append(cdr.important, name)
+}
+
+// VisitGroups visits each command group in lexicographical order, calling
+// fn for each.
+func (cdr *Commander) VisitGroups(fn func(*CommandGroup)) {
+	sort.Sort(byGroupName(cdr.commands))
+	for _, g := range cdr.commands {
+		fn(g)
+	}
+}
+
+// VisitCommands visits each command in registered order grouped by
+// command group in lexicographical order, calling fn for each.
+func (cdr *Commander) VisitCommands(fn func(*CommandGroup, Command)) {
+	cdr.VisitGroups(func(g *CommandGroup) {
+		for _, cmd := range g.commands {
+			fn(g, cmd)
+		}
+	})
+}
+
+// VisitAllImportant visits the important top level flags in lexicographical
+// order, calling fn for each. It visits all flags, even those not set.
+func (cdr *Commander) VisitAllImportant(fn func(*flag.Flag)) {
+	sort.Strings(cdr.important)
+	for _, name := range cdr.important {
+		f := cdr.topFlags.Lookup(name)
+		if f == nil {
+			panic(fmt.Sprintf("Important flag (%s) is not defined", name))
+		}
+		fn(f)
+	}
+}
+
+// VisitAll visits the top level flags in lexicographical order, calling fn
+// for each. It visits all flags, even those not set.
+func (cdr *Commander) VisitAll(fn func(*flag.Flag)) {
+	if cdr.topFlags != nil {
+		cdr.topFlags.VisitAll(fn)
+	}
+}
+
+// countFlags returns the number of top-level flags defined, even those not set.
+func (cdr *Commander) countTopFlags() int {
+	count := 0
+	cdr.VisitAll(func(*flag.Flag) {
+		count++
+	})
+	return count
 }
 
 // Execute should be called once the top-level-flags on a Commander
@@ -133,7 +201,7 @@ func (cdr *Commander) Execute(ctx context.Context, args ...interface{}) ExitStat
 				continue
 			}
 			f := flag.NewFlagSet(name, flag.ContinueOnError)
-			f.Usage = func() { explain(cdr.Error, cmd) }
+			f.Usage = func() { cdr.ExplainCommand(cdr.Error, cmd) }
 			cmd.SetFlags(f)
 			if f.Parse(cdr.topFlags.Args()[1:]) != nil {
 				return ExitUsageError
@@ -148,8 +216,9 @@ func (cdr *Commander) Execute(ctx context.Context, args ...interface{}) ExitStat
 }
 
 // Sorting of a slice of command groups.
-type byGroupName []*commandGroup
+type byGroupName []*CommandGroup
 
+// TODO Sort by function rather than implement sortable?
 func (p byGroupName) Len() int           { return len(p) }
 func (p byGroupName) Less(i, j int) bool { return p[i].name < p[j].name }
 func (p byGroupName) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
@@ -160,14 +229,18 @@ func (cdr *Commander) explain(w io.Writer) {
 	fmt.Fprintf(w, "Usage: %s <flags> <subcommand> <subcommand args>\n\n", cdr.name)
 	sort.Sort(byGroupName(cdr.commands))
 	for _, group := range cdr.commands {
-		explainGroup(w, group)
+		cdr.ExplainGroup(w, group)
 	}
 	if cdr.topFlags == nil {
 		fmt.Fprintln(w, "\nNo top level flags.")
 		return
 	}
+
+	sort.Strings(cdr.important)
 	if len(cdr.important) == 0 {
-		fmt.Fprintf(w, "\nUse \"%s flags\" for a list of top-level flags\n", cdr.name)
+		if cdr.countTopFlags() > 0 {
+			fmt.Fprintf(w, "\nUse \"%s flags\" for a list of top-level flags\n", cdr.name)
+		}
 		return
 	}
 
@@ -175,19 +248,19 @@ func (cdr *Commander) explain(w io.Writer) {
 	for _, name := range cdr.important {
 		f := cdr.topFlags.Lookup(name)
 		if f == nil {
-			panic("Important flag is not defined")
+			panic(fmt.Sprintf("Important flag (%s) is not defined", name))
 		}
 		fmt.Fprintf(w, "  -%s=%s: %s\n", f.Name, f.DefValue, f.Usage)
 	}
 }
 
 // Sorting of the commands within a group.
-func (g commandGroup) Len() int           { return len(g.commands) }
-func (g commandGroup) Less(i, j int) bool { return g.commands[i].Name() < g.commands[j].Name() }
-func (g commandGroup) Swap(i, j int)      { g.commands[i], g.commands[j] = g.commands[j], g.commands[i] }
+func (g CommandGroup) Len() int           { return len(g.commands) }
+func (g CommandGroup) Less(i, j int) bool { return g.commands[i].Name() < g.commands[j].Name() }
+func (g CommandGroup) Swap(i, j int)      { g.commands[i], g.commands[j] = g.commands[j], g.commands[i] }
 
 // explainGroup explains all the subcommands for a particular group.
-func explainGroup(w io.Writer, group *commandGroup) {
+func explainGroup(w io.Writer, group *CommandGroup) {
 	if len(group.commands) == 0 {
 		return
 	}
@@ -197,8 +270,32 @@ func explainGroup(w io.Writer, group *commandGroup) {
 		fmt.Fprintf(w, "Subcommands for %s:\n", group.name)
 	}
 	sort.Sort(group)
+
+	aliases := make(map[string][]string)
 	for _, cmd := range group.commands {
-		fmt.Fprintf(w, "\t%-15s  %s\n", cmd.Name(), cmd.Synopsis())
+		if alias, ok := cmd.(*aliaser); ok {
+			root := dealias(alias).Name()
+
+			if _, ok := aliases[root]; !ok {
+				aliases[root] = []string{}
+			}
+			aliases[root] = append(aliases[root], alias.Name())
+		}
+	}
+
+	for _, cmd := range group.commands {
+		if _, ok := cmd.(*aliaser); ok {
+			continue
+		}
+
+		name := cmd.Name()
+		names := []string{name}
+
+		if a, ok := aliases[name]; ok {
+			names = append(names, a...)
+		}
+
+		fmt.Fprintf(w, "\t%-15s  %s\n", strings.Join(names, ", "), cmd.Synopsis())
 	}
 	fmt.Fprintln(w)
 }
@@ -229,7 +326,7 @@ func (h *helper) Usage() string {
 func (h *helper) Execute(_ context.Context, f *flag.FlagSet, args ...interface{}) ExitStatus {
 	switch f.NArg() {
 	case 0:
-		(*Commander)(h).explain(h.Output)
+		(*Commander)(h).Explain(h.Output)
 		return ExitSuccess
 
 	case 1:
@@ -238,7 +335,7 @@ func (h *helper) Execute(_ context.Context, f *flag.FlagSet, args ...interface{}
 				if f.Arg(0) != cmd.Name() {
 					continue
 				}
-				explain(h.Output, cmd)
+				(*Commander)(h).ExplainCommand(h.Output, cmd)
 				return ExitSuccess
 			}
 		}
@@ -332,6 +429,30 @@ func (l *lister) Execute(_ context.Context, f *flag.FlagSet, _ ...interface{}) E
 // CommandsCommand returns Command which implements a "commands" subcommand.
 func (cdr *Commander) CommandsCommand() Command {
 	return (*lister)(cdr)
+}
+
+// An aliaser is a Command wrapping another Command but returning a
+// different name as its alias.
+type aliaser struct {
+	alias string
+	Command
+}
+
+func (a *aliaser) Name() string { return a.alias }
+
+// Alias returns a Command alias which implements a "commands" subcommand.
+func Alias(alias string, cmd Command) Command {
+	return &aliaser{alias, cmd}
+}
+
+// dealias recursivly dealiases a command until a non-aliased command
+// is reached.
+func dealias(cmd Command) Command {
+	if alias, ok := cmd.(*aliaser); ok {
+		return dealias(alias.Command)
+	}
+
+	return cmd
 }
 
 // DefaultCommander is the default commander using flag.CommandLine for flags

@@ -6,7 +6,9 @@ go_library(
         "credentials.go",
         "error.go",
         "helper.go",
+        "version.go",
     ],
+    importmap = "github.com/GoogleCloudPlatform/docker-credential-gcr/vendor/github.com/docker/docker-credential-helpers/credentials",
     importpath = "github.com/docker/docker-credential-helpers/credentials",
     visibility = ["//visibility:public"],
 )
