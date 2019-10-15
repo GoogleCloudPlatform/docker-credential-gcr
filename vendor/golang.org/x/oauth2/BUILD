@@ -7,9 +7,8 @@ go_library(
         "token.go",
         "transport.go",
     ],
+    importmap = "github.com/GoogleCloudPlatform/docker-credential-gcr/vendor/golang.org/x/oauth2",
     importpath = "golang.org/x/oauth2",
     visibility = ["//visibility:public"],
-    deps = [
-        "//vendor/golang.org/x/oauth2/internal:go_default_library",
-    ],
+    deps = ["//vendor/golang.org/x/oauth2/internal:go_default_library"],
 )

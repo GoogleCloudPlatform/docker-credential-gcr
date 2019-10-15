@@ -4,11 +4,14 @@ go_library(
     name = "go_default_library",
     srcs = [
         "appengine.go",
+        "appengine_gen2_flex.go",
         "default.go",
+        "doc.go",
         "google.go",
         "jwt.go",
         "sdk.go",
     ],
+    importmap = "github.com/GoogleCloudPlatform/docker-credential-gcr/vendor/golang.org/x/oauth2/google",
     importpath = "golang.org/x/oauth2/google",
     visibility = ["//visibility:public"],
     deps = [

@@ -29,7 +29,7 @@ import (
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/util"
 	cliconfig "github.com/docker/cli/cli/config"
 	"github.com/docker/cli/cli/config/configfile"
-	"github.com/docker/docker/api/types"
+	"github.com/docker/cli/cli/config/types"
 	"github.com/google/subcommands"
 )
 

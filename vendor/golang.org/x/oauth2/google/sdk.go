@@ -6,6 +6,7 @@ package google
 
 import (
 	"bufio"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -18,7 +19,6 @@ import (
 	"strings"
 	"time"
 
-	"context"
 	"golang.org/x/oauth2"
 )
 

@@ -3,9 +3,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 go_library(
     name = "go_default_library",
     srcs = ["metadata.go"],
+    importmap = "github.com/GoogleCloudPlatform/docker-credential-gcr/vendor/cloud.google.com/go/compute/metadata",
     importpath = "cloud.google.com/go/compute/metadata",
     visibility = ["//visibility:public"],
-    deps = [
-        "//vendor/golang.org/x/net/context/ctxhttp:go_default_library",
-    ],
 )

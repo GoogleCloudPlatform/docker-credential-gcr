@@ -8,6 +8,7 @@ go_library(
         "controller.go",
         "matchers.go",
     ],
+    importmap = "github.com/GoogleCloudPlatform/docker-credential-gcr/vendor/github.com/golang/mock/gomock",
     importpath = "github.com/golang/mock/gomock",
     visibility = ["//visibility:public"],
 )
