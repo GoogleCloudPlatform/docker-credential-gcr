@@ -28,6 +28,7 @@ import (
 	"time"
 
 	"context"
+
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/config"
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/util"
 	"github.com/docker/docker-credential-helpers/credentials"
@@ -47,8 +48,7 @@ type tokens struct {
 }
 
 type dockerCredentials struct {
-	GCRCreds   *tokens                            `json:"gcrCreds,omitempty"`
-	OtherCreds map[string]credentials.Credentials `json:"otherCreds,omitempty"`
+	GCRCreds *tokens `json:"gcrCreds,omitempty"`
 }
 
 // A GCRAuth provides access to tokens from a prior login.
@@ -73,11 +73,6 @@ type GCRCredStore interface {
 	GetGCRAuth() (*GCRAuth, error)
 	SetGCRAuth(tok *oauth2.Token) error
 	DeleteGCRAuth() error
-
-	GetOtherCreds(string) (*credentials.Credentials, error)
-	SetOtherCreds(*credentials.Credentials) error
-	DeleteOtherCreds(string) error
-	AllThirdPartyCreds() (map[string]credentials.Credentials, error)
 }
 
 type credStore struct {
@@ -97,83 +92,6 @@ func NewGCRCredStore(path string) GCRCredStore {
 	return &credStore{
 		credentialPath: path,
 	}
-}
-
-// GetOtherCreds returns the stored credentials corresponding to the given
-// registry URL, or an error if the credentials cannot be retrieved or do not
-// exist.
-func (s *credStore) GetOtherCreds(serverURL string) (*credentials.Credentials, error) {
-	all3pCreds, err := s.AllThirdPartyCreds()
-	if err != nil {
-		return nil, err
-	}
-
-	creds, present := all3pCreds[serverURL]
-	if !present {
-		return nil, credentials.NewErrCredentialsNotFound()
-	}
-
-	return &creds, nil
-}
-
-// SetOtherCreds stores the given credentials under the repository URL
-// specified by newCreds.ServerURL.
-func (s *credStore) SetOtherCreds(newCreds *credentials.Credentials) error {
-	serverURL := newCreds.ServerURL
-	newCreds.ServerURL = "" // wasted space
-	creds, err := s.loadDockerCredentials()
-	if err != nil {
-		// It's OK if we couldn't read any credentials,
-		// making a new file.
-		creds = &dockerCredentials{}
-	}
-	if creds.OtherCreds == nil {
-		creds.OtherCreds = map[string]credentials.Credentials{}
-	}
-
-	creds.OtherCreds[serverURL] = *newCreds
-
-	return s.setDockerCredentials(creds)
-}
-
-// DeleteOtherCreds removes the Docker credentials corresponding to the
-// given serverURL, returning an error if the credentials existed but could
-// not be erased.
-func (s *credStore) DeleteOtherCreds(serverURL string) error {
-	creds, err := s.loadDockerCredentials()
-	if err != nil {
-		if os.IsNotExist(err) {
-			// No file, no credentials.
-			return nil
-		}
-		return err
-	}
-
-	// Optimization: only perform a 'set' if a change must be made
-	if creds.OtherCreds != nil {
-		if _, exists := creds.OtherCreds[serverURL]; exists {
-			delete(creds.OtherCreds, serverURL)
-			return s.setDockerCredentials(creds)
-		}
-	}
-
-	return nil
-}
-
-// AllThirdPartyCreds returns a map of all 3rd party repositories to their
-// associated Docker credentials.Credentials.
-// Returns the credentials if they exist, nil and credentials.errCredentialsNotFound if they do not.
-func (s *credStore) AllThirdPartyCreds() (map[string]credentials.Credentials, error) {
-	allCreds, err := s.loadDockerCredentials()
-	if err != nil {
-		if os.IsNotExist(err) {
-			// No file, no credentials.
-			return nil, credentials.NewErrCredentialsNotFound()
-		}
-		return nil, err
-	}
-
-	return allCreds.OtherCreds, nil
 }
 
 // GetGCRAuth creates an GCRAuth for the currently signed-in account.

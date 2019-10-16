@@ -26,7 +26,6 @@ import (
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/config"
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/store"
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/util/cmd"
-	"github.com/docker/docker-credential-helpers/credentials"
 	"github.com/golang/mock/gomock"
 )
 
@@ -74,128 +73,6 @@ func TestIsAGCRHostname(t *testing.T) {
 	}
 }
 
-func TestAdd_GCRCredentials(t *testing.T) {
-	t.Parallel()
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-
-	mockStore := mock_store.NewMockGCRCredStore(mockCtrl)
-	mockUserCfg := mock_config.NewMockUserConfig(mockCtrl)
-	tested := NewGCRCredentialHelper(mockStore, mockUserCfg)
-
-	creds := credentials.Credentials{
-		Username: "foobarre",
-		Secret:   "secret",
-	}
-
-	for _, host := range defaultGCRHosts {
-		creds.ServerURL = "https://" + host
-		err := tested.Add(&creds)
-		if err == nil {
-			t.Error("Adding GCR credentials should return an error.")
-		}
-	}
-}
-
-func TestAdd_OtherCredentials(t *testing.T) {
-	t.Parallel()
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-
-	mockStore := mock_store.NewMockGCRCredStore(mockCtrl)
-	mockUserCfg := mock_config.NewMockUserConfig(mockCtrl)
-
-	tested := NewGCRCredentialHelper(mockStore, mockUserCfg)
-
-	creds := credentials.Credentials{
-		Username: "foobarre",
-		Secret:   "secret",
-	}
-
-	for _, host := range otherHosts {
-		creds.ServerURL = "https://" + host
-		mockStore.EXPECT().SetOtherCreds(&creds).Return(nil)
-
-		err := tested.Add(&creds)
-
-		if err != nil {
-			t.Errorf("Add returned an error: %v", err)
-		}
-	}
-}
-
-func TestGet_OtherCredentials(t *testing.T) {
-	t.Parallel()
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-
-	mockStore := mock_store.NewMockGCRCredStore(mockCtrl)
-	mockUserCfg := mock_config.NewMockUserConfig(mockCtrl)
-	expectedGCRSecret := "GCR secrets!"
-	tested := &gcrCredHelper{
-		store:   mockStore,
-		userCfg: mockUserCfg,
-		envToken: func() (string, error) {
-			return expectedGCRSecret, nil
-		},
-		gcloudSDKToken: func(_ cmd.Command) (string, error) {
-			return "", errors.New("no token here")
-		},
-		credStoreToken: func(_ store.GCRCredStore) (string, error) {
-			return "", errors.New("no token here")
-		},
-	}
-
-	expectedUsername := "foobarre"
-	expected3pSecret := "3p secrets!"
-	creds := credentials.Credentials{
-		Username: expectedUsername,
-		Secret:   expected3pSecret,
-	}
-
-	// positive case
-	for _, host := range otherHosts {
-		mockStore.EXPECT().GetOtherCreds(host).Return(&creds, nil)
-
-		username, secret, err := tested.Get(host)
-
-		if err != nil {
-			t.Errorf("get returned an error: %v", err)
-		} else if username != expectedUsername {
-			t.Errorf("expected username: %s but got: %s", expectedUsername, username)
-		} else if secret != expected3pSecret {
-			t.Errorf("expected 3p secret: %s but got: %s", expected3pSecret, secret)
-		}
-	}
-
-	// negative case - not found, not returning GCR's creds by default.
-	mockStore.EXPECT().GetOtherCreds("somewhere.else").Return(nil, credentials.NewErrCredentialsNotFound())
-	mockUserCfg.EXPECT().DefaultToGCRAccessToken().Return(false)
-
-	_, _, err := tested.Get("somewhere.else")
-
-	if err == nil {
-		t.Error("expected an error to be returned")
-	} else if !credentials.IsErrCredentialsNotFound(err) {
-		t.Errorf("expected a CredentialsNotFound error: %v", err)
-	}
-
-	// negative case - 3p creds not found, but configured to return GCR's creds by default.
-	mockStore.EXPECT().GetOtherCreds("somewhere.else").Return(nil, credentials.NewErrCredentialsNotFound())
-	mockUserCfg.EXPECT().TokenSources().Return(config.DefaultTokenSources[:])
-	mockUserCfg.EXPECT().DefaultToGCRAccessToken().Return(true)
-
-	username, secret, err := tested.Get("somewhere.else")
-
-	if err != nil {
-		t.Errorf("get returned an error: %v", err)
-	} else if username != expectedGCRUsername {
-		t.Errorf("expected GCR username: %s but got: %s", expectedGCRUsername, username)
-	} else if secret != expectedGCRSecret {
-		t.Errorf("expected GCR secret: %s but got: %s", expectedGCRSecret, secret)
-	}
-}
-
 func TestGet_GCRCredentials(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
@@ -230,44 +107,6 @@ func TestGet_GCRCredentials(t *testing.T) {
 			t.Errorf("expected GCR username: %s but got: %s", expectedGCRUsername, username)
 		} else if secret != expectedSecret {
 			t.Errorf("expected secret: %s but got: %s", expectedSecret, secret)
-		}
-	}
-}
-
-func TestDelete_GCRCredentials(t *testing.T) {
-	t.Parallel()
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-
-	mockStore := mock_store.NewMockGCRCredStore(mockCtrl)
-	mockUserCfg := mock_config.NewMockUserConfig(mockCtrl)
-	tested := NewGCRCredentialHelper(mockStore, mockUserCfg)
-
-	for _, host := range defaultGCRHosts {
-		err := tested.Delete("https://" + host)
-		if err == nil {
-			t.Error("deleting GCR credentials should return an error.")
-		}
-	}
-}
-
-func TestDelete_OtherCredentials(t *testing.T) {
-	t.Parallel()
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-
-	mockStore := mock_store.NewMockGCRCredStore(mockCtrl)
-	mockUserCfg := mock_config.NewMockUserConfig(mockCtrl)
-	tested := NewGCRCredentialHelper(mockStore, mockUserCfg)
-
-	for _, host := range otherHosts {
-		schemedHost := "https://" + host
-		mockStore.EXPECT().DeleteOtherCreds(schemedHost).Return(nil)
-
-		err := tested.Delete(schemedHost)
-
-		if err != nil {
-			t.Errorf("delete returned an error: %v", err)
 		}
 	}
 }

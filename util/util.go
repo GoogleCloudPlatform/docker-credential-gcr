@@ -23,14 +23,7 @@ import (
 	"os/user"
 	"path/filepath"
 	"runtime"
-	"strconv"
-	"strings"
-	"unicode"
-
-	"github.com/GoogleCloudPlatform/docker-credential-gcr/util/cmd"
 )
-
-var docker cmd.Command = &cmd.RealImpl{Command: "docker"}
 
 // SdkConfigPath tries to return the directory where the gcloud config is
 // located.
@@ -51,62 +44,4 @@ func unixHomeDir() string {
 		return usr.HomeDir
 	}
 	return os.Getenv("HOME")
-}
-
-// dockerClientVersionStrings attempts to discover the version of the Docker client,
-// returning the major, minor, and patch versions, or an error if unsuccessful.
-func dockerClientVersionStrings() (string, string, string, error) {
-	out, err := docker.Exec("version", "--format", "'{{.Client.Version}}'")
-	if err != nil {
-		return "", "", "", err
-	}
-
-	vstring := string(out)
-
-	// Remove any leading/trailing whitespace or '
-	vstring = strings.TrimFunc(vstring, func(r rune) bool {
-		return unicode.IsSpace(r) || r == '\''
-	})
-
-	ver := strings.Split(vstring, ".")
-
-	if len(ver) != 3 {
-		return "", "", "", errors.New("version string not of the form '<major>.<minor>.<patch>': " + vstring)
-	}
-	return ver[0], ver[1], ver[2], nil
-}
-
-// DockerClientVersion attempts to discover the major and minor version
-// numbers of the Docker client, returning <major number>, <minor number>,
-// <patch number>, <patch suffix>, nil if successful, 0, 0, err otherwise.
-// e.g.
-// '1.12.0' => 1, 12, 0, "", nil
-// '1.13.0-dev' => 1, 13, 0, "dev", nil
-// '1.what.0' => 0, 0, 0, "", nil
-func DockerClientVersion() (int, int, int, string, error) {
-	majorstr, minorstr, patchstr, err := dockerClientVersionStrings()
-	if err != nil {
-		return 0, 0, 0, "", err
-	}
-
-	major, err := strconv.Atoi(majorstr)
-	if err != nil {
-		return 0, 0, 0, "", err
-	}
-	minor, err := strconv.Atoi(minorstr)
-	if err != nil {
-		return 0, 0, 0, "", err
-	}
-
-	patchSplit := strings.Split(patchstr, "-")
-	patch, err := strconv.Atoi(patchSplit[0])
-	if err != nil {
-		return 0, 0, 0, "", err
-	}
-
-	if len(patchSplit) > 1 {
-		return major, minor, patch, patchSplit[1], nil
-	}
-
-	return major, minor, patch, "", nil
 }

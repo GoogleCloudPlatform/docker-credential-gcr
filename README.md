@@ -4,7 +4,7 @@
 
 ## Introduction
 
-`docker-credential-gcr` is [Google Container Registry](https://cloud.google.com/container-registry/)'s _standalone_, `gcloud` SDK-independent Docker credential helper. It allows for **Docker clients since v1.11** to easily make authenticated requests to GCR's repositories (gcr.io, eu.gcr.io, etc.).
+`docker-credential-gcr` is [Google Container Registry](https://cloud.google.com/container-registry/)'s _standalone_, `gcloud` SDK-independent Docker credential helper. It allows for **v18.03+ Docker clients** to easily make authenticated requests to GCR's repositories (gcr.io, eu.gcr.io, etc.).
 
 **Note:** `docker-credential-gcr` is primarily intended for users wishing to authenticate with GCR in the **absence of `gcloud`**, though they are [not mutually exclusive](#gcr-credentials). For normal development setups, users are encouraged to use [`gcloud auth configure-docker`](https://cloud.google.com/sdk/gcloud/reference/auth/configure-docker), instead.
 
@@ -47,7 +47,7 @@ echo "https://gcr.io" | docker-credential-gcr get
 
 ## Other Credentials
 
-The helper implements the [Docker Credential Store](https://docs.docker.com/engine/reference/commandline/login/#/credentials-store) API and can be used to store credentials for other repositories. **WARNING**: Credentials are stored in plain text in a file under the user's home directory (e.g. $HOME/.config/gcloud/docker_credentials.json on non-windows systems).
+As of the 2.0 release, `docker-credential-gcr` no longer supports generalized [`credsStore`](https://docs.docker.com/engine/reference/commandline/login/#/credentials-store) functionality.
 
 ### Building from Source
 
@@ -103,7 +103,6 @@ sudo mv ./bin/docker-credential-gcr /usr/bin/docker-credential-gcr
 	```
 
 ### Manual Docker Client Configuration
-#### **(Recommended)** Using `credHelpers`, for Docker clients since v1.13.0
 
 Add a `credHelpers` entry in the Docker config file (usually `~/.docker/config.json` on OSX and Linux, `%USERPROFILE%\.docker\config.json` on Windows) for each GCR registry that you care about. The key should be the domain of the registry (**without** the "https://") and the value should be the suffix of the credential helper binary (everything after "docker-credential-").
 
@@ -120,28 +119,6 @@ Add a `credHelpers` entry in the Docker config file (usually `~/.docker/config.j
             "asia.gcr.io": "gcr",
             ...</b>
       },
-      "HttpHeaders": ...
-      "psFormat": ...
-      "imagesFormat": ...
-      "detachKeys": ...
-    }
-  </pre>
-
-
-#### Using the `credsStore`, for Docker clients since v1.11.0
-Set the `credsStore` and `auths` fields in your Docker config file (usually `~/.docker/config.json` on OSX and Linux, `%USERPROFILE%\.docker\config.json` on Windows). The value of `credsStore` should be the suffix of the compiled binary (everything after "docker-credential-") and `auths` should have an empty entry for each GCR endpoint that you care about (**with** the "https://").
-
-	e.g. for `docker-credential-gcr`:
-
-  <pre>
-    {
-      "auths": {
-            "https://coolregistry.com": { ... },
-            <b>"https://gcr.io": {},
-            "https://asia.gcr.io": {},
-            ...</b>
-      },
-      <b>"credsStore": "gcr",</b>
       "HttpHeaders": ...
       "psFormat": ...
       "imagesFormat": ...

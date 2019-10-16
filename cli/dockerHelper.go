@@ -53,7 +53,7 @@ func NewStoreSubcommand() subcommands.Command {
 	return &helperCmd{
 		cmd{
 			name:     "store",
-			synopsis: "for the specified server, store the credentials provided via stdin",
+			synopsis: "(UNIMPLEMENTED) for the specified server, store the credentials provided via stdin",
 		},
 	}
 }
@@ -75,7 +75,7 @@ func NewEraseSubcommand() subcommands.Command {
 	return &helperCmd{
 		cmd{
 			name:     "erase",
-			synopsis: "erase any stored credentials for the server specified via stdin",
+			synopsis: "(UNIMPLEMENTED) erase any stored credentials for the server specified via stdin",
 		},
 	}
 }
@@ -86,7 +86,7 @@ func NewListSubcommand() subcommands.Command {
 	return &helperCmd{
 		cmd{
 			name:     "list",
-			synopsis: "list all stored credentials",
+			synopsis: "(UNIMPLEMENTED) list all stored credentials",
 		},
 	}
 }
