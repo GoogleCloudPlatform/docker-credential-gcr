@@ -19,6 +19,9 @@ generate access tokens for use with GCR.
 package auth
 
 import (
+	"crypto/rand"
+	"crypto/sha256"
+	"encoding/base64"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -79,16 +82,27 @@ func (a *GCRLoginAgent) PerformLogin() (*oauth2.Token, error) {
 		Endpoint:     config.GCROAuth2Endpoint,
 	}
 
+	verifier, challenge, method, err := codeChallengeParams()
+
+	authCodeOpts := []oauth2.AuthCodeOption{
+		oauth2.AccessTypeOffline,
+		oauth2.SetAuthURLParam("code_challenge", challenge),
+		oauth2.SetAuthURLParam("code_challenge_method", method),
+	}
+
 	if a.AllowBrowser {
 		// Attempt to receive the authorization code via redirect URL
 		if ln, port, err := getListener(); err == nil {
 			defer ln.Close()
 			// open a web browser and listen on the redirect URL port
 			conf.RedirectURL = fmt.Sprintf("http://localhost:%d", port)
-			url := conf.AuthCodeURL("state", oauth2.AccessTypeOffline)
+			url := conf.AuthCodeURL("state", authCodeOpts...)
 			if err := a.OpenBrowser(url); err == nil {
 				if code, err := handleCodeResponse(ln); err == nil {
-					return conf.Exchange(config.OAuthHTTPContext, code)
+					return conf.Exchange(
+						config.OAuthHTTPContext,
+						code,
+						oauth2.SetAuthURLParam("code_verifier", verifier))
 				}
 			}
 		}
@@ -96,18 +110,21 @@ func (a *GCRLoginAgent) PerformLogin() (*oauth2.Token, error) {
 
 	// If we can't or shouldn't automatically retrieve the code via browser,
 	// default to a command line prompt.
-	code, err := a.codeViaPrompt(conf)
+	code, err := a.codeViaPrompt(conf, authCodeOpts)
 	if err != nil {
 		return nil, err
 	}
 
-	return conf.Exchange(config.OAuthHTTPContext, code)
+	return conf.Exchange(
+		config.OAuthHTTPContext,
+		code,
+		oauth2.SetAuthURLParam("code_verifier", verifier))
 }
 
-func (a *GCRLoginAgent) codeViaPrompt(conf *oauth2.Config) (string, error) {
+func (a *GCRLoginAgent) codeViaPrompt(conf *oauth2.Config, authCodeOpts []oauth2.AuthCodeOption) (string, error) {
 	// Direct the user to our login portal
 	conf.RedirectURL = redirectURIAuthCodeInTitleBar
-	url := conf.AuthCodeURL("state", oauth2.AccessTypeOffline)
+	url := conf.AuthCodeURL("state", authCodeOpts...)
 	fmt.Fprintln(a.Out, "Please visit the following URL and complete the authorization dialog:")
 	fmt.Fprintf(a.Out, "%v\n", url)
 
@@ -173,4 +190,27 @@ func handleCodeResponse(ln net.Listener) (string, error) {
 func getResponseBody(body string) io.ReadCloser {
 	reader := strings.NewReader(body)
 	return ioutil.NopCloser(reader)
+}
+
+// generates the values used in "Proof Key for Code Exchange by OAuth Public Clients"
+// https://tools.ietf.org/html/rfc7636
+// https://developers.google.com/identity/protocols/OAuth2InstalledApp#step1-code-verifier
+func codeChallengeParams() (verifier, challenge, method string, err error) {
+	// A `code_verifier` is a high-entropy cryptographic random string using the unreserved characters
+	// [A-Z] / [a-z] / [0-9] / "-" / "." / "_" / "~"
+	// with a minimum length of 43 characters and a maximum length of 128 characters.
+	b := make([]byte, 32)
+	_, err = rand.Read(b)
+	if err != nil {
+		return "", "", "", err
+	}
+	verifier = base64.RawURLEncoding.EncodeToString(b)
+
+	// https://tools.ietf.org/html/rfc7636#section-4.2
+	// If the client is capable of using "S256", it MUST use "S256":
+	// code_challenge = BASE64URL-ENCODE(SHA256(ASCII(code_verifier)))
+	sha := sha256.Sum256([]byte(verifier))
+	challenge = base64.RawURLEncoding.EncodeToString(sha[:])
+
+	return verifier, challenge, "S256", nil
 }
