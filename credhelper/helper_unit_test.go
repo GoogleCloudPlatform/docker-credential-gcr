@@ -31,46 +31,15 @@ import (
 
 var expectedGCRUsername = fmt.Sprintf("_dcgcr_%d_%d_%d_token", config.MajorVersion, config.MinorVersion, config.PatchVersion)
 
-var defaultGCRHosts = [...]string{
+var testGCRHosts = [...]string{
 	"gcr.io",
 	"us.gcr.io",
 	"eu.gcr.io",
 	"asia.gcr.io",
 	"staging-k8s.gcr.io",
 	"marketplace.gcr.io",
-}
-var otherGCRHosts = [...]string{"appengine.gcr.io", "k8s.gcr.io"}
-var otherHosts = [...]string{"docker.io", "otherrepo.com"}
-
-func TestIsAGCRHostname(t *testing.T) {
-	t.Parallel()
-	// test for default GCR hosts
-	for _, host := range defaultGCRHosts {
-		if !isAGCRHostname(host) {
-			t.Error("Expected to be detected as a GCR hostname: ", host)
-		}
-	}
-
-	// test for default GCR hosts + scheme
-	for _, host := range otherGCRHosts {
-		if !isAGCRHostname("https://" + host) {
-			t.Error("Expected to be detected as a GCR hostname: ", "https://"+host)
-		}
-	}
-
-	// test for non-default GCR hosts
-	for _, host := range defaultGCRHosts {
-		if !isAGCRHostname(host) {
-			t.Error("Expected to be detected as a GCR hostname: ", host)
-		}
-	}
-
-	// test for non-GCR hosts
-	for _, host := range otherHosts {
-		if isAGCRHostname(host) {
-			t.Error("Expected to not be a GCR host: ", host)
-		}
-	}
+	"appengine.gcr.io",
+	"hypothetical-alias.gcr.io",
 }
 
 func TestGet_GCRCredentials(t *testing.T) {
@@ -98,7 +67,7 @@ func TestGet_GCRCredentials(t *testing.T) {
 	}
 
 	// Verify that all of GCR's hostnames return GCR's access token.
-	for _, host := range defaultGCRHosts {
+	for _, host := range testGCRHosts {
 		mockUserCfg.EXPECT().TokenSources().Return(config.DefaultTokenSources[:])
 		username, secret, err := tested.Get("https://" + host)
 		if err != nil {

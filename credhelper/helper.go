@@ -21,7 +21,6 @@ package credhelper
 import (
 	"errors"
 	"fmt"
-	"net/url"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/config"
@@ -77,12 +76,7 @@ func (*gcrCredHelper) Delete(string) error {
 
 // Get returns the username and secret to use for a given registry server URL.
 func (ch *gcrCredHelper) Get(serverURL string) (string, string, error) {
-	// If this is a GCR hostname, return GCR's credentials.
-	if isAGCRHostname(serverURL) {
-		return ch.gcrCreds()
-	}
-
-	return "", "", credentials.NewErrCredentialsNotFound()
+	return ch.gcrCreds()
 }
 
 func (ch *gcrCredHelper) gcrCreds() (string, string, error) {
@@ -192,15 +186,6 @@ func tokenFromPrivateStore(store store.GCRCredStore) (string, error) {
 	}
 
 	return tok.AccessToken, nil
-}
-
-// isAGCRHostname returns true if the given hostname is one of GCR's
-func isAGCRHostname(serverURL string) bool {
-	URL, err := url.Parse(serverURL)
-	if err != nil {
-		return false
-	}
-	return config.DefaultGCRRegistries[URL.Host] || config.DefaultGCRRegistries[serverURL] || strings.HasSuffix(URL.Host, "gcr.io")
 }
 
 func helperErr(message string, err error) error {

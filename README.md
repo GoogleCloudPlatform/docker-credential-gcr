@@ -76,11 +76,17 @@ sudo mv ./bin/docker-credential-gcr /usr/bin/docker-credential-gcr
 
 ## Configuration and Usage
 
-* Configure the Docker CLI to use docker-credential-gcr as its credential store:
+* Configure the Docker CLI to use `docker-credential-gcr` as a credential helper for the default set of GCR registries:
 
 	```shell
 	docker-credential-gcr configure-docker
 	```
+
+  To speed up `docker build`s, you can instead configure a minimal set of registries:
+
+  ```shell
+  docker-credential-gcr configure-docker --registries="eu.gcr.io, marketplace.gcr.io"
+  ```
 
   * Alternatively, use the [manual configuration instructions](#manual-docker-client-configuration) below to configure your version of the Docker client.
 
