@@ -41,12 +41,12 @@ mocks:
 	@find ${MOCK_DIR} -name '*.go.bak' -exec rm {} \;
 
 test: clean deps test-bin
-	@go test -race -timeout 10s -v ./...
+	@go test -timeout 10s -v ./...
 
 tests-unit: deps
 	@go test -race -timeout 10s -v -tags=unit ./...
 
-vet: 
+vet:
 	@go vet ./...
 
 lint:
@@ -63,4 +63,4 @@ fix:
 
 pretty: fmt fix
 
-presubmit: deps criticism pretty bin test
+presubmit: deps criticism pretty bin tests-unit test
