@@ -37,15 +37,12 @@ var DefaultTokenSources = [...]string{"store", "gcloud", "env"}
 type UserConfig interface {
 	TokenSources() []string
 	SetTokenSources([]string) error
-	DefaultToGCRAccessToken() bool
-	SetDefaultToGCRAccessToken(bool) error
 	ResetAll() error
 }
 
 // configFile describes the structure of the persistent config store.
 type configFile struct {
-	TokenSrcs         []string `json:"TokenSources,omitempty"`
-	DefaultToGCRToken bool     `json:"DefaultToGCRToken,omitempty"`
+	TokenSrcs []string `json:"TokenSources,omitempty"`
 
 	// package private helper, made a member variable and exposed for testing
 	persist func(*configFile) error
@@ -117,15 +114,6 @@ func (c *configFile) SetTokenSources(newSources []string) error {
 	return c.persist(c)
 }
 
-func (c *configFile) DefaultToGCRAccessToken() bool {
-	return c.DefaultToGCRToken
-}
-
-func (c *configFile) SetDefaultToGCRAccessToken(defaultToGCR bool) error {
-	c.DefaultToGCRToken = defaultToGCR
-	return c.persist(c)
-}
-
 func persist(c *configFile) error {
 	f, err := createConfigFile()
 	if err != nil {
@@ -161,7 +149,6 @@ func (c *configFile) ResetAll() error {
 		return err
 	}
 	c.TokenSrcs = nil
-	c.DefaultToGCRToken = false
 	return nil
 }
 

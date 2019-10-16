@@ -16,10 +16,7 @@ go_library(
 
 go_test(
     name = "go_default_test",
-    srcs = [
-        "helper_integration_test.go",
-        "helper_unit_test.go",
-    ],
+    srcs = ["helper_unit_test.go"],
     embed = [":go_default_library"],
     deps = [
         "//config:go_default_library",
@@ -28,7 +25,6 @@ go_test(
         "//mock/mock_store:go_default_library",
         "//store:go_default_library",
         "//util/cmd:go_default_library",
-        "//vendor/github.com/docker/docker-credential-helpers/credentials:go_default_library",
         "//vendor/github.com/golang/mock/gomock:go_default_library",
     ],
 )

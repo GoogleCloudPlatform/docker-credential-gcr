@@ -19,6 +19,7 @@ for GCR authentication.
 package credhelper
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 	"strings"
@@ -60,48 +61,18 @@ func NewGCRCredentialHelper(store store.GCRCredStore, userCfg config.UserConfig)
 }
 
 // Delete lists all stored credentials and associated usernames.
-func (ch *gcrCredHelper) List() (map[string]string, error) {
-	all3pCreds, err := ch.store.AllThirdPartyCreds()
-	if err != nil && !credentials.IsErrCredentialsNotFound(err) {
-		return nil, helperErr("could not retrieve 3p credentials", err)
-	}
-
-	resp := make(map[string]string)
-
-	for registry, creds := range all3pCreds {
-		resp[registry] = creds.Username
-	}
-
-	for gcrRegistry := range config.DefaultGCRRegistries {
-		resp[gcrRegistry] = config.GcrOAuth2Username
-	}
-
-	return resp, nil
+func (*gcrCredHelper) List() (map[string]string, error) {
+	return nil, errors.New("list is unimplemented")
 }
 
 // Add adds new third-party credentials to the keychain.
-func (ch *gcrCredHelper) Add(creds *credentials.Credentials) error {
-	serverURL := creds.ServerURL
-	if isAGCRHostname(serverURL) {
-		errStr := "this operation is unsupported for GCR, please see docker-credential-gcr documentation for supported login methods. " +
-			"'gcloud docker' is unnecessary when using docker-credential-gcr, use 'docker' instead."
-		return helperErr(errStr, nil)
-	}
-	if err := ch.store.SetOtherCreds(creds); err != nil {
-		return helperErr("could not store 3p credentials for "+serverURL, err)
-	}
-	return nil
+func (*gcrCredHelper) Add(*credentials.Credentials) error {
+	return errors.New("add is unimplemented")
 }
 
 // Delete removes third-party credentials from the store.
-func (ch *gcrCredHelper) Delete(serverURL string) error {
-	if isAGCRHostname(serverURL) {
-		return helperErr("delete is unimplemented for GCR: "+serverURL, nil)
-	}
-	if err := ch.store.DeleteOtherCreds(serverURL); err != nil {
-		return helperErr("could not delete 3p credentials for "+serverURL, err)
-	}
-	return nil
+func (*gcrCredHelper) Delete(string) error {
+	return errors.New("delete is unimplemented")
 }
 
 // Get returns the username and secret to use for a given registry server URL.
@@ -111,24 +82,6 @@ func (ch *gcrCredHelper) Get(serverURL string) (string, string, error) {
 		return ch.gcrCreds()
 	}
 
-	// Next, attempt to retrieve credentials for another repository.
-	creds, err := ch.store.GetOtherCreds(serverURL)
-	if err != nil {
-		// Swallow not found error, return everything else.
-		if !credentials.IsErrCredentialsNotFound(err) {
-			return "", "", helperErr("could not retrieve 3p credentials for "+serverURL, err)
-		}
-	} else {
-		// If 3p creds are found, return them.
-		return creds.Username, creds.Secret, nil
-	}
-
-	// Finally, if we're configured to return GCR's access token rather
-	// than a not found error, do so. Otherwise, return the not found error
-	// expected by "github.com/docker/docker-credential-helpers/credentials"
-	if ch.userCfg.DefaultToGCRAccessToken() {
-		return ch.gcrCreds()
-	}
 	return "", "", credentials.NewErrCredentialsNotFound()
 }
 

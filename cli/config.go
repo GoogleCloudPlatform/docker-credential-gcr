@@ -17,7 +17,6 @@ package cli
 import (
 	"context"
 	"encoding/csv"
-	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -28,16 +27,14 @@ import (
 )
 
 const (
-	defaultToGCRTokenFlag = "default-to-gcr-access-token"
-	tokenSourceFlag       = "token-source"
-	resetAllFlag          = "unset-all"
+	tokenSourceFlag = "token-source"
+	resetAllFlag    = "unset-all"
 )
 
 type configCmd struct {
 	cmd
-	defaultToGCRToken bool
-	tokenSources      string
-	resetAll          bool
+	tokenSources string
+	resetAll     bool
 }
 
 // NewConfigSubcommand returns a subcommands.Command which allows for user
@@ -50,7 +47,6 @@ func NewConfigSubcommand() subcommands.Command {
 		},
 		// Because only specified flags are iterated by FlagSet.Visit,
 		// these values will always be explicitly set by the user if visited.
-		false,
 		"unused",
 		false,
 	}
@@ -58,50 +54,33 @@ func NewConfigSubcommand() subcommands.Command {
 
 func (c *configCmd) SetFlags(fs *flag.FlagSet) {
 	validSources := strings.Join(config.DefaultTokenSources[:], ", ")
-	fs.BoolVar(&c.defaultToGCRToken, defaultToGCRTokenFlag, false, "If enabled, the credential helper will attempt to return GCR's access token, rather than an error, when credentials cannot otherwise be found.")
-	fs.StringVar(&c.tokenSources, tokenSourceFlag, validSources, "The source(s), in order, to search for GCR credentials. Valid values are: "+validSources+". ")
-	fs.BoolVar(&c.resetAll, resetAllFlag, false, "Resets all settings to default.")
+	fs.StringVar(&c.tokenSources, tokenSourceFlag, validSources, "The source(s), in order, to search for GCR credentials")
+	fs.BoolVar(&c.resetAll, resetAllFlag, false, "Resets all settings to default")
 }
 
 func (c *configCmd) Execute(_ context.Context, flags *flag.FlagSet, _ ...interface{}) subcommands.ExitStatus {
-	result := subcommands.ExitSuccess
-
-	//TODO(jsand@google.com): un-uglify
 	if c.resetAll {
 		if err := resetAll(); err != nil {
 			printError(resetAllFlag, err)
-			result = subcommands.ExitFailure
-		} else {
-			printSuccess("Config reset.")
+			return subcommands.ExitFailure
 		}
-	} else {
-		flags.Visit(func(f *flag.Flag) {
-			flag := f.Name
-			// FlagSet.XXXVar was used instead of Flag.Value for sanity purposes,
-			// but FlagSet.Visit is useful to only process explicitly set flags.
-			switch flag {
-			case tokenSourceFlag:
-				if err := setTokenSources(c.tokenSources); err != nil {
-					printError(tokenSourceFlag, err)
-					result = subcommands.ExitFailure
-				} else {
-					printSuccess("Token source(s) set.")
-				}
-			case defaultToGCRTokenFlag:
-				if err := setDefaultToGCR(c.defaultToGCRToken); err != nil {
-					printError(defaultToGCRTokenFlag, err)
-					result = subcommands.ExitFailure
-				} else if c.defaultToGCRToken {
-					printSuccess("Will attempt to return GCR's access token when no other credentials are found.")
-				} else {
-					printSuccess("Will return an error when credentials are not found.")
-				}
-			default:
-				printError(flag, errors.New("unknown flag"))
-				result = subcommands.ExitFailure
-			}
-		})
+		printSuccess("Config reset.")
+		return subcommands.ExitSuccess
 	}
+
+	result := subcommands.ExitSuccess
+	flags.Visit(func(f *flag.Flag) {
+		if f.Name == tokenSourceFlag {
+			if err := setTokenSources(c.tokenSources); err != nil {
+				printError(tokenSourceFlag, err)
+				result = subcommands.ExitFailure
+				return
+			}
+			printSuccess("Token source(s) set.")
+			result = subcommands.ExitSuccess
+		}
+	})
+
 	return result
 }
 
@@ -111,14 +90,6 @@ func resetAll() error {
 		return err
 	}
 	return cfg.ResetAll()
-}
-
-func setDefaultToGCR(defaultToGCR bool) error {
-	cfg, err := config.LoadUserConfig()
-	if err != nil {
-		return err
-	}
-	return cfg.SetDefaultToGCRAccessToken(defaultToGCR)
 }
 
 func setTokenSources(rawSource string) error {

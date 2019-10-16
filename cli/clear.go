@@ -54,16 +54,5 @@ func (c *clearCmd) ClearAll() error {
 		return err
 	}
 
-	othercreds, err := s.AllThirdPartyCreds()
-	if err != nil {
-		return err
-	}
-
-	for reg := range othercreds {
-		if err := s.DeleteOtherCreds(reg); err != nil {
-			return err
-		}
-	}
-
 	return s.DeleteGCRAuth()
 }
