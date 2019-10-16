@@ -84,7 +84,50 @@ func TestConfigureDocker(t *testing.T) {
 		t.Fatal("CredentialHelpers was empty.")
 	}
 
-	for registryHostname := range config.DefaultGCRRegistries {
+	for _, registryHostname := range config.DefaultGCRRegistries {
+		if helperSuffix, ok := dockerConfig.CredentialHelpers[registryHostname]; ok {
+			if helperSuffix != "gcr" {
+				t.Errorf("Wanted value for %s in dockerConfig.CredentialHelpers to be %s, got %s", registryHostname, "gcr", helperSuffix)
+			}
+		} else {
+			t.Errorf("Expected %s to be present in dockerConfig.CredentialHelpers: %v", helperSuffix, dockerConfig.CredentialHelpers)
+		}
+	}
+}
+
+func TestConfigureDocker_NonDefault(t *testing.T) {
+	if err := deleteDockerConfig(); err != nil {
+		if err != nil {
+			t.Fatalf("Failed to delete the pre-existing docker config: %v", err)
+		}
+	}
+	dockerConfig, err := getDockerConfig()
+	if err != nil {
+		t.Fatalf("Failed to get the docker config: %#v", err)
+	}
+
+	if len(dockerConfig.CredentialHelpers) > 0 {
+		t.Fatal("Failed to clean the docker config.")
+	}
+
+	// Configure docker.
+	helper := helperCmd([]string{"configure-docker", "--overwrite", "--registries=foo.gcr.io, bar.gcr.io, baz.gcr.io"})
+	var out bytes.Buffer
+	helper.Stdout = &out
+	if err = helper.Run(); err != nil {
+		t.Fatalf("Failed to execute `configure-docker --overwrite`: %v Stdout: %s", err, string(out.Bytes()))
+	}
+
+	dockerConfig, err = getDockerConfig()
+	if err != nil {
+		t.Fatalf("Failed to get the docker config: %v", err)
+	}
+
+	if len(dockerConfig.CredentialHelpers) == 0 {
+		t.Fatal("CredentialHelpers was empty.")
+	}
+
+	for _, registryHostname := range []string{"foo.gcr.io", "bar.gcr.io", "baz.gcr.io"} {
 		if helperSuffix, ok := dockerConfig.CredentialHelpers[registryHostname]; ok {
 			if helperSuffix != "gcr" {
 				t.Errorf("Wanted value for %s in dockerConfig.CredentialHelpers to be %s, got %s", registryHostname, "gcr", helperSuffix)

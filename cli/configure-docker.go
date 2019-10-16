@@ -16,6 +16,7 @@ package cli
 
 import (
 	"context"
+	"encoding/csv"
 	"flag"
 	"fmt"
 	"os"
@@ -33,6 +34,8 @@ type dockerConfigCmd struct {
 	cmd
 	// overwrite any previously configured credential store and/or credentials
 	overwrite bool
+	// the registries to configure the cred helper for
+	registries string
 }
 
 // see https://github.com/docker/docker/blob/master/cliconfig/credentials/native_store.go
@@ -47,11 +50,14 @@ func NewDockerConfigSubcommand() subcommands.Command {
 			synopsis: fmt.Sprintf("configures the Docker client to use %s", os.Args[0]),
 		},
 		false,
+		"unused",
 	}
 }
 
 func (c *dockerConfigCmd) SetFlags(fs *flag.FlagSet) {
+	defaultReg := strings.Join(config.DefaultGCRRegistries[:], ", ")
 	fs.BoolVar(&c.overwrite, "overwrite", false, "overwrite any previously configured credential store and/or credentials")
+	fs.StringVar(&c.registries, "registries", defaultReg, "the comma-separated list of registries to configure the cred helper for")
 }
 
 func (c *dockerConfigCmd) Execute(context.Context, *flag.FlagSet, ...interface{}) subcommands.ExitStatus {
@@ -77,21 +83,27 @@ func (c *dockerConfigCmd) Execute(context.Context, *flag.FlagSet, ...interface{}
 	// binary.
 	credHelperSuffix := binaryName[len(credHelperPrefix):]
 
-	return setConfig(dockerConfig, credHelperSuffix)
+	return c.setConfig(dockerConfig, credHelperSuffix)
 }
 
 // Configure Docker to use the credential helper for GCR's registries only.
 // Defining additional 'auths' entries is unnecessary in versions which
 // support registry-specific credential helpers.
-func setConfig(dockerConfig *configfile.ConfigFile, helperSuffix string) subcommands.ExitStatus {
+func (c *dockerConfigCmd) setConfig(dockerConfig *configfile.ConfigFile, helperSuffix string) subcommands.ExitStatus {
 	// We always overwrite since there's no way that we can accidentally
 	// disable other credentials as a registry-specific credential helper.
 	if dockerConfig.CredentialHelpers == nil {
 		dockerConfig.CredentialHelpers = map[string]string{}
 	}
 
-	for registry := range config.DefaultGCRRegistries {
-		dockerConfig.CredentialHelpers[registry] = helperSuffix
+	strReader := strings.NewReader(c.registries)
+	registries, err := csv.NewReader(strReader).Read()
+	if err != nil {
+		printErrorln("Unable to parse `--registries` value %q: %v", c.registries, err)
+		return subcommands.ExitFailure
+	}
+	for _, registry := range registries {
+		dockerConfig.CredentialHelpers[strings.TrimSpace(registry)] = helperSuffix
 	}
 
 	if err := dockerConfig.Save(); err != nil {

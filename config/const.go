@@ -47,13 +47,12 @@ const (
 )
 
 // DefaultGCRRegistries contains the list of default registries to authenticate for.
-var DefaultGCRRegistries = map[string]bool{
-	"gcr.io":             true,
-	"us.gcr.io":          true,
-	"eu.gcr.io":          true,
-	"asia.gcr.io":        true,
-	"staging-k8s.gcr.io": true,
-	"marketplace.gcr.io": true,
+var DefaultGCRRegistries = [...]string{
+	"gcr.io",
+	"us.gcr.io",
+	"eu.gcr.io",
+	"asia.gcr.io",
+	"marketplace.gcr.io",
 }
 
 // SupportedGCRTokenSources maps config keys to plain english explanations for
