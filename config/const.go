@@ -39,9 +39,9 @@ const (
 	// PATCH version when you make backwards-compatible bug fixes.
 
 	// MajorVersion is the credential helper's major version number.
-	MajorVersion = 1
+	MajorVersion = 2
 	// MinorVersion is the credential helper's minor version number.
-	MinorVersion = 5
+	MinorVersion = 0
 	// PatchVersion is the credential helper's patch version number.
 	PatchVersion = 0
 )
