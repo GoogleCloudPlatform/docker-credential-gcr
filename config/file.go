@@ -31,7 +31,7 @@ const (
 
 // DefaultTokenSources designates which default source(s) should be used to
 // fetch a GCR access_token, and in which order.
-var DefaultTokenSources = [...]string{"store", "gcloud", "env"}
+var DefaultTokenSources = [...]string{"store", "env"}
 
 // UserConfig describes
 type UserConfig interface {

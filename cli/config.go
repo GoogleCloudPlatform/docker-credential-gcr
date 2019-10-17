@@ -53,8 +53,13 @@ func NewConfigSubcommand() subcommands.Command {
 }
 
 func (c *configCmd) SetFlags(fs *flag.FlagSet) {
-	validSources := strings.Join(config.DefaultTokenSources[:], ", ")
-	fs.StringVar(&c.tokenSources, tokenSourceFlag, validSources, "The source(s), in order, to search for GCR credentials")
+	srcs := make([]string, 0, len(config.SupportedGCRTokenSources))
+	for src := range config.SupportedGCRTokenSources {
+		srcs = append(srcs, src)
+	}
+	supportedSources := strings.Join(srcs, ", ")
+	defaultSources := strings.Join(config.DefaultTokenSources[:], ", ")
+	fs.StringVar(&c.tokenSources, tokenSourceFlag, defaultSources, "The source(s), in order, to search for credentials. Supported sources are: "+supportedSources)
 	fs.BoolVar(&c.resetAll, resetAllFlag, false, "Resets all settings to default")
 }
 

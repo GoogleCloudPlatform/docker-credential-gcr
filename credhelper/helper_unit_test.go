@@ -119,40 +119,6 @@ func TestGetGCRAccessToken_Env(t *testing.T) {
 	}
 }
 
-func TestGetGCRAccessToken_GcloudSDK(t *testing.T) {
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-	// create a mock store to use
-	mockStore := mock_store.NewMockGCRCredStore(mockCtrl)
-
-	mockUserCfg := mock_config.NewMockUserConfig(mockCtrl)
-	mockUserCfg.EXPECT().TokenSources().Return(config.DefaultTokenSources[:])
-
-	// mock the helper methods used by getGCRAccessToken
-	const expected = "gcloud sdk creds!"
-	tested := &gcrCredHelper{
-		store:   mockStore,
-		userCfg: mockUserCfg,
-		envToken: func() (string, error) {
-			return "creds from `env`", nil
-		},
-		gcloudSDKToken: func(_ cmd.Command) (string, error) {
-			return expected, nil
-		},
-		credStoreToken: func(_ store.GCRCredStore) (string, error) {
-			return "", errors.New("no token from the cred store")
-		},
-	}
-
-	token, err := tested.getGCRAccessToken()
-
-	if err != nil {
-		t.Fatalf("getGCRAccessToken returned an error: %v", err)
-	} else if token != expected {
-		t.Fatalf("Expected: %s got: %s", expected, token)
-	}
-}
-
 func TestGetGCRAccessToken_PrivateStore(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
