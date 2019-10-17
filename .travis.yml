@@ -1,52 +1,73 @@
-sudo: required
-
 dist: trusty
 
-services:
-  - docker
-
 language: go
-
-go:
-  - 1.11
-  - tip
-
-before_install:
-  # Bazel requires JDK8
-  - sudo apt-get install oracle-java8-installer
-
-addons:
-  apt:
-    sources:
-      - sourceline: 'deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8'
-        key_url: 'https://storage.googleapis.com/bazel-apt/doc/apt-key.pub.gpg'
-    packages:
-      - bazel
 
 install:
   - go get -u golang.org/x/lint/golint
 
 script:
-  - make deps
+  - env
+  - make
+  - ./bin/docker-credential-gcr configure-docker
+  - make test
 
-  # Verify that all source files are correctly formatted.
-  - gofmt -e -l .
+matrix:
+  include:
+    # Test ARM64
+    - arch: arm64
 
-  # Verify go lint, go vet, gofmt, go fix.
-  - make criticism
-  - make pretty
+    # Test min/max supported versions of Go
+    - go: tip
+    - go: 1.11
 
-  # Verify that a vanilla Go build still works.
-  - make bin
+    # Test OSX
+    - os: osx
 
-  # Verify that there aren't issues with correctness...
-  - go build -a -v -race main.go
+    # Test OSX
+    - os: windows
+      script:
+        - env
+        - go test -race -timeout 10s -v -tags=unit ./...
+        - go build -o docker-credential-gcr.exe main.go
+        - ./docker-credential-gcr.exe configure-docker
 
-  # Verify tests.
-  - make test-bin
-  - go test -timeout 10s -v -tags=travis ./...
+    # Run rigorous integration/e2e tests with Bazel and Docker
+    - os: linux
+      arch: amd64
+      env: FULL_TEST="yes"
+      sudo: required
+      services:
+        - docker
+      before_install:
+        # Bazel requires JDK8
+        - sudo apt-get install oracle-java8-installer
+      addons:
+        apt:
+          sources:
+            - sourceline: 'deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8'
+              key_url: 'https://storage.googleapis.com/bazel-apt/doc/apt-key.pub.gpg'
+          packages:
+            - bazel
+      script:
+        - env
 
-  # Verify that Bazel builds still work.
-  - bazel clean
-  - bazel build //...
-  - bazel test //...
+        # Verify go lint, go vet, gofmt, go fix, etc.
+        - gofmt -e -l .
+        - make criticism
+        - make presubmit
+
+        # Verify that a vanilla Go build still works.
+        - make
+        - ./bin/docker-credential-gcr configure-docker
+
+        # Verify that there aren't issues with correctness...
+        - go build -a -v -race main.go
+
+        # Run destructive tests.
+        - make test-bin
+        - go test -timeout 10s -v -tags=travis ./...
+
+        # Verify that Bazel builds still work.
+        - bazel clean
+        - bazel build //...
+        - bazel test //...
