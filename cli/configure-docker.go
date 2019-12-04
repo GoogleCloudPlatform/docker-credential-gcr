@@ -55,7 +55,7 @@ func NewDockerConfigSubcommand() subcommands.Command {
 }
 
 func (c *dockerConfigCmd) SetFlags(fs *flag.FlagSet) {
-	defaultReg := strings.Join(config.DefaultGCRRegistries[:], ", ")
+	defaultReg := strings.Join(config.AllRegistries[:], ", ")
 	fs.BoolVar(&c.overwrite, "overwrite", false, "overwrite any previously configured credential store and/or credentials")
 	fs.StringVar(&c.registries, "registries", defaultReg, "the comma-separated list of registries to configure the cred helper for")
 }

@@ -84,7 +84,7 @@ func TestConfigureDocker(t *testing.T) {
 		t.Fatal("CredentialHelpers was empty.")
 	}
 
-	for _, registryHostname := range config.DefaultGCRRegistries {
+	for _, registryHostname := range config.AllRegistries {
 		if helperSuffix, ok := dockerConfig.CredentialHelpers[registryHostname]; ok {
 			if helperSuffix != "gcr" {
 				t.Errorf("Wanted value for %s in dockerConfig.CredentialHelpers to be %s, got %s", registryHostname, "gcr", helperSuffix)
