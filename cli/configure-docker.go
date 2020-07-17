@@ -36,6 +36,8 @@ type dockerConfigCmd struct {
 	overwrite bool
 	// the registries to configure the cred helper for
 	registries string
+	// whether to include all AR Registries
+	includeArtifactRegistry bool
 }
 
 // see https://github.com/docker/docker/blob/master/cliconfig/credentials/native_store.go
@@ -51,13 +53,14 @@ func NewDockerConfigSubcommand() subcommands.Command {
 		},
 		false,
 		"unused",
+		false,
 	}
 }
 
 func (c *dockerConfigCmd) SetFlags(fs *flag.FlagSet) {
-	defaultReg := strings.Join(config.DefaultGCRRegistries[:], ", ")
 	fs.BoolVar(&c.overwrite, "overwrite", false, "overwrite any previously configured credential store and/or credentials")
-	fs.StringVar(&c.registries, "registries", defaultReg, "the comma-separated list of registries to configure the cred helper for")
+	fs.BoolVar(&c.includeArtifactRegistry, "include-artifact-registry", false, "include all Artifact Registry registries as well as GCR registries ")
+	fs.StringVar(&c.registries, "registries", "", "the comma-separated list of registries to configure the cred helper for")
 }
 
 func (c *dockerConfigCmd) Execute(context.Context, *flag.FlagSet, ...interface{}) subcommands.ExitStatus {
@@ -96,12 +99,30 @@ func (c *dockerConfigCmd) setConfig(dockerConfig *configfile.ConfigFile, helperS
 		dockerConfig.CredentialHelpers = map[string]string{}
 	}
 
-	strReader := strings.NewReader(c.registries)
-	registries, err := csv.NewReader(strReader).Read()
-	if err != nil {
-		printErrorln("Unable to parse `--registries` value %q: %v", c.registries, err)
-		return subcommands.ExitFailure
+	var registries []string
+	if c.registries == "" {
+		fmt.Println("Configuring default registries....")
+		fmt.Println("WARNING: A long list of credential helpers may cause delays running 'docker build'.")
+		fmt.Println("We recommend passing the registry names via the --registries flag for the specific registries you are using")
+		if c.includeArtifactRegistry {
+			fmt.Println("Adding config for all GCR and AR registries.")
+			registries = append(config.DefaultGCRRegistries[:], config.DefaultARRegistries[:]...)
+		} else {
+			fmt.Println("Adding config for all GCR registries.")
+			registries = config.DefaultGCRRegistries[:]
+		}
+	} else {
+		fmt.Println("Configuring supplied registries....")
+		strReader := strings.NewReader(c.registries)
+		var err error
+		registries, err = csv.NewReader(strReader).Read()
+		if err != nil {
+			printErrorln("Unable to parse `--registries` value %q: %v", c.registries, err)
+			return subcommands.ExitFailure
+		}
+		fmt.Printf("Adding config for registries: %s\n", strings.Join(registries, ","))
 	}
+
 	for _, registry := range registries {
 		dockerConfig.CredentialHelpers[strings.TrimSpace(registry)] = helperSuffix
 	}
@@ -111,7 +132,11 @@ func (c *dockerConfigCmd) setConfig(dockerConfig *configfile.ConfigFile, helperS
 		return subcommands.ExitFailure
 	}
 
-	fmt.Printf("%s configured to use this credential helper for GCR registries\n", dockerConfig.Filename)
+	if c.includeArtifactRegistry {
+		fmt.Printf("%s configured to use this credential helper for GCR and AR registries\n", dockerConfig.Filename)
+	} else {
+		fmt.Printf("%s configured to use this credential helper for GCR registries\n", dockerConfig.Filename)
+	}
 	return subcommands.ExitSuccess
 }
 
