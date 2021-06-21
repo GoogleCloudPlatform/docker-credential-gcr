@@ -38,10 +38,16 @@ func SdkConfigPath() (string, error) {
 	return filepath.Join(homeDir, ".config", "gcloud"), nil
 }
 
+// unixHomeDir returns the user's home directory.  Note that $HOME has
+// precedence over records in the password database since the credential helper
+// may be running under a different UID in a user namespace.
 func unixHomeDir() string {
-	usr, err := user.Current()
-	if err == nil {
+	homeDir := os.Getenv("HOME")
+	if homeDir != "" {
+		return homeDir
+	}
+	if usr, err := user.Current(); err == nil {
 		return usr.HomeDir
 	}
-	return os.Getenv("HOME")
+	return ""
 }
