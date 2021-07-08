@@ -59,15 +59,14 @@ var DefaultGCRRegistries = [...]string{
 // Registry.  If the --include-artifact-registry flag is supplied then these
 // are added in addition to the GCR Registries.
 var DefaultARRegistries = [...]string{
-	"northamerica-northeast1-docker.pkg.dev",
-	"northamerica-northeast2-docker.pkg.dev", "us-central1-docker.pkg.dev",
+	"northamerica-northeast1-docker.pkg.dev", "us-central1-docker.pkg.dev",
 	"us-east1-docker.pkg.dev", "us-east4-docker.pkg.dev",
 	"us-west2-docker.pkg.dev", "us-west1-docker.pkg.dev",
 	"us-west3-docker.pkg.dev", "us-west4-docker.pkg.dev",
-	"southamerica-east1-docker.pkg.dev", "southamerica-west1-docker.pkg.dev",
-	"europe-central2-docker.pkg.dev", "europe-north1-docker.pkg.dev",
-	"europe-west1-docker.pkg.dev", "europe-west2-docker.pkg.dev",
-	"europe-west3-docker.pkg.dev", "europe-west4-docker.pkg.dev",
+	"southamerica-east1-docker.pkg.dev", "europe-central2-docker.pkg.dev",
+	"europe-north1-docker.pkg.dev", "europe-west1-docker.pkg.dev",
+	"europe-west2-docker.pkg.dev", "europe-west3-docker.pkg.dev",
+	"europe-west4-docker.pkg.dev", "europe-west5-docker.pkg.dev",
 	"europe-west6-docker.pkg.dev", "asia-east1-docker.pkg.dev",
 	"asia-east2-docker.pkg.dev", "asia-northeast1-docker.pkg.dev",
 	"asia-northeast2-docker.pkg.dev", "asia-northeast3-docker.pkg.dev",
