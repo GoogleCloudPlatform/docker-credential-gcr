@@ -13,9 +13,6 @@ script:
 
 matrix:
   include:
-    # Test ARM64
-    - arch: arm64
-
     # Test min/max supported versions of Go
     - go: tip
     - go: 1.11
