@@ -59,7 +59,8 @@ var DefaultGCRRegistries = [...]string{
 // Registry.  If the --include-artifact-registry flag is supplied then these
 // are added in addition to the GCR Registries.
 var DefaultARRegistries = [...]string{
-	"northamerica-northeast1-docker.pkg.dev", "us-central1-docker.pkg.dev",
+	"northamerica-northeast1-docker.pkg.dev",
+	"northamerica-northeast2-docker.pkg.dev", "us-central1-docker.pkg.dev",
 	"us-east1-docker.pkg.dev", "us-east4-docker.pkg.dev",
 	"us-west2-docker.pkg.dev", "us-west1-docker.pkg.dev",
 	"us-west3-docker.pkg.dev", "us-west4-docker.pkg.dev",
