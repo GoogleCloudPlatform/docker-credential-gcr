@@ -15,7 +15,7 @@ matrix:
   include:
     # Test min/max supported versions of Go
     - go: tip
-    - go: 1.11
+    - go: 1.13
 
     # Test OSX
     - os: osx
