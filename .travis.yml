@@ -11,6 +11,9 @@ script:
   - ./bin/docker-credential-gcr configure-docker
   - make test
 
+env:
+  - GO111MODULE=on
+
 matrix:
   include:
     # Test min/max supported versions of Go
