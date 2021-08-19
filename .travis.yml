@@ -9,6 +9,8 @@ install:
   - go get -u golang.org/x/lint/golint
 
 script:
+  - export GO111MODULE=on
+  - export GIMME=on
   - env
   - eval $(gimme 1.13)
   - make
@@ -31,6 +33,7 @@ matrix:
     - os: windows
       script:
         - env
+        - go version
         - go test -race -timeout 10s -v -tags=unit ./...
         - go build -o docker-credential-gcr.exe main.go
         - ./docker-credential-gcr.exe configure-docker
@@ -54,6 +57,7 @@ matrix:
             - bazel
       script:
         - env
+        - go version
 
         # Verify go lint, go vet, gofmt, go fix, etc.
         - gofmt -e -l .
