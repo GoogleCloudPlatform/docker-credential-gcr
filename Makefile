@@ -10,14 +10,14 @@ SRCS = $(go list ./... | grep -v vendor)
 all: clean bin
 
 deps:
-	@go get -u -t ./...
+	@go get -u ./...
 
 bin: deps
-	@go build -i -o ${OUT_DIR}/${BINARY_FILENAME} main.go
+	@go build -o ${OUT_DIR}/${BINARY_FILENAME} main.go
 	@echo Binary created: ${OUT_DIR}/${BINARY_FILENAME}
 
 test-bin: deps
-	@go build -i -o test/testdata/docker-credential-gcr main.go
+	@go build -o test/testdata/docker-credential-gcr main.go
 
 clean:
 	@rm -rf ${OUT_DIR}

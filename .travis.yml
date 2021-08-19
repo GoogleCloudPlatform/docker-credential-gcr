@@ -1,12 +1,16 @@
-dist: trusty
+dist: bionic
 
 language: go
+
+git:
+  depth: 1
 
 install:
   - go get -u golang.org/x/lint/golint
 
 script:
   - env
+  - eval $(go env)
   - make
   - ./bin/docker-credential-gcr configure-docker
   - make test
