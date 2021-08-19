@@ -10,7 +10,7 @@ install:
 
 script:
   - env
-  - eval $(go env)
+  - eval $(gimme 1.13)
   - make
   - ./bin/docker-credential-gcr configure-docker
   - make test
