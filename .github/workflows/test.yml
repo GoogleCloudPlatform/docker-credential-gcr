@@ -1,0 +1,103 @@
+on: [push, pull_request]
+
+name: Tests
+
+jobs:
+  unit_test:
+    strategy:
+      matrix:
+        go-version: [1.11, 1.x] # Test min/max supported versions of Go
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Test
+        run: go test ./...
+
+  unit_test_mac:
+    strategy:
+      matrix:
+        go-version: [1.11, 1.x] # Test min/max supported versions of Go
+    runs-on: macos-latest
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Print env
+        run: env
+      - name: Test
+        run: |
+          make
+          ./bin/docker-credential-gcr configure-docker
+          make test
+
+  unit_test_windows:
+    strategy:
+      matrix:
+        go-version: [1.11, 1.x] # Test min/max supported versions of Go
+    runs-on: windows-latest
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Print env
+        run: env
+      - name: Test
+        run: |
+          go test -race -timeout 10s -v -tags=unit ./...
+          go build -o docker-credential-gcr.exe main.go
+          ./docker-credential-gcr.exe configure-docker
+
+  e2e_test_ubuntu:
+    runs-on: ubuntu-latest
+    env:
+      FULL_TEST: yes
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Print env
+        run: env
+      - name: Verify go cmds # Verify go lint, go vet, gofmt, go fix, etc.
+        run: |
+          gofmt -e -l .
+          make criticism
+          make presubmit
+      - name: Verify vanilla build
+        run: |
+          make
+          ./bin/docker-credential-gcr configure-docker
+      - name: Verify correctness
+        run: go build -a -v -race main.go
+      - name: Destructive tests
+        run: |
+          make test-bin
+          go test -timeout 10s -v -tags=e2e
+
+  bazel_test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup bazel
+        uses: jwlawson/actions-setup-bazel@v1
+        with:
+          bazel-version: "2.0.0"
+      - name: Clean
+        run: bazel clean
+      - name: Build
+        run: bazel build //...
+      - name: Test
+        run: bazel test //...
