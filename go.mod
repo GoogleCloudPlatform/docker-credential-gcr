@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/docker-credential-gcr
 
-go 1.17
+go 1.15
 
 require (
 	github.com/docker/cli v20.10.8+incompatible
