@@ -51,6 +51,9 @@ jobs:
     env:
       GO111MODULE: auto
       FULL_TEST: yes
+    strategy:
+      matrix:
+        go-version: [1.11, 1.x] # Test min/max supported versions of Go
     runs-on: ubuntu-latest
     steps:
       - name: Install Go
