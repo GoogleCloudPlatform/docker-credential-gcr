@@ -4,6 +4,8 @@ name: Tests
 
 jobs:
   unit_test_mac:
+    env:
+      GO111MODULE: auto
     strategy:
       matrix:
         go-version: [1.11, 1.x] # Test min/max supported versions of Go
@@ -24,6 +26,8 @@ jobs:
           make test
 
   unit_test_windows:
+    env:
+      GO111MODULE: auto
     strategy:
       matrix:
         go-version: [1.11, 1.x] # Test min/max supported versions of Go
@@ -44,9 +48,10 @@ jobs:
           ./docker-credential-gcr.exe configure-docker
 
   e2e_test_ubuntu:
-    runs-on: ubuntu-latest
     env:
+      GO111MODULE: auto
       FULL_TEST: yes
+    runs-on: ubuntu-latest
     steps:
       - name: Install Go
         uses: actions/setup-go@v2
@@ -71,17 +76,8 @@ jobs:
         run: |
           make test-bin
           go test -timeout 10s -v -tags=e2e
-
-  bazel_test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Setup bazel
-        uses: jwlawson/actions-setup-bazel@v1
-        with:
-          bazel-version: "2.0.0"
-      - name: Clean
-        run: bazel clean
-      - name: Build
-        run: bazel build //...
-      - name: Test
-        run: bazel test //...
+      - name: Bazel tests
+        run: |
+          bazelisk clean
+          bazelisk build //...
+          bazelisk test //...
