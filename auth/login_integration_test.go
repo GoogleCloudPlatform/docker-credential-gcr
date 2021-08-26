@@ -318,15 +318,15 @@ type multiThreadReadWriter struct {
 }
 
 func (m *multiThreadReadWriter) Read(p []byte) (int, error) {
+	bytes := <-m.c
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	bytes := <-m.c
 	return copy(p, bytes), nil
 }
 func (m *multiThreadReadWriter) Write(p []byte) (int, error) {
+	m.c <- p
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	m.c <- p
 	return len(p), nil
 }
 func newMultiThreadReadWriter() io.ReadWriter {
