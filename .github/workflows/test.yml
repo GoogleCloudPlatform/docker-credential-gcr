@@ -2,9 +2,6 @@ on: [push, pull_request]
 name: Test
 jobs:
   test:
-    env:
-      BINARY_FILENAME: docker-credential-gcr
-      OUT_DIR: bin
     strategy:
       matrix:
         go-version: [1.13, 1.x]
@@ -18,8 +15,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Build
-        run: make
+        run: go build
       - name: Test
-        run: |
-          ./bin/docker-credential-gcr configure-docker
-          make test
+        run: go test -v ./...
+      - name: Test race
+        run: go test -race -timeout 10s -v ./...
