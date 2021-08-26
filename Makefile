@@ -10,6 +10,7 @@ SRCS = $(go list ./... | grep -v vendor)
 all: clean bin
 
 deps:
+	@go mod vendor
 	@go get -u -t ./...
 
 bin: deps
