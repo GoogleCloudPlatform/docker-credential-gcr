@@ -7,3 +7,4 @@ bazel*
 **/testdata
 .idea
 *.iml
+docker-credential-gcr

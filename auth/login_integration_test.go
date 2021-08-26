@@ -1,3 +1,4 @@
+//go:build !unit
 // +build !unit
 
 // Copyright 2016 Google, Inc.
@@ -26,6 +27,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/config"
@@ -311,19 +313,24 @@ func performCommandLineInteraction(t *testing.T, outRead io.Reader) {
 // multiThreadReadWriter is a io.ReadWriter that allows for simpler
 // communication than is afforded by io.Pipe
 type multiThreadReadWriter struct {
-	c chan []byte
+	mu sync.Mutex
+	c  chan []byte
 }
 
-func (m multiThreadReadWriter) Read(p []byte) (int, error) {
+func (m *multiThreadReadWriter) Read(p []byte) (int, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	bytes := <-m.c
 	return copy(p, bytes), nil
 }
-func (m multiThreadReadWriter) Write(p []byte) (int, error) {
+func (m *multiThreadReadWriter) Write(p []byte) (int, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	m.c <- p
 	return len(p), nil
 }
 func newMultiThreadReadWriter() io.ReadWriter {
-	return multiThreadReadWriter{
+	return &multiThreadReadWriter{
 		c: make(chan []byte),
 	}
 }
