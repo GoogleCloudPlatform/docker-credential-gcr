@@ -17,8 +17,9 @@ jobs:
           go-version: ${{ matrix.go-version }}
       - name: Checkout code
         uses: actions/checkout@v2
+      - name: Build
+        run: make
       - name: Test
         run: |
-          make
           ./bin/docker-credential-gcr configure-docker
           make test
