@@ -1,4 +1,5 @@
-// +build !unit
+//go:build !race
+// +build !race
 
 // Copyright 2016 Google, Inc.
 //
@@ -310,6 +311,7 @@ func performCommandLineInteraction(t *testing.T, outRead io.Reader) {
 
 // multiThreadReadWriter is a io.ReadWriter that allows for simpler
 // communication than is afforded by io.Pipe
+// TODO: Fix race condition when reading/writing using same slice.
 type multiThreadReadWriter struct {
 	c chan []byte
 }
