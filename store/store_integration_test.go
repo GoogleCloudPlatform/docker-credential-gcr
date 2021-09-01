@@ -1,4 +1,5 @@
-// +build !unit
+//go:build !windows
+// +build !windows
 
 // Copyright 2016 Google, Inc.
 //
@@ -99,6 +100,7 @@ func TestGetGCRAuth_GCRCredsAbsent(t *testing.T) {
 	}
 }
 
+// TODO: Fix test for windows.
 func TestSetGCRAuth_NoFile(t *testing.T) {
 	err := cleanUp()
 	if err != nil {
@@ -254,6 +256,7 @@ func TestDeleteGCRAuth_GCRCredsAbsent(t *testing.T) {
 	}
 }
 
+// TODO: Fix test for windows.
 func TestDeleteGCRAuth_NoFile(t *testing.T) {
 	err := cleanUp()
 	if err != nil {
@@ -268,6 +271,7 @@ func TestDeleteGCRAuth_NoFile(t *testing.T) {
 	}
 }
 
+// TODO: Fix test for windows.
 func TestGCRAuthLifespan(t *testing.T) {
 	err := cleanUp()
 	if err != nil {
