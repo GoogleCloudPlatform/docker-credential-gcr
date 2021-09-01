@@ -73,7 +73,7 @@ func setTestFileEnvVars() error {
 // the given arguments.
 func helperCmd(args []string) *exec.Cmd {
 	// Execute the compiled helper binary relative to the test directory.
-	return exec.Command(testDataDir+"/docker-credential-gcr", args...)
+	return exec.Command("../docker-credential-gcr", args...)
 }
 
 // testConfigPath returns the absolute path to the test credential helper config.
