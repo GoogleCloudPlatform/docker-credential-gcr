@@ -1,3 +1,4 @@
+//go:build !unit && !gazelle
 // +build !unit,!gazelle
 
 // Copyright 2016 Google, Inc.
@@ -17,10 +18,17 @@
 package test
 
 import (
+	"bytes"
+	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/GoogleCloudPlatform/docker-credential-gcr/config"
+	cliconfig "github.com/docker/cli/cli/config"
+	"github.com/docker/cli/cli/config/configfile"
 )
 
 func TestConfig(t *testing.T) {
@@ -56,5 +64,117 @@ func TestConfig(t *testing.T) {
 	}
 	if _, err = os.Stat(configPath); err == nil {
 		t.Fatal("Config file still present.")
+	}
+}
+
+// getDockerConfig returns the docker config.
+func getDockerConfig() (*configfile.ConfigFile, error) {
+	dockerConfig, err := cliconfig.Load(cliconfig.Dir())
+	if err != nil {
+		return nil, fmt.Errorf("unable to load docker config: %v", err)
+	}
+	return dockerConfig, nil
+}
+
+// deleteDockerConfig deletes the docker config.
+func deleteDockerConfig() error {
+	filename := filepath.Join(cliconfig.Dir(), cliconfig.ConfigFileName)
+
+	_, err := os.Stat(filename)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return err
+	}
+
+	return os.Remove(filename)
+}
+
+func TestConfigureDocker(t *testing.T) {
+	if err := deleteDockerConfig(); err != nil {
+		if err != nil {
+			t.Fatalf("Failed to delete the pre-existing docker config: %v", err)
+		}
+	}
+	dockerConfig, err := getDockerConfig()
+	if err != nil {
+		t.Fatalf("Failed to get the docker config: %#v", err)
+	}
+
+	if len(dockerConfig.CredentialHelpers) > 0 {
+		t.Fatal("Failed to clean the docker config.")
+	}
+
+	// Configure docker.
+	helper := helperCmd([]string{"configure-docker", "--overwrite"})
+	var out bytes.Buffer
+	helper.Stdout = &out
+	helper.Stderr = os.Stderr
+	if err = helper.Run(); err != nil {
+		t.Fatalf("Failed to execute `configure-docker --overwrite`: %v Stdout: %s", err, string(out.Bytes()))
+	}
+
+	dockerConfig, err = getDockerConfig()
+	if err != nil {
+		t.Fatalf("Failed to get the docker config: %v", err)
+	}
+
+	if len(dockerConfig.CredentialHelpers) == 0 {
+		t.Fatal("CredentialHelpers was empty.")
+	}
+
+	for _, registryHostname := range config.DefaultGCRRegistries {
+		if helperSuffix, ok := dockerConfig.CredentialHelpers[registryHostname]; ok {
+			if helperSuffix != "gcr" {
+				t.Errorf("Wanted value for %s in dockerConfig.CredentialHelpers to be %s, got %s", registryHostname, "gcr", helperSuffix)
+			}
+		} else {
+			t.Errorf("Expected %s to be present in dockerConfig.CredentialHelpers: %v", helperSuffix, dockerConfig.CredentialHelpers)
+		}
+	}
+}
+
+func TestConfigureDocker_NonDefault(t *testing.T) {
+	if err := deleteDockerConfig(); err != nil {
+		if err != nil {
+			t.Fatalf("Failed to delete the pre-existing docker config: %v", err)
+		}
+	}
+	dockerConfig, err := getDockerConfig()
+	if err != nil {
+		t.Fatalf("Failed to get the docker config: %#v", err)
+	}
+
+	if len(dockerConfig.CredentialHelpers) > 0 {
+		t.Fatal("Failed to clean the docker config.")
+	}
+
+	// Configure docker.
+	helper := helperCmd([]string{"configure-docker", "--overwrite", "--registries=foo.gcr.io, bar.gcr.io, baz.gcr.io"})
+	var out bytes.Buffer
+	helper.Stdout = &out
+	helper.Stderr = os.Stderr
+	if err = helper.Run(); err != nil {
+		t.Fatalf("Failed to execute `configure-docker --overwrite`: %v Stdout: %s", err, string(out.Bytes()))
+	}
+
+	dockerConfig, err = getDockerConfig()
+	if err != nil {
+		t.Fatalf("Failed to get the docker config: %v", err)
+	}
+
+	if len(dockerConfig.CredentialHelpers) == 0 {
+		t.Fatal("CredentialHelpers was empty.")
+	}
+
+	for _, registryHostname := range []string{"foo.gcr.io", "bar.gcr.io", "baz.gcr.io"} {
+		if helperSuffix, ok := dockerConfig.CredentialHelpers[registryHostname]; ok {
+			if helperSuffix != "gcr" {
+				t.Errorf("Wanted value for %s in dockerConfig.CredentialHelpers to be %s, got %s", registryHostname, "gcr", helperSuffix)
+			}
+		} else {
+			t.Errorf("Expected %s to be present in dockerConfig.CredentialHelpers: %v", helperSuffix, dockerConfig.CredentialHelpers)
+		}
 	}
 }

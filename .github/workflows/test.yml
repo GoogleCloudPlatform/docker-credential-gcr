@@ -15,8 +15,9 @@ jobs:
           go-version: ${{ matrix.go-version }}
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Build
-        run: go build
+        run: |
+          go build
+          go build -o $(go env GOPATH)/bin/docker-credential-gcr main.go
       - name: Vet
         run: go vet ./...
       - name: Test mac/ubuntu

@@ -23,7 +23,8 @@ Before you submit your pull request consider the following guidelines:
 * Run the full test suite.
 
      ```shell
-     make test
+     go build
+     go test -timeout 10s -v ./...
      ```
 * Commit your changes using a descriptive commit message.
 
@@ -31,12 +32,6 @@ Before you submit your pull request consider the following guidelines:
      git commit -a -m "omg y u bad @ coding"
      ```
   Note: the optional commit `-a` command line option will automatically "add" and "rm" edited files.
-
-* Build your changes locally to ensure all the tests pass:
-
-    ```shell
-    make test
-    ```
 
 * Push your branch to GitHub:
 
@@ -96,10 +91,11 @@ After your pull request is merged, you can safely delete your branch and pull th
 * Source files must be formatted with `gofmt` and updated with `go fix` before submission.
 
     ```shell
-    make pretty
+    go fmt
+    go fix
     ```
-* Source files should be inspected by `go vet` and `golint`. Since there may be false positives with both, ignored warnings require justification but won't necessarily block changes.
+* Source files should be inspected by `go vet`. Since there may be false positives with both, ignored warnings require justification but won't necessarily block changes.
 
     ```shell
-    make criticism
+    go vet
     ```
