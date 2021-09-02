@@ -1,5 +1,5 @@
-//go:build !unit && !gazelle
-// +build !unit,!gazelle
+//go:build !unit && !gazelle && !windows
+// +build !unit,!gazelle,!windows
 
 // Copyright 2016 Google, Inc.
 //

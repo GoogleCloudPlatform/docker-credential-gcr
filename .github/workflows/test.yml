@@ -16,9 +16,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Build
-        run: |
-          go build
-          go build -o $(go env GOPATH)/bin/docker-credential-gcr main.go
+        run: go build
+      - name: Build in GOPATH
+        if: ${{ matrix.os != 'windows-latest' }}
+        run: go build -o $(go env GOPATH)/bin/docker-credential-gcr main.go
       - name: Vet
         run: go vet ./...
       - name: Test mac/ubuntu
