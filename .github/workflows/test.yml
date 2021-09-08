@@ -1,0 +1,34 @@
+on: [push, pull_request]
+name: Test
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        go-version: [1.13, 1.x] # Test 1.13 and tip
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Build
+        run: go build
+      - name: Build in GOPATH
+        if: ${{ matrix.os != 'windows-latest' }}
+        run: go build -o $(go env GOPATH)/bin/docker-credential-gcr main.go
+      - name: Vet
+        run: go vet ./...
+      - name: Test mac/ubuntu
+        if: ${{ matrix.os != 'windows-latest' }}
+        run: |
+          go test -timeout 10s -v ./...
+          go test -race -timeout 10s -v ./...
+      - name: Test windows
+        if: ${{ matrix.os == 'windows-latest' }}
+        run: |
+          go test -timeout 10s -v -tags=windows ./...
+          go test -race -timeout 10s -v -tags=windows ./...
