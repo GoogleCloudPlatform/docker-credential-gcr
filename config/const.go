@@ -18,6 +18,8 @@ package config
 import (
 	"context"
 	"fmt"
+	"runtime/debug"
+	"strings"
 
 	"golang.org/x/oauth2/google"
 )
@@ -32,19 +34,21 @@ const (
 	// performing the OAuth2 Authorization Code grant flow.
 	// See https://developers.google.com/identity/protocols/OAuth2InstalledApp
 	GCRCredHelperClientNotSoSecret = "HpVi8cnKx8AAkddzaNrSWmS8"
-
-	// From http://semver.org/
-	// MAJOR version when you make incompatible API changes,
-	// MINOR version when you add functionality in a backwards-compatible manner, and
-	// PATCH version when you make backwards-compatible bug fixes.
-
-	// MajorVersion is the credential helper's major version number.
-	MajorVersion = 2
-	// MinorVersion is the credential helper's minor version number.
-	MinorVersion = 0
-	// PatchVersion is the credential helper's patch version number.
-	PatchVersion = 4
 )
+
+// Version can be set via:
+// -ldflags="-X 'github.com/GoogleCloudPlatform/docker-credential-gcr/config.Version=$TAG'"
+var Version string
+
+func init() {
+	if Version == "" {
+		i, ok := debug.ReadBuildInfo()
+		if !ok {
+			return
+		}
+		Version = i.Main.Version
+	}
+}
 
 // DefaultGCRRegistries contains the list of default registries to authenticate for.
 var DefaultGCRRegistries = [...]string{
@@ -112,4 +116,4 @@ var GCRScopes = []string{"https://www.googleapis.com/auth/cloud-platform"}
 var OAuthHTTPContext = context.Background()
 
 // GcrOAuth2Username is the Basic auth username accompanying Docker requests to GCR.
-var GcrOAuth2Username = fmt.Sprintf("_dcgcr_%d_%d_%d_token", MajorVersion, MinorVersion, PatchVersion)
+var GcrOAuth2Username = fmt.Sprintf("_dcgcr_%s_token", strings.ReplaceAll(Version, ".", "_"))

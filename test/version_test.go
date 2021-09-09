@@ -1,3 +1,4 @@
+//go:build !unit && !gazelle
 // +build !unit,!gazelle
 
 // Copyright 2016 Google, Inc.
@@ -32,9 +33,13 @@ func TestVersion(t *testing.T) {
 	}
 
 	// Enforce a particular format so that a regex can extract the version easily.
-	expectedRegex := "Google Container Registry Docker credential helper [0-9]+\\.[0-9]+\\.[0-9]+\n"
 	actual := out.String()
-	if match, _ := regexp.MatchString(expectedRegex, actual); !match {
-		t.Fatalf("Expected version string to match: %s, got: %s", expectedRegex, actual)
+	expectedProdRegex := "Google Container Registry Docker credential helper [0-9]+\\_[0-9]+\\_[0-9]+\n"
+	if match, _ := regexp.MatchString(expectedProdRegex, actual); !match {
+		// Fail if not a dev version.
+		expectedDevString := "Google Container Registry Docker credential helper (devel)\n"
+		if actual != expectedDevString {
+			t.Fatalf("Expected version string to match: %s, got: %s", expectedProdRegex, actual)
+		}
 	}
 }
