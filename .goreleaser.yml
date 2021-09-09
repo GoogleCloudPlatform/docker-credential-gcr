@@ -2,13 +2,17 @@
 # Make sure to check the documentation at http://goreleaser.com
 before:
   hooks:
-    # You may remove this if you don't use go modules.
+    # Needed because we use go modules.
     - go mod tidy
-    # you may remove this if you don't need go generate
-    - go generate ./...
 builds:
   - env:
       - CGO_ENABLED=0
+    ldflags:
+      - "-s -w -X github.com/GoogleCloudPlatform/docker-credential-gcr/config.Version={{.Version}}"
+    goarch:
+      - amd64
+      - arm64
+      - 386
     goos:
       - linux
       - windows
@@ -20,13 +24,14 @@ archives:
       windows: Windows
       386: i386
       amd64: x86_64
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}-{{ .Version }}"
 checksum:
-  name_template: 'checksums.txt'
+  name_template: "checksums.txt"
 snapshot:
-  name_template: "{{ incpatch .Tag }}-next"
+  name_template: "{{ incpatch .Tag }}"
 changelog:
   sort: asc
   filters:
     exclude:
-      - '^docs:'
-      - '^test:'
+      - "^docs:"
+      - "^test:"
