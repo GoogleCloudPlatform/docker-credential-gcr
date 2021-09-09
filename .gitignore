@@ -8,3 +8,4 @@ bazel*
 docker-credential-gcr
 .idea
 *.iml
+dist/
