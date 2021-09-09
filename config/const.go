@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"runtime/debug"
+	"strings"
 
 	"golang.org/x/oauth2/google"
 )
@@ -115,4 +116,4 @@ var GCRScopes = []string{"https://www.googleapis.com/auth/cloud-platform"}
 var OAuthHTTPContext = context.Background()
 
 // GcrOAuth2Username is the Basic auth username accompanying Docker requests to GCR.
-var GcrOAuth2Username = fmt.Sprintf("_dcgcr_%s_token", Version)
+var GcrOAuth2Username = fmt.Sprintf("_dcgcr_%s_token", strings.ReplaceAll(Version, ".", "_"))
