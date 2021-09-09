@@ -29,7 +29,7 @@ import (
 	"github.com/golang/mock/gomock"
 )
 
-var expectedGCRUsername = fmt.Sprintf("_dcgcr_%d_%d_%d_token", config.MajorVersion, config.MinorVersion, config.PatchVersion)
+var expectedGCRUsername = fmt.Sprintf("_dcgcr_%s_token", config.Version)
 
 var testGCRHosts = [...]string{
 	"gcr.io",

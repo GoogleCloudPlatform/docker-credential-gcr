@@ -1,3 +1,4 @@
+//go:build !unit && !gazelle
 // +build !unit,!gazelle
 
 // Copyright 2016 Google, Inc.
@@ -123,7 +124,11 @@ func TestEndToEnd_GCRCreds(t *testing.T) {
 	}
 
 	if match, err := regexp.MatchString("_dcgcr_(?:[0-9]+_)*token", creds.Username); !match || err != nil {
-		t.Errorf("Bad GCR username: Wanted: %q, Got (val, err): %q, %v", "_dcgcr_(?:[0-9]+_)*token", creds.Username, err)
+		// Fail if not a dev version.
+		devUsername := "_dcgcr__token"
+		if creds.Username != devUsername {
+			t.Errorf("Bad GCR username: Wanted: %q, Got (val, err): %q, %v", "_dcgcr_(?:[0-9]+_)*token", creds.Username, err)
+		}
 	}
 	if creds.Secret != gcrAccessToken {
 		t.Errorf("Bad GCR access token. Wanted: %s, Got: %s", gcrAccessToken, creds.Secret)
