@@ -87,6 +87,7 @@ var DefaultARRegistries = [...]string{
 	"northamerica-northeast1-docker.pkg.dev",
 	"northamerica-northeast2-docker.pkg.dev",
 	"southamerica-east1-docker.pkg.dev",
+	"southamerica-west1-docker.pkg.dev",
 	"us-docker.pkg.dev",
 	"us-central1-docker.pkg.dev",
 	"us-east1-docker.pkg.dev",
