@@ -31,6 +31,7 @@ import (
 
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/config"
 	"golang.org/x/oauth2"
+	"golang.org/x/sync/errgroup"
 )
 
 const (
@@ -122,7 +123,7 @@ func (b *testBrowser) Open(urlStr string) error {
 	return nil
 }
 
-func performBrowserActions(t *testing.T, browser *testBrowser) {
+func performBrowserActions(t *testing.T, browser *testBrowser) error {
 	// simulate the authorization code redirect after the user
 	// performs the login flow
 	redirURL := <-browser.RedirectURL
@@ -138,16 +139,17 @@ func performBrowserActions(t *testing.T, browser *testBrowser) {
 	defer resp.Body.Close()
 	// the browser should receive a response AFTER the entire auth flow has completed
 	if resp.StatusCode >= 400 {
-		t.Errorf("Unsuccessful response: %+v", *resp)
+		return fmt.Errorf("Unsuccessful response: %+v", *resp)
 	}
+	return nil
 }
 
-func performAuthServerActions(t *testing.T, testLn net.Listener) {
+func performAuthServerActions(t *testing.T, testLn net.Listener) error {
 	// perform the auth server-side actions...
 	// receive the authorization_code exchange request
 	conn, err := testLn.Accept()
 	if err != nil {
-		t.Errorf("Could not accept tcp connection: %v", err)
+		return fmt.Errorf("Could not accept tcp connection: %w", err)
 	}
 
 	srvConn := httputil.NewServerConn(conn, nil)
@@ -155,39 +157,39 @@ func performAuthServerActions(t *testing.T, testLn net.Listener) {
 
 	req, err := srvConn.Read()
 	if err != nil {
-		t.Fatalf("Could not read from connection: %v", err)
+		return fmt.Errorf("Could not read from connection: %w", err)
 	}
 
 	if req.URL.Path != expectedTokenPath {
-		t.Errorf("Expected path: %s, got %s", expectedTokenPath, req.URL.Path)
+		return fmt.Errorf("Expected path: %s, got %s", expectedTokenPath, req.URL.Path)
 	}
 
 	grantType := req.PostFormValue("grant_type")
 	if grantType != expectedGrantType {
-		t.Errorf("Expected grant_type: %s, got: %s", expectedGrantType, grantType)
+		return fmt.Errorf("Expected grant_type: %s, got: %s", expectedGrantType, grantType)
 	}
 
 	clientID := req.PostFormValue("client_id")
 	if clientID == "" {
 		// Newer google oauth libraries deliver client_id in the Authorization header.
 		if username, _, headerExists := req.BasicAuth(); !headerExists || username != expectedClientID {
-			t.Errorf("Expected username: %s, got: %s", expectedClientID, username)
+			return fmt.Errorf("Expected username: %s, got: %s", expectedClientID, username)
 		}
 	} else if clientID != expectedClientID {
 		// Older libraries use a client_id form value.
-		t.Errorf("Expected client_id: %s, got: %s", expectedClientID, clientID)
+		return fmt.Errorf("Expected client_id: %s, got: %s", expectedClientID, clientID)
 	}
 	redirectURI := req.PostFormValue("redirect_uri")
 	if redirectURI == "" {
-		t.Errorf("Expected redirect_uri to be present: %+v", *req)
+		return fmt.Errorf("Expected redirect_uri to be present: %+v", *req)
 	}
 	code := req.PostFormValue("code")
 	if code != expectedCode {
-		t.Errorf("Expected authorization_code: %s, got: %s", expectedCode, code)
+		return fmt.Errorf("Expected authorization_code: %s, got: %s", expectedCode, code)
 	}
 
 	if t.Failed() {
-		t.Errorf("Request: %+v", *req)
+		return fmt.Errorf("Request: %+v", *req)
 	}
 
 	// Respond with the access_token, refresh_token
@@ -204,6 +206,8 @@ func performAuthServerActions(t *testing.T, testLn net.Listener) {
 	resp.Close = true
 	resp.ContentLength = -1   // unknown length
 	srvConn.Write(req, &resp) // ignore errors; expected
+
+	return nil
 }
 
 // turn a string into a ReadCloser as required by http Responses
@@ -230,11 +234,16 @@ func TestBrowserAllowed(t *testing.T) {
 	defer close(mockBrowser.RedirectURL)
 	defer close(mockBrowser.State)
 
-	// start a goroutine to act as the browser
-	go performBrowserActions(t, mockBrowser)
-
-	// start a goroutine to act as the auth server
-	go performAuthServerActions(t, testLn)
+	g := new(errgroup.Group)
+	g.Go(func() error {
+		// Fetch the URL.
+		// start a goroutine to act as the browser
+		return performBrowserActions(t, mockBrowser)
+	})
+	g.Go(func() error {
+		// start a goroutine to act as the auth server
+		return performAuthServerActions(t, testLn)
+	})
 
 	// test the client-side code
 	tested := &GCRLoginAgent{
@@ -253,6 +262,11 @@ func TestBrowserAllowed(t *testing.T) {
 	}
 	if tok.TokenType != "Bearer" {
 		t.Errorf("Expected token_type: %s, got: %s", "Bearer", tok.TokenType)
+	}
+
+	// Wait for all HTTP fetches to complete.
+	if err := g.Wait(); err != nil {
+		t.Fatal(err)
 	}
 }
 
