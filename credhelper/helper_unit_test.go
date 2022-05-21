@@ -17,6 +17,7 @@ package credhelper
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/mock/mock_cmd"
@@ -29,7 +30,7 @@ import (
 	"github.com/golang/mock/gomock"
 )
 
-var expectedGCRUsername = fmt.Sprintf("_dcgcr_%s_token", config.Version)
+var expectedGCRUsername = fmt.Sprintf("_dcgcr_%s_token", strings.ReplaceAll(config.Version, ".", "_"))
 
 var testGCRHosts = [...]string{
 	"gcr.io",
