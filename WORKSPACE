@@ -714,6 +714,11 @@ go_repository(
     version = "v3.0.3",
 )
 
+load("//:repositories.bzl", "go_repositories")
+
+# gazelle:repository_macro repositories.bzl%go_repositories
+go_repositories()
+
 go_rules_dependencies()
 
 go_register_toolchains("1.18.3")
