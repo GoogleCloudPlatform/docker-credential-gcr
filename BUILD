@@ -7,12 +7,6 @@ exports_files(["LICENSE"])
 
 gazelle(
     name = "gazelle",
-    command = "fix",
-    external = "vendored",
-    extra_args = [
-        "-build_file_name",
-        "BUILD,BUILD.bazel",  # Prioritize `BUILD` for newly added files.
-    ],
     prefix = "github.com/GoogleCloudPlatform/docker-credential-gcr",
 )
 
@@ -23,7 +17,7 @@ go_library(
     visibility = ["//visibility:private"],
     deps = [
         "//cli:go_default_library",
-        "//vendor/github.com/google/subcommands:go_default_library",
+        "@com_github_google_subcommands//:go_default_library",
     ],
 )
 

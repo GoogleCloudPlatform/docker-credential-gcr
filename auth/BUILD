@@ -7,8 +7,8 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "//config:go_default_library",
-        "//vendor/github.com/toqueteos/webbrowser:go_default_library",
-        "//vendor/golang.org/x/oauth2:go_default_library",
+        "@com_github_toqueteos_webbrowser//:go_default_library",
+        "@org_golang_x_oauth2//:go_default_library",
     ],
 )
 
@@ -18,6 +18,7 @@ go_test(
     embed = [":go_default_library"],
     deps = [
         "//config:go_default_library",
-        "//vendor/golang.org/x/oauth2:go_default_library",
+        "@org_golang_x_oauth2//:go_default_library",
+        "@org_golang_x_sync//errgroup:go_default_library",
     ],
 )

@@ -8,9 +8,9 @@ go_library(
     deps = [
         "//config:go_default_library",
         "//util:go_default_library",
-        "//vendor/github.com/docker/docker-credential-helpers/credentials:go_default_library",
-        "//vendor/golang.org/x/oauth2:go_default_library",
-        "//vendor/golang.org/x/oauth2/google:go_default_library",
+        "@com_github_docker_docker_credential_helpers//credentials:go_default_library",
+        "@org_golang_x_oauth2//:go_default_library",
+        "@org_golang_x_oauth2//google:go_default_library",
     ],
 )
 
@@ -21,8 +21,46 @@ go_test(
         "store_unit_test.go",
     ],
     embed = [":go_default_library"],
-    deps = [
-        "//vendor/github.com/docker/docker-credential-helpers/credentials:go_default_library",
-        "//vendor/golang.org/x/oauth2:go_default_library",
-    ],
+    deps = select({
+        "@io_bazel_rules_go//go/platform:aix": [
+            "@org_golang_x_oauth2//:go_default_library",
+        ],
+        "@io_bazel_rules_go//go/platform:android": [
+            "@org_golang_x_oauth2//:go_default_library",
+        ],
+        "@io_bazel_rules_go//go/platform:darwin": [
+            "@org_golang_x_oauth2//:go_default_library",
+        ],
+        "@io_bazel_rules_go//go/platform:dragonfly": [
+            "@org_golang_x_oauth2//:go_default_library",
+        ],
+        "@io_bazel_rules_go//go/platform:freebsd": [
+            "@org_golang_x_oauth2//:go_default_library",
+        ],
+        "@io_bazel_rules_go//go/platform:illumos": [
+            "@org_golang_x_oauth2//:go_default_library",
+        ],
+        "@io_bazel_rules_go//go/platform:ios": [
+            "@org_golang_x_oauth2//:go_default_library",
+        ],
+        "@io_bazel_rules_go//go/platform:js": [
+            "@org_golang_x_oauth2//:go_default_library",
+        ],
+        "@io_bazel_rules_go//go/platform:linux": [
+            "@org_golang_x_oauth2//:go_default_library",
+        ],
+        "@io_bazel_rules_go//go/platform:netbsd": [
+            "@org_golang_x_oauth2//:go_default_library",
+        ],
+        "@io_bazel_rules_go//go/platform:openbsd": [
+            "@org_golang_x_oauth2//:go_default_library",
+        ],
+        "@io_bazel_rules_go//go/platform:plan9": [
+            "@org_golang_x_oauth2//:go_default_library",
+        ],
+        "@io_bazel_rules_go//go/platform:solaris": [
+            "@org_golang_x_oauth2//:go_default_library",
+        ],
+        "//conditions:default": [],
+    }),
 )

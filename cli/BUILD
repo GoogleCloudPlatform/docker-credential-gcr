@@ -19,9 +19,9 @@ go_library(
         "//config:go_default_library",
         "//credhelper:go_default_library",
         "//store:go_default_library",
-        "//vendor/github.com/docker/cli/cli/config:go_default_library",
-        "//vendor/github.com/docker/cli/cli/config/configfile:go_default_library",
-        "//vendor/github.com/docker/docker-credential-helpers/credentials:go_default_library",
-        "//vendor/github.com/google/subcommands:go_default_library",
+        "@com_github_docker_cli//cli/config:go_default_library",
+        "@com_github_docker_cli//cli/config/configfile:go_default_library",
+        "@com_github_docker_docker_credential_helpers//credentials:go_default_library",
+        "@com_github_google_subcommands//:go_default_library",
     ],
 )

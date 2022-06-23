@@ -9,8 +9,8 @@ go_library(
         "//config:go_default_library",
         "//store:go_default_library",
         "//util/cmd:go_default_library",
-        "//vendor/github.com/docker/docker-credential-helpers/credentials:go_default_library",
-        "//vendor/golang.org/x/oauth2/google:go_default_library",
+        "@com_github_docker_docker_credential_helpers//credentials:go_default_library",
+        "@org_golang_x_oauth2//google:go_default_library",
     ],
 )
 
@@ -25,6 +25,6 @@ go_test(
         "//mock/mock_store:go_default_library",
         "//store:go_default_library",
         "//util/cmd:go_default_library",
-        "//vendor/github.com/golang/mock/gomock:go_default_library",
+        "@com_github_golang_mock//gomock:go_default_library",
     ],
 )
