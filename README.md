@@ -52,6 +52,8 @@ As of the 2.0 release, `docker-credential-gcr` no longer supports generalized [`
 
 ### Building from Source
 
+## Go
+
 The program in this repository is written with the Go programming language and can be built with `go build`. These instructions assume you are using [**Go 1.13+**](https://golang.org/) or higher.
 
 You can download the source code, compile the binary, and put it in your `$GOPATH` with `go get`.
@@ -73,6 +75,23 @@ Then, you can put that binary in your `$PATH` to make it visible to `docker`. Fo
 
 ```shell
 sudo mv ./docker-credential-gcr /usr/bin/docker-credential-gcr
+```
+
+## Bazel
+
+You can build this repository with `bazel` from source.
+
+```shell
+# WORKSPACE
+http_archive(
+    name = "com_github_google_cloud_platform_docker_credential_gcr",
+    sha256 = "{TBD}",
+    strip_prefix = "docker-credential-gcr-2.1.6",
+    urls = ["https://github.com/GoogleCloudPlatform/docker-credential-gcr/archive/refs/tags/v2.1.6.tar.gz"],
+)
+
+load("@com_github_google_cloud_platform_docker_credential_gcr//:repositories.bzl", docker_credential_gcr_go_repositories = "go_repositories")
+docker_credential_gcr_go_repositories()
 ```
 
 ## Configuration and Usage
