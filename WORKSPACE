@@ -21,27 +21,13 @@ http_archive(
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
 
-go_repository(
-    name = "org_golang_x_mod",
-    importpath = "golang.org/x/mod",
-    sum = "h1:Gz96sIWK3OalVv/I/qNygP42zyoKp3xptRVCWRFEBvo=",
-    version = "v0.4.2",
-)
-
-go_repository(
-    name = "org_golang_x_xerrors",
-    importpath = "golang.org/x/xerrors",
-    sum = "h1:uF6paiQQebLeSXkrTqHqz0MXhXXS1KgF41eUdBNvxK0=",
-    version = "v0.0.0-20220609144429-65e65417b02f",
-)
-
-load("//:repositories.bzl", "go_repositories")
-
-# gazelle:repository_macro repositories.bzl%go_repositories
-go_repositories()
-
 go_rules_dependencies()
 
 go_register_toolchains("1.18.3")
 
 gazelle_dependencies()
+
+load("//:repositories.bzl", "go_repositories")
+
+# gazelle:repository_macro repositories.bzl%go_repositories
+go_repositories()
