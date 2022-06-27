@@ -96,7 +96,6 @@ def go_repositories():
         importpath = "github.com/docker/cli",
         sum = "h1:eO2KS7ZFeov5UJeaDmIs1NFEDRf32PaqRpvoEkKBy5M=",
         version = "v20.10.17+incompatible",
-        build_external = "external", # https://github.com/bazelbuild/bazel-gazelle/issues/1217
     )
     go_repository(
         name = "com_github_docker_docker",
