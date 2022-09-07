@@ -9,3 +9,5 @@ docker-credential-gcr
 .idea
 *.iml
 dist/
+*.ipr
+*.iws
