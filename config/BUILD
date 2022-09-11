@@ -10,7 +10,7 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "//util:go_default_library",
-        "//vendor/golang.org/x/oauth2/google:go_default_library",
+        "@org_golang_x_oauth2//google:go_default_library",
     ],
 )
 

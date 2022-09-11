@@ -5,5 +5,5 @@ go_library(
     srcs = ["mocks.go"],
     importpath = "github.com/GoogleCloudPlatform/docker-credential-gcr/mock/mock_cmd",
     visibility = ["//visibility:public"],
-    deps = ["//vendor/github.com/golang/mock/gomock:go_default_library"],
+    deps = ["@com_github_golang_mock//gomock:go_default_library"],
 )
