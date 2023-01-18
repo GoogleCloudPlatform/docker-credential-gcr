@@ -37,7 +37,7 @@ import (
 const (
 	// The client ID corresponding to GCR's OAuth2 login page.
 	expectedClientID  = "99426463878-o7n0bshgue20tdpm25q4at0vs2mr4utq.apps.googleusercontent.com"
-	expectedScope     = "https://www.googleapis.com/auth/cloud-platform"
+	expectedScope     = "https://www.googleapis.com/auth/devstorage.read_write"
 	expectedHost      = "localhost"
 	expectedAuthPath  = "/auth"
 	expectedTokenPath = "/token"

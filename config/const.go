@@ -116,7 +116,7 @@ var SupportedGCRTokenSources = map[string]string{
 var GCROAuth2Endpoint = google.Endpoint
 
 // GCRScopes is/are the OAuth2 scope(s) to request during access_token creation.
-var GCRScopes = []string{"https://www.googleapis.com/auth/cloud-platform"}
+var GCRScopes = []string{"https://www.googleapis.com/auth/devstorage.read_write"}
 
 // OAuthHTTPContext is the HTTP context to use when performing OAuth2 calls.
 var OAuthHTTPContext = context.Background()
