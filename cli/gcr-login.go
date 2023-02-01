@@ -27,7 +27,6 @@ import (
 
 type loginCmd struct {
 	cmd
-	forbidBrowser bool // whether automatic browser execution should be forbidden
 }
 
 // NewGCRLoginSubcommand returns a subcommands.Command which implements the GCR
@@ -38,12 +37,7 @@ func NewGCRLoginSubcommand() subcommands.Command {
 			name:     "gcr-login",
 			synopsis: "log in to GCR",
 		},
-		false,
 	}
-}
-
-func (c *loginCmd) SetFlags(fs *flag.FlagSet) {
-	fs.BoolVar(&c.forbidBrowser, "no-browser", false, "forbid automatic browser launch")
 }
 
 func (c *loginCmd) Execute(context.Context, *flag.FlagSet, ...interface{}) subcommands.ExitStatus {
@@ -57,9 +51,7 @@ func (c *loginCmd) Execute(context.Context, *flag.FlagSet, ...interface{}) subco
 // GCRLogin performs the actions necessary to generate a GCR access token
 // and persist it for later use.
 func (c *loginCmd) GCRLogin() error {
-	loginAgent := &auth.GCRLoginAgent{
-		AllowBrowser: !c.forbidBrowser,
-	}
+	loginAgent := &auth.GCRLoginAgent{}
 	s, err := store.DefaultGCRCredStore()
 	if err != nil {
 		return err

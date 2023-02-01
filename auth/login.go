@@ -45,9 +45,6 @@ const redirectURIAuthCodeInTitleBar = "urn:ietf:wg:oauth:2.0:oob"
 // attempt to use In and Out to direct the user to the login portal and receive
 // the authorization_code in response.
 type GCRLoginAgent struct {
-	// Whether to execute OpenBrowser when authenticating the user.
-	AllowBrowser bool
-
 	// Read input from here; if nil, uses os.Stdin.
 	In io.Reader
 
@@ -90,29 +87,25 @@ func (a *GCRLoginAgent) PerformLogin() (*oauth2.Token, error) {
 		oauth2.SetAuthURLParam("code_challenge_method", method),
 	}
 
-	if a.AllowBrowser {
-		// Attempt to receive the authorization code via redirect URL
-		if ln, port, err := getListener(); err == nil {
-			defer ln.Close()
-			// open a web browser and listen on the redirect URL port
-			conf.RedirectURL = fmt.Sprintf("http://localhost:%d", port)
-			url := conf.AuthCodeURL("state", authCodeOpts...)
-			if err := a.OpenBrowser(url); err == nil {
-				if code, err := handleCodeResponse(ln); err == nil {
-					return conf.Exchange(
-						config.OAuthHTTPContext,
-						code,
-						oauth2.SetAuthURLParam("code_verifier", verifier))
-				}
-			}
-		}
+	// Browser based auth is the only mechanism supported now.
+	// Attempt to receive the authorization code via redirect URL
+	ln, port, err := getListener();
+	if err != nil {
+		return nil, fmt.Errorf("Unable to open local listener: %v", err)
+	}
+	defer ln.Close()
+
+	// open a web browser and listen on the redirect URL port
+	conf.RedirectURL = fmt.Sprintf("http://localhost:%d", port)
+	url := conf.AuthCodeURL("state", authCodeOpts...)
+	err = a.OpenBrowser(url);
+	if err != nil {
+		return nil, fmt.Errorf("Unable to open browser: %v", err)
 	}
 
-	// If we can't or shouldn't automatically retrieve the code via browser,
-	// default to a command line prompt.
-	code, err := a.codeViaPrompt(conf, authCodeOpts)
+	code, err := handleCodeResponse(ln);
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Response was invalid: %v", err)
 	}
 
 	return conf.Exchange(
