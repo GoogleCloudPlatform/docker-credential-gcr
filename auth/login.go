@@ -89,7 +89,7 @@ func (a *GCRLoginAgent) PerformLogin() (*oauth2.Token, error) {
 
 	// Browser based auth is the only mechanism supported now.
 	// Attempt to receive the authorization code via redirect URL
-	ln, port, err := getListener();
+	ln, port, err := getListener()
 	if err != nil {
 		return nil, fmt.Errorf("Unable to open local listener: %v", err)
 	}
@@ -98,12 +98,12 @@ func (a *GCRLoginAgent) PerformLogin() (*oauth2.Token, error) {
 	// open a web browser and listen on the redirect URL port
 	conf.RedirectURL = fmt.Sprintf("http://localhost:%d", port)
 	url := conf.AuthCodeURL("state", authCodeOpts...)
-	err = a.OpenBrowser(url);
+	err = a.OpenBrowser(url)
 	if err != nil {
 		return nil, fmt.Errorf("Unable to open browser: %v", err)
 	}
 
-	code, err := handleCodeResponse(ln);
+	code, err := handleCodeResponse(ln)
 	if err != nil {
 		return nil, fmt.Errorf("Response was invalid: %v", err)
 	}
