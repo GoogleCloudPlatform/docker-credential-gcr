@@ -80,7 +80,10 @@ func (a *GCRLoginAgent) PerformLogin() (*oauth2.Token, error) {
 	}
 
 	verifier, challenge, method, err := codeChallengeParams()
-
+	state, err := makeRandString(16)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to build random string: %v", err)
+	}
 	authCodeOpts := []oauth2.AuthCodeOption{
 		oauth2.AccessTypeOffline,
 		oauth2.SetAuthURLParam("code_challenge", challenge),
@@ -97,13 +100,13 @@ func (a *GCRLoginAgent) PerformLogin() (*oauth2.Token, error) {
 
 	// open a web browser and listen on the redirect URL port
 	conf.RedirectURL = fmt.Sprintf("http://localhost:%d", port)
-	url := conf.AuthCodeURL("state", authCodeOpts...)
+	url := conf.AuthCodeURL(state, authCodeOpts...)
 	err = a.OpenBrowser(url)
 	if err != nil {
 		return nil, fmt.Errorf("Unable to open browser: %v", err)
 	}
 
-	code, err := handleCodeResponse(ln)
+	code, err := handleCodeResponse(ln, state)
 	if err != nil {
 		return nil, fmt.Errorf("Response was invalid: %v", err)
 	}
@@ -140,7 +143,7 @@ func getListener() (net.Listener, int, error) {
 	return ln, ln.Addr().(*net.TCPAddr).Port, nil
 }
 
-func handleCodeResponse(ln net.Listener) (string, error) {
+func handleCodeResponse(ln net.Listener, stateCheck string) (string, error) {
 	conn, err := ln.Accept()
 	if err != nil {
 		return "", err
@@ -155,6 +158,7 @@ func handleCodeResponse(ln net.Listener) (string, error) {
 	}
 
 	code := req.URL.Query().Get("code")
+	state := req.URL.Query().Get("state")
 
 	resp := &http.Response{
 		StatusCode:    200,
@@ -171,6 +175,13 @@ func handleCodeResponse(ln net.Listener) (string, error) {
 	// TODO i18n?
 	if code == "" {
 		err := fmt.Errorf("Code not present in response: %s", req.URL.String())
+		resp.Body = getResponseBody("ERROR: Authentication code not present in response, please retry with --no-browser.")
+		return "", err
+	}
+
+	if state != stateCheck {
+		err := fmt.Errorf("Invalid State")
+		resp.StatusCode = 400
 		resp.Body = getResponseBody("ERROR: Authentication code not present in response, please retry with --no-browser.")
 		return "", err
 	}
@@ -192,12 +203,10 @@ func codeChallengeParams() (verifier, challenge, method string, err error) {
 	// A `code_verifier` is a high-entropy cryptographic random string using the unreserved characters
 	// [A-Z] / [a-z] / [0-9] / "-" / "." / "_" / "~"
 	// with a minimum length of 43 characters and a maximum length of 128 characters.
-	b := make([]byte, 32)
-	_, err = rand.Read(b)
+	verifier, err = makeRandString(32)
 	if err != nil {
 		return "", "", "", err
 	}
-	verifier = base64.RawURLEncoding.EncodeToString(b)
 
 	// https://tools.ietf.org/html/rfc7636#section-4.2
 	// If the client is capable of using "S256", it MUST use "S256":
@@ -206,4 +215,13 @@ func codeChallengeParams() (verifier, challenge, method string, err error) {
 	challenge = base64.RawURLEncoding.EncodeToString(sha[:])
 
 	return verifier, challenge, "S256", nil
+}
+
+func makeRandString(length int) (string, error) {
+	b := make([]byte, length)
+	_, err := rand.Read(b)
+	if err != nil {
+		return "", err
+	}
+	return base64.RawURLEncoding.EncodeToString(b), nil
 }

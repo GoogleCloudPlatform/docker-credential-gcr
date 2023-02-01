@@ -66,6 +66,7 @@ type testBrowser struct {
 	t             *testing.T
 	RedirectURL   chan *url.URL
 	State         chan string
+	returnedState string
 }
 
 // the testBrowser's Open method exists to verify the URL which is passed
@@ -118,7 +119,11 @@ func (b *testBrowser) Open(urlStr string) error {
 	}
 
 	// pass the 'state' variable to the browser thread
-	b.State <- URL.Query().Get("state")
+	if b.returnedState != "" {
+		b.State <- b.returnedState
+	} else {
+		b.State <- URL.Query().Get("state")
+	}
 
 	return nil
 }
@@ -266,6 +271,46 @@ func TestBrowserAllowed(t *testing.T) {
 	// Wait for all HTTP fetches to complete.
 	if err := g.Wait(); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestStateMismatch(t *testing.T) {
+	testLn, err := initAuthServer()
+	if err != nil {
+		t.Fatalf("Unable to initialize auth server: %v", err)
+	}
+	defer testLn.Close()
+	mockBrowser := &testBrowser{
+		shouldSucceed: true,
+		t:             t,
+		RedirectURL:   make(chan *url.URL),
+		State:         make(chan string),
+		returnedState: "badstate",
+	}
+	defer close(mockBrowser.RedirectURL)
+	defer close(mockBrowser.State)
+
+	g := new(errgroup.Group)
+	g.Go(func() error {
+		// Fetch the URL.
+		// start a goroutine to act as the browser
+		return performBrowserActions(t, mockBrowser)
+	})
+	g.Go(func() error {
+		// start a goroutine to act as the auth server
+		return performAuthServerActions(t, testLn)
+	})
+
+	// test the client-side code
+	tested := &GCRLoginAgent{
+		OpenBrowser: mockBrowser.Open,
+	}
+	_, err = tested.PerformLogin()
+	if err == nil {
+		t.Fatalf("No error, expected bad state")
+	}
+	if !strings.Contains(err.Error(), "Invalid State") {
+		t.Fatalf("Expected 'Invalid State' error, but got: %v", err)
 	}
 }
 
