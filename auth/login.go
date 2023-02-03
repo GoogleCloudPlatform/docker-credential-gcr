@@ -175,14 +175,14 @@ func handleCodeResponse(ln net.Listener, stateCheck string) (string, error) {
 	// TODO i18n?
 	if code == "" {
 		err := fmt.Errorf("Code not present in response: %s", req.URL.String())
-		resp.Body = getResponseBody("ERROR: Authentication code not present in response, please retry with --no-browser.")
+		resp.Body = getResponseBody("ERROR: Authentication code not present in response.")
 		return "", err
 	}
 
 	if state != stateCheck {
 		err := fmt.Errorf("Invalid State")
 		resp.StatusCode = 400
-		resp.Body = getResponseBody("ERROR: Authentication code not present in response, please retry with --no-browser.")
+		resp.Body = getResponseBody("ERROR: State parameter is invalid.")
 		return "", err
 	}
 
