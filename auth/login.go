@@ -186,6 +186,13 @@ func handleCodeResponse(ln net.Listener, stateCheck string) (string, error) {
 		return "", err
 	}
 
+	if state != stateCheck {
+		err := fmt.Errorf("Invalid State")
+		resp.StatusCode = 400
+		resp.Body = getResponseBody("ERROR: Authentication code not present in response, please retry with --no-browser.")
+		return "", err
+	}
+
 	resp.Body = getResponseBody("Success! You may now close your browser.")
 	return code, nil
 }
