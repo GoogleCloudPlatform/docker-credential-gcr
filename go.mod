@@ -1,4 +1,4 @@
-module github.com/GoogleCloudPlatform/docker-credential-gcr
+module github.com/GoogleCloudPlatform/docker-credential-gcr/v2
 
 go 1.17
 

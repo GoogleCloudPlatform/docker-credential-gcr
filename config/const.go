@@ -37,7 +37,7 @@ const (
 )
 
 // Version can be set via:
-// -ldflags="-X 'github.com/GoogleCloudPlatform/docker-credential-gcr/config.Version=$TAG'"
+// -ldflags="-X 'github.com/GoogleCloudPlatform/docker-credential-gcr/v2/config.Version=$TAG'"
 var Version string
 
 func init() {

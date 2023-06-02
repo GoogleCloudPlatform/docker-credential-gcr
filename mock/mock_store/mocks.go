@@ -5,7 +5,7 @@
 package mock_store
 
 import (
-	store "github.com/GoogleCloudPlatform/docker-credential-gcr/store"
+	store "github.com/GoogleCloudPlatform/docker-credential-gcr/v2/store"
 	credentials "github.com/docker/docker-credential-helpers/credentials"
 	gomock "github.com/golang/mock/gomock"
 	oauth2 "golang.org/x/oauth2"

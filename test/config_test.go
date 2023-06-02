@@ -26,7 +26,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/GoogleCloudPlatform/docker-credential-gcr/config"
+	"github.com/GoogleCloudPlatform/docker-credential-gcr/v2/config"
 	cliconfig "github.com/docker/cli/cli/config"
 	"github.com/docker/cli/cli/config/configfile"
 )
