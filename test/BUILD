@@ -7,6 +7,6 @@ go_library(
         "const.go",
         "util.go",
     ],
-    importpath = "github.com/GoogleCloudPlatform/docker-credential-gcr/test",
+    importpath = "github.com/GoogleCloudPlatform/docker-credential-gcr/v2/test",
     visibility = ["//visibility:public"],
 )
