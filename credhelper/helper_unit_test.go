@@ -17,6 +17,7 @@ package credhelper
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/v2/mock/mock_cmd"
@@ -29,7 +30,8 @@ import (
 	"github.com/golang/mock/gomock"
 )
 
-var expectedGCRUsername = fmt.Sprintf("_dcgcr_%s_token", config.Version)
+var expectedGCRUsername = fmt.Sprintf("_dcgcr_%s_token", strings.ReplaceAll(config.Version, ".", "_"))
+var expectedGCRZeroUsername = "_dcgcr_0_0_0_token"
 
 var testGCRHosts = [...]string{
 	"gcr.io",
@@ -72,7 +74,7 @@ func TestGet_GCRCredentials(t *testing.T) {
 		username, secret, err := tested.Get("https://" + host)
 		if err != nil {
 			t.Errorf("get returned an error: %v", err)
-		} else if username != expectedGCRUsername {
+		} else if username != expectedGCRUsername && username != expectedGCRZeroUsername {
 			t.Errorf("expected GCR username: %s but got: %s", expectedGCRUsername, username)
 		} else if secret != expectedSecret {
 			t.Errorf("expected secret: %s but got: %s", expectedSecret, secret)
