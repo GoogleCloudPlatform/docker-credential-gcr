@@ -25,10 +25,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/GoogleCloudPlatform/docker-credential-gcr/auth"
-	"github.com/GoogleCloudPlatform/docker-credential-gcr/config"
-	"github.com/GoogleCloudPlatform/docker-credential-gcr/store"
-	"github.com/GoogleCloudPlatform/docker-credential-gcr/util/cmd"
+  "github.com/GoogleCloudPlatform/docker-credential-gcr/v2/auth"
+	"github.com/GoogleCloudPlatform/docker-credential-gcr/v2/config"
+	"github.com/GoogleCloudPlatform/docker-credential-gcr/v2/store"
+	"github.com/GoogleCloudPlatform/docker-credential-gcr/v2/util/cmd"
 	"github.com/docker/docker-credential-helpers/credentials"
 
 	"golang.org/x/oauth2"

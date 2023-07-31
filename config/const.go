@@ -18,6 +18,7 @@ package config
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"runtime/debug"
 	"strings"
 
@@ -37,7 +38,7 @@ const (
 )
 
 // Version can be set via:
-// -ldflags="-X 'github.com/GoogleCloudPlatform/docker-credential-gcr/config.Version=$TAG'"
+// -ldflags="-X 'github.com/GoogleCloudPlatform/docker-credential-gcr/v2/config.Version=$TAG'"
 var Version string
 
 func init() {
@@ -88,6 +89,7 @@ var DefaultARRegistries = [...]string{
 	"europe-west9-docker.pkg.dev",
 	"europe-west12-docker.pkg.dev",
 	"me-central1-docker.pkg.dev",
+	"me-central2-docker.pkg.dev",
 	"me-west1-docker.pkg.dev",
 	"northamerica-northeast1-docker.pkg.dev",
 	"northamerica-northeast2-docker.pkg.dev",
@@ -124,4 +126,13 @@ var GCRScopes = []string{"https://www.googleapis.com/auth/devstorage.read_write"
 var OAuthHTTPContext = context.Background()
 
 // GcrOAuth2Username is the Basic auth username accompanying Docker requests to GCR.
-var GcrOAuth2Username = fmt.Sprintf("_dcgcr_%s_token", strings.ReplaceAll(Version, ".", "_"))
+var GcrOAuth2Username string
+
+func init() {
+	re := regexp.MustCompile(`^(?:[0-9]+\._)*$`)
+	if re.MatchString(Version) {
+		GcrOAuth2Username = fmt.Sprintf("_dcgcr_%s_token", strings.ReplaceAll(Version, ".", "_"))
+	} else {
+		GcrOAuth2Username = "_dcgcr_0_0_0_token"
+	}
+}
