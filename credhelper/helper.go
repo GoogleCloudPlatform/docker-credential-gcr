@@ -25,7 +25,7 @@ import (
 	"os"
 	"strings"
 
-  "github.com/GoogleCloudPlatform/docker-credential-gcr/v2/auth"
+	"github.com/GoogleCloudPlatform/docker-credential-gcr/v2/auth"
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/v2/config"
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/v2/store"
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/v2/util/cmd"
