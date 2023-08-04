@@ -43,11 +43,16 @@ var Version string
 
 func init() {
 	if Version == "" {
-		i, ok := debug.ReadBuildInfo()
-		if !ok {
-			return
+		if i, ok := debug.ReadBuildInfo(); ok {
+			Version = i.Main.Version
 		}
-		Version = i.Main.Version
+	}
+	Version = strings.TrimPrefix(Version, "v")
+	re := regexp.MustCompile(`^[0-9]+(?:[\._][0-9]+)*$`)
+	if re.MatchString(Version) {
+		GcrOAuth2Username = fmt.Sprintf("_dcgcr_%s_token", strings.ReplaceAll(Version, ".", "_"))
+	} else {
+		GcrOAuth2Username = "_dcgcr_0_0_0_token"
 	}
 }
 
@@ -127,12 +132,3 @@ var OAuthHTTPContext = context.Background()
 
 // GcrOAuth2Username is the Basic auth username accompanying Docker requests to GCR.
 var GcrOAuth2Username string
-
-func init() {
-	re := regexp.MustCompile(`^(?:[0-9]+\._)*$`)
-	if re.MatchString(Version) {
-		GcrOAuth2Username = fmt.Sprintf("_dcgcr_%s_token", strings.ReplaceAll(Version, ".", "_"))
-	} else {
-		GcrOAuth2Username = "_dcgcr_0_0_0_token"
-	}
-}
