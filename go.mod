@@ -14,7 +14,7 @@ require (
 
 require (
 	cloud.google.com/go/compute v1.1.0 // indirect
-	github.com/docker/docker v24.0.5+incompatible // indirect
+	github.com/docker/docker v24.0.7+incompatible // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
