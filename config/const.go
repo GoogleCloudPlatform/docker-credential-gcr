@@ -116,13 +116,13 @@ var DefaultARRegistries = [...]string{
 	"us-east5-docker.pkg.dev",
 	"docker.us-east5.rep.pkg.dev",
 	"us-south1-docker.pkg.dev",
-	"docker.us-south1.rep.pkg.dev"
+	"docker.us-south1.rep.pkg.dev",
 	"us-west1-docker.pkg.dev",
-	"docker.us-west1.rep.pkg.dev"
+	"docker.us-west1.rep.pkg.dev",
 	"us-west2-docker.pkg.dev",
 	"docker.us-west2.rep.pkg.dev",
 	"us-west3-docker.pkg.dev",
-	"docker.us-west3.rep.pkg.dev"
+	"docker.us-west3.rep.pkg.dev",
 	"us-west4-docker.pkg.dev",
 	"docker.us-west4.rep.pkg.dev",
 	"us-west8-docker.pkg.dev",
