@@ -89,10 +89,13 @@ var DefaultARRegistries = [...]string{
 	"europe-west1-docker.pkg.dev",
 	"europe-west2-docker.pkg.dev",
 	"europe-west3-docker.pkg.dev",
+	"docker.europe-west3.rep.pkg.dev",
 	"europe-west4-docker.pkg.dev",
 	"europe-west6-docker.pkg.dev",
 	"europe-west8-docker.pkg.dev",
+	"docker.europe-west8.rep.pkg.dev",
 	"europe-west9-docker.pkg.dev",
+	"docker.europe-west9.rep.pkg.dev",
 	"europe-west10-docker.pkg.dev",
 	"europe-west12-docker.pkg.dev",
 	"me-central1-docker.pkg.dev",
@@ -105,15 +108,25 @@ var DefaultARRegistries = [...]string{
 	"southamerica-west1-docker.pkg.dev",
 	"us-docker.pkg.dev",
 	"us-central1-docker.pkg.dev",
+	"docker.us-central1.rep.pkg.dev",
 	"us-east1-docker.pkg.dev",
+	"docker.us-east1.rep.pkg.dev",
 	"us-east4-docker.pkg.dev",
+	"docker.us-east4.rep.pkg.dev",
 	"us-east5-docker.pkg.dev",
+	"docker.us-east5.rep.pkg.dev",
 	"us-south1-docker.pkg.dev",
+	"docker.us-south1.rep.pkg.dev"
 	"us-west1-docker.pkg.dev",
+	"docker.us-west1.rep.pkg.dev"
 	"us-west2-docker.pkg.dev",
+	"docker.us-west2.rep.pkg.dev",
 	"us-west3-docker.pkg.dev",
+	"docker.us-west3.rep.pkg.dev"
 	"us-west4-docker.pkg.dev",
+	"docker.us-west4.rep.pkg.dev",
 	"us-west8-docker.pkg.dev",
+	"docker.us-west8.rep.pkg.dev",
 }
 
 // SupportedGCRTokenSources maps config keys to plain english explanations for
