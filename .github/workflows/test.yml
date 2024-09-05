@@ -2,7 +2,7 @@ on: [push, pull_request]
 name: Test
 
 jobs:
-  test:
+  go-test:
     strategy:
       matrix:
         go-version: [1.21, 1.x] # Test 1.21 and tip
@@ -34,3 +34,16 @@ jobs:
         run: |
           go test -timeout 10s -v -tags=windows ./...
           go test -race -timeout 10s -v -tags=windows ./...
+  goreleaser-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v5
+      - name: Build GoReleaser
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: '~> v2'
+          args: build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
