@@ -48,6 +48,6 @@ jobs:
         with:
           distribution: goreleaser
           version: '~> v2'
-          args: build
+          args: build --snapshot --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
