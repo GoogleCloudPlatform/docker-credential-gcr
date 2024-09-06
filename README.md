@@ -52,7 +52,7 @@ As of the 2.0 release, `docker-credential-gcr` no longer supports generalized [`
 
 ### Building from Source
 
-The program in this repository is written with the Go programming language and can be built with `go build`. These instructions assume you are using [**Go 1.13+**](https://golang.org/) or higher.
+The program in this repository is written with the Go programming language and can be built with `go build`. These instructions assume you are using [**Go 1.18+**](https://golang.org/) or higher.
 
 You can download the source code, compile the binary, and put it in your `$GOPATH` with `go get`.
 
