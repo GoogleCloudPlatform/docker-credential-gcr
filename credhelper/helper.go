@@ -165,7 +165,8 @@ It looks for credentials in the following places, preferring the first location 
 */
 func tokenFromEnv() (string, error) {
 	creds, err := cloudcreds.DetectDefault(&cloudcreds.DetectOptions{
-		Scopes: config.GCRScopes,
+		Scopes:           config.GCRScopes,
+		UseSelfSignedJWT: true,
 	})
 	if err != nil {
 		return "", helperErr("failed to detect default credentials", err)
