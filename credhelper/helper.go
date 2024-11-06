@@ -145,11 +145,7 @@ func (ch *gcrCredHelper) getGCRAccessToken() (string, error) {
 }
 
 /*
-tokenFromEnv retrieves a gcloud access_token from the environment.
-
-From https://godoc.org/golang.org/x/oauth2/google:
-
-DefaultTokenSource is a token source that uses "Application Default Credentials".
+tokenFromEnv retrieves a JWT access_token from the environment.
 
 It looks for credentials in the following places, preferring the first location found:
 
@@ -223,7 +219,7 @@ func tokenFromPrivateStore(store store.GCRCredStore) (string, error) {
 
 func helperErr(message string, err error) error {
 	if err == nil {
-		return fmt.Errorf("docker-credential-gcr/helper: %v", message)
+		return fmt.Errorf("docker-credential-gcr/helper: %s", message)
 	}
 	return fmt.Errorf("docker-credential-gcr/helper: %s: %v", message, err)
 }
