@@ -19,6 +19,7 @@ for GCR authentication.
 package credhelper
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -168,7 +169,7 @@ func tokenFromEnv() (string, error) {
 		return "", helperErr("failed to detect default credentials", err)
 	}
 
-	token, err := creds.Token(config.OAuthHTTPContext)
+	token, err := creds.Token(context.Background())
 	if err != nil {
 		return "", err
 	}
