@@ -149,3 +149,7 @@ var OAuthHTTPContext = context.Background()
 
 // GcrOAuth2Username is the Basic auth username accompanying Docker requests to GCR.
 var GcrOAuth2Username string
+
+// GCEArtifactRegistryDomainKey is the key that points to the Artifact Registry domain used by
+// the current GCE VM in the metadata server.
+const GCEArtifactRegistryDomainKey = "universe/artifact_registry_domain"
