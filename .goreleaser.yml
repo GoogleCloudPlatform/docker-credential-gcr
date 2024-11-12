@@ -9,7 +9,7 @@ builds:
   - env:
       - CGO_ENABLED=0
     ldflags:
-      - "-s -w -X github.com/GoogleCloudPlatform/docker-credential-gcr/config.Version={{.Version}}"
+      - "-s -w -X github.com/GoogleCloudPlatform/docker-credential-gcr/v2/config.Version={{.Version}}"
     goarch:
       - amd64
       - arm64
