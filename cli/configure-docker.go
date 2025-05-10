@@ -23,7 +23,9 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 
+	"github.com/GoogleCloudPlatform/docker-credential-gcr/v2/computemetadata"
 	"github.com/GoogleCloudPlatform/docker-credential-gcr/v2/config"
 	cliconfig "github.com/docker/cli/cli/config"
 	"github.com/docker/cli/cli/config/configfile"
@@ -38,6 +40,8 @@ type dockerConfigCmd struct {
 	registries string
 	// whether to include all AR Registries
 	includeArtifactRegistry bool
+	// whether to include the Artifact Registry Domain GCE uses if running inside a GCE VM
+	includeGCEArtifactRegistryDomain bool
 }
 
 // see https://github.com/docker/docker/blob/master/cliconfig/credentials/native_store.go
@@ -47,13 +51,14 @@ const credHelperPrefix = "docker-credential-"
 // the docker client to use this credential helper
 func NewDockerConfigSubcommand() subcommands.Command {
 	return &dockerConfigCmd{
-		cmd{
+		cmd: cmd{
 			name:     "configure-docker",
 			synopsis: fmt.Sprintf("configures the Docker client to use %s", os.Args[0]),
 		},
-		false,
-		"unused",
-		false,
+		overwrite:                        false,
+		registries:                       "unused",
+		includeArtifactRegistry:          false,
+		includeGCEArtifactRegistryDomain: false,
 	}
 }
 
@@ -104,12 +109,21 @@ func (c *dockerConfigCmd) setConfig(dockerConfig *configfile.ConfigFile, helperS
 		fmt.Println("Configuring default registries....")
 		fmt.Println("WARNING: A long list of credential helpers may cause delays running 'docker build'.")
 		fmt.Println("We recommend passing the registry names via the --registries flag for the specific registries you are using")
+		fmt.Println("Adding config for all GCR registries.")
+		registries = config.DefaultGCRRegistries[:]
 		if c.includeArtifactRegistry {
-			fmt.Println("Adding config for all GCR and AR registries.")
-			registries = append(config.DefaultGCRRegistries[:], config.DefaultARRegistries[:]...)
-		} else {
-			fmt.Println("Adding config for all GCR registries.")
-			registries = config.DefaultGCRRegistries[:]
+			fmt.Println("Adding config for all AR registries.")
+			registries = append(registries, config.DefaultARRegistries[:]...)
+		}
+		if c.includeGCEArtifactRegistryDomain {
+			fmt.Println("Adding config for all AR registry used by the current GCE VM.")
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+			arDomain, err := computemetadata.GetGCEArtifactRegistryDockerDomain(ctx)
+			if err != nil {
+				fmt.Printf("WARNING: failed to add GCE Artifact Registry domain: %v\n", err)
+			}
+			registries = append(registries, arDomain)
 		}
 	} else {
 		fmt.Println("Configuring supplied registries....")
