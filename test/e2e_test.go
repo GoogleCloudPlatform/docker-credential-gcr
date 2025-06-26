@@ -114,7 +114,7 @@ func TestEndToEnd_GCRCreds(t *testing.T) {
 	helper.Stdout = &out
 	helper.Stdin = strings.NewReader(gcrRegistry)
 	if err = helper.Run(); err != nil {
-		t.Fatalf("`get` failed: %v, Stdout: %s", err, string(out.Bytes()))
+		t.Fatalf("`get` failed: %v, Stdout: %s", err, out.String())
 	}
 
 	// Verify the credentials
