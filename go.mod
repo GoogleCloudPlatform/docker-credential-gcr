@@ -21,7 +21,7 @@ require (
 	github.com/googleapis/enterprise-certificate-proxy v0.3.6 // indirect
 	github.com/googleapis/gax-go/v2 v2.14.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/sirupsen/logrus v1.8.3 // indirect
+	github.com/sirupsen/logrus v1.9.4 // indirect
 	golang.org/x/sys v0.33.0 // indirect
 	gotest.tools/v3 v3.0.3 // indirect
 )
