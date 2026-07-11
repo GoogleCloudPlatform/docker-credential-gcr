@@ -112,7 +112,7 @@ func TestConfigureDocker(t *testing.T) {
 	helper.Stdout = &out
 	helper.Stderr = os.Stderr
 	if err = helper.Run(); err != nil {
-		t.Fatalf("Failed to execute `configure-docker --overwrite`: %v Stdout: %s", err, string(out.Bytes()))
+		t.Fatalf("Failed to execute `configure-docker --overwrite`: %v Stdout: %s", err, out.String())
 	}
 
 	dockerConfig, err = getDockerConfig()
@@ -156,7 +156,7 @@ func TestConfigureDocker_NonDefault(t *testing.T) {
 	helper.Stdout = &out
 	helper.Stderr = os.Stderr
 	if err = helper.Run(); err != nil {
-		t.Fatalf("Failed to execute `configure-docker --overwrite`: %v Stdout: %s", err, string(out.Bytes()))
+		t.Fatalf("Failed to execute `configure-docker --overwrite`: %v Stdout: %s", err, out.String())
 	}
 
 	dockerConfig, err = getDockerConfig()
