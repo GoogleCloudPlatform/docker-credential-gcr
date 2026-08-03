@@ -2,7 +2,7 @@ module github.com/GoogleCloudPlatform/docker-credential-gcr/v2
 
 go 1.26.0
 
-toolchain go1.26.4
+toolchain go1.26.5
 
 require (
 	cloud.google.com/go/auth v0.22.0
