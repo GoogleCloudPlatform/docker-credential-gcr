@@ -17,7 +17,6 @@ require (
 
 require (
 	cloud.google.com/go/compute/metadata v0.7.0 // indirect
-	github.com/docker/docker v25.0.6+incompatible // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.6 // indirect
 	github.com/googleapis/gax-go/v2 v2.14.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
