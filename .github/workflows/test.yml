@@ -1,6 +1,9 @@
 on: [push, pull_request]
 name: Test
 
+permissions:
+  contents: read
+
 jobs:
   go-test:
     strategy:
@@ -8,8 +11,6 @@ jobs:
         go-version: [1.21, 1.x] # Test 1.21 and tip
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
-    permissions:
-      contents: read
     steps:
       - name: Install Go
         uses: actions/setup-go@bfdd3570ce990073878bf10f6b2d79082de49492 # v2
