@@ -34,7 +34,7 @@ func TestVersion(t *testing.T) {
 
 	// Enforce a particular format so that a regex can extract the version easily.
 	actual := out.String()
-	expectedProdRegex := "Google Container Registry Docker credential helper [0-9]+\\.[0-9]+\\.[0-9]+-[0-9]+-[0-9a-f]+\n"
+	expectedProdRegex := "Google Container Registry Docker credential helper [0-9]+\\.[0-9]+\\.[0-9]+(-[0-9]+-[0-9a-f]+)?\n"
 	if match, _ := regexp.MatchString(expectedProdRegex, actual); !match {
 		// Fail if not a dev version.
 		expectedDevString := "Google Container Registry Docker credential helper (devel)\n"
