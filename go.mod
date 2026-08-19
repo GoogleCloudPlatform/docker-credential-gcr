@@ -5,8 +5,8 @@ go 1.26.0
 toolchain go1.26.5
 
 require (
-	cloud.google.com/go/auth v0.22.0
-	github.com/docker/cli v29.6.2+incompatible
+	cloud.google.com/go/auth v0.23.0
+	github.com/docker/cli v29.7.2+incompatible
 	github.com/docker/docker-credential-helpers v0.9.8
 	github.com/golang/mock v1.6.0
 	github.com/google/subcommands v1.2.0
