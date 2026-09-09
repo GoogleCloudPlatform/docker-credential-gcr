@@ -5,14 +5,14 @@ go 1.26.0
 toolchain go1.26.5
 
 require (
-	cloud.google.com/go/auth v0.22.0
-	github.com/docker/cli v29.6.2+incompatible
-	github.com/docker/docker-credential-helpers v0.9.8
+	cloud.google.com/go/auth v0.23.2
+	github.com/docker/cli v29.7.2+incompatible
+	github.com/docker/docker-credential-helpers v0.9.9
 	github.com/golang/mock v1.6.0
 	github.com/google/subcommands v1.2.0
 	github.com/toqueteos/webbrowser v1.2.1
-	golang.org/x/oauth2 v0.36.0
-	golang.org/x/sync v0.22.0
+	golang.org/x/oauth2 v0.37.0
+	golang.org/x/sync v0.23.0
 )
 
 require (
